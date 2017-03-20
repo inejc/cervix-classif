@@ -1,1 +1,1 @@
-# cervix-classif
+## Intel & MobileODT Cervical Cancer Screening competition on Kaggle
