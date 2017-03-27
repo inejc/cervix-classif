@@ -1,3 +1,9 @@
+"""
+Usage:
+    python data_dirs_organizer.py organize
+    python data_dirs_organizer.py clean
+"""
+
 from os import mkdir, listdir, makedirs, remove
 from os.path import join, abspath, basename, dirname
 from shutil import rmtree
@@ -27,17 +33,24 @@ VAL_SIZE_FRACTION = 0.1
 ImageFile.LOAD_TRUNCATED_IMAGES = True
 
 
+def organize():
+    """Splits labeled images into training and validation sets in a stratified
+    manner (size of the validation set is VAL_SIZE_FRACTION). Additionally
+    resizes each image to HEIGHTxWIDTH pixels.
+    """
+    _organize_train_dir()
+    _organize_test_dir()
+
+
 def clean():
+    """Deletes all resized images datasests (i.e. train, val, test) and the
+    info file.
+    """
     data_info = load_organized_data_info(HEIGHT)
     rmtree(data_info['dir_tr'])
     rmtree(data_info['dir_val'])
     rmtree(data_info['dir_te'])
     remove(organized_data_info_file(HEIGHT))
-
-
-def organize():
-    _organize_train_dir()
-    _organize_test_dir()
 
 
 def _organize_train_dir():

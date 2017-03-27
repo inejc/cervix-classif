@@ -12,6 +12,20 @@ ORGANIZED_DATA_INFO_FILE = 'organized_data_info_.json'
 
 
 def load_organized_data_info(imgs_dim):
+    """Loads the train, val, test datasets info file.
+    
+    Returns dict
+    -------
+    {
+        'dir_tr': absolute path of the training directory
+        'num_tr': number of training images
+        'dir_val': absolute path of the validation directory
+        'num_val': number of validation images
+        'dir_te': absolute path of the test directory
+        'num_te': number of test images
+        'num_classes': number of distinct classes
+    }
+    """
     if not isfile(organized_data_info_file(imgs_dim)):
         raise FileNotFoundError('run data_dirs_organizer.py organize first')
     with open(organized_data_info_file(imgs_dim), 'r') as f:
