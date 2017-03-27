@@ -92,7 +92,6 @@ venv/
 ENV/
 
 # custom
-data/train/
-data/test/
-data/additional/
+data
 *.7z
+.ipynb_checkpoints
