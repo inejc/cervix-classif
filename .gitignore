@@ -92,7 +92,7 @@ venv/
 ENV/
 
 # custom
-data/
-models/
+data
+models
 *.7z
 .ipynb_checkpoints

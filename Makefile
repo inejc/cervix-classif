@@ -4,7 +4,7 @@ help:
 	@echo "  setup         setup basic project files"
 
 setup:
-	python3 -m venv env && \
+	virtualenv -p python3 env && \
 	. env/bin/activate && \
 	pip install -U pip setuptools wheel && \
 	pip install -r requirements.txt && \
