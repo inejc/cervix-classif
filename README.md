@@ -16,3 +16,14 @@
 * https://www.kaggle.com/philschmidt/intel-mobileodt-cervical-cancer-screening/cervix-eda/notebook
 * https://www.kaggle.com/kambarakun/intel-mobileodt-cervical-cancer-screening/how-to-start-with-python-on-colfax-cluster/notebook
 * https://www.kaggle.com/vfdev5/intel-mobileodt-cervical-cancer-screening/data-exploration/notebook
+
+### Project setup (ocean)
+```
+git clone https://github.com/inejc/cervix-classif.git
+cd cervix-classif
+make setup
+. env/bin/activate
+```
+
+### Training and validation split
+Be careful with this on server since your data directory is just a symlink to a everyone's shared data directory :). Run `python data_dirs_organizer.py organize` to split the dataset into training and validation sets. Currently each image's smallest dimension is resized to 299 pixels and then cropped at the center of the larger dimension. We can call the detection functionality from here later. Similarly run `python data_dirs_organizer.py clean` to delete all resized and organized images (i.e. to undo organize).
