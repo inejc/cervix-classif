@@ -1,4 +1,5 @@
 from json import load, dump
+from os import listdir
 from os.path import join, dirname, isfile
 
 DATA_DIR = join(dirname(dirname(__file__)), 'data')
@@ -14,9 +15,9 @@ ORGANIZED_DATA_INFO_FILE = 'organized_data_info_.json'
 def load_organized_data_info(imgs_dim):
     """Loads the train, val, test datasets info file.
     
-    Returns dict
+    Returns
     -------
-    {
+    dict
         'dir_tr': absolute path of the training directory
         'num_tr': number of training images
         'dir_val': absolute path of the validation directory
@@ -24,7 +25,6 @@ def load_organized_data_info(imgs_dim):
         'dir_te': absolute path of the test directory
         'num_te': number of test images
         'num_classes': number of distinct classes
-    }
     """
     if not isfile(organized_data_info_file(imgs_dim)):
         raise FileNotFoundError('run data_dirs_organizer.py organize first')
@@ -41,3 +41,16 @@ def organized_data_info_file(imgs_dim):
     split = ORGANIZED_DATA_INFO_FILE.split('.')
     split[0] += str(imgs_dim)
     return join(DATA_DIR, '.'.join(split))
+
+
+def num_examples_per_class_in_dir(dir_):
+    """Returns number of images for each CLASSES element (subdir) in the
+    dir_ directory."""
+    num_per_class = {}
+
+    for class_ in CLASSES:
+        class_dir = join(dir_, class_)
+        num = len([x for x in listdir(class_dir) if x.endswith('.jpg')])
+        num_per_class[class_] = num
+
+    return num_per_class

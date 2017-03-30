@@ -10,7 +10,12 @@
 * Image resolutions between 4128x3096 in 3264x2448 (all jpg - 3 channels)
 * 1481 images in the training set (type_1: 250 (0.168805), type_2: 781 (0.527346), type_3: 450 (0.303849))
 * 512 images in the test set
-* 6924 additional training images (labeling errors, see https://www.kaggle.com/c/intel-mobileodt-cervical-cancer-screening/discussion/30621)
+
+#### Additional dataset
+* 6924 additional training images (at least prior to fixing)
+* [Data cleaning 0](https://www.kaggle.com/chiszpanski/intel-mobileodt-cervical-cancer-screening/non-cervix-images)
+* [Data cleaning 1](https://www.kaggle.com/aamaia/intel-mobileodt-cervical-cancer-screening/three-empty-images-in-additional-7z)
+* Contains blurry and truncated images
 
 ### Useful notebooks
 * https://www.kaggle.com/philschmidt/intel-mobileodt-cervical-cancer-screening/cervix-eda/notebook
