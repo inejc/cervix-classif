@@ -108,20 +108,23 @@ def create_embeddings():
     return X_tr, y_tr, X_val, y_val, X_te, te_names
 
 
-def train_top_classifier():
+def train_top_classifier(lr=0.01, epochs=10, batch_size=32, save_model=True):
     X_tr, y_tr, X_val, y_val, _, _ = create_embeddings()
     y_tr, y_val = to_categorical(y_tr), to_categorical(y_val)
 
     model = Sequential()
     model.add(Dense(3, activation='softmax', input_shape=X_tr.shape[1:]))
-    model.compile(Adam(lr=0.01), loss='categorical_crossentropy')
+    model.compile(Adam(lr=lr), loss='categorical_crossentropy')
 
     model.fit(
         X_tr, y_tr,
-        epochs=10,
-        batch_size=32,
+        epochs=epochs,
+        batch_size=batch_size,
         validation_data=(X_val, y_val)
     )
+
+    if save_model:
+        model.save(TOP_CLASSIFIER_FILE)
 
 
 def fine_tune():

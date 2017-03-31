@@ -25,8 +25,3 @@ r:
 
 cli:
 	@$(MAKE) r cmd="/bin/bash; cd $UHOME"
-
-
-
-
-
