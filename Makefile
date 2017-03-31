@@ -12,6 +12,8 @@ setup-host:
 	    mkdir models
 
 setup-docker:
+	sed -i "s/head/$(USER)/g" docker-compose.yml
+	sed -i "s/head/$(USER)/g" Dockerfile
 	nvidia-docker-compose build
 
 run:
