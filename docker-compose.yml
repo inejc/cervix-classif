@@ -8,4 +8,3 @@ services:
         volumes:
             - ~:/home/user
             - /mnt/nfs/kaggle/cervix/data:/home/user/cervix-classif/data
-
