@@ -23,12 +23,38 @@
 * https://www.kaggle.com/vfdev5/intel-mobileodt-cervical-cancer-screening/data-exploration/notebook
 
 ### Project setup
+
+## Initial setup
+This should be performed only once (unless you change `Dockerfile` then you
+have to run `make setup-docker` again. 
+
 ```
 git clone https://github.com/inejc/cervix-classif.git
-cd cervix-classif
-make setup
-. env/bin/activate
+make setup-host
+make setup-docker
 ```
+
+Since mounting of data folder assumes specific path, it's best if you clone `cervix-classif`
+repository directly into your home directory on `ocean`. If you have a sudden
+change of heart, you can change mounted directory in `docker-compose.yml` file.
+
+## Everytime you start working
+At the start of the day, you should run `make run`. This runs docker container
+in the background. You can see if it is running by running `docker ps`. By
+default it's named after your `$USER` on the server.
+
+To login to the container, you can run `make cli` and bash will open. Your
+home directory from `ocean` server is directly mounted into docker home
+directory (`/home/user`). Data is also automatically mounted on
+`/home/user/cervix-classif/data`.
+
+There's a shortcut with running any command with `make r cmd='<your command>'.
+However we noticed some issues with that, you're better off just using the above
+approach.
+
+## Additional commands
+`make stop` - stops any docker container you might be running.
+
 
 ### Training and validation split
 Be careful with this on server since your data directory is just a symlink to everyone's shared directory :). Run `python data_dirs_organizer.py organize` to split the dataset into training and validation sets. Currently each image's smallest dimension is resized to 299 pixels and then cropped at the center of the larger dimension (obtaining 299x299 images). We can call the detection functionality from here later. Similarly run `python data_dirs_organizer.py clean` to delete all resized and organized images (i.e. to undo organize).
