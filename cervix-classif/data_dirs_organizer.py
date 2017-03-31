@@ -106,7 +106,7 @@ def _save_images_to_dir(dest_dir, src_paths, labels):
 
     for src_path, label in zip(src_paths, labels):
         dest_path = join(join(dest_dir, label), basename(src_path))
-        _save_scaled_cropped_img(src_path, dest_path)
+        _save_preprocessed_img(src_path, dest_path)
 
 
 def _organize_test_dir():
@@ -120,7 +120,7 @@ def _organize_test_dir():
 
         src_path = abspath(join(TEST_DIR, file_name))
         dest_path = join(NEW_TEST_DIR, file_name)
-        _save_scaled_cropped_img(src_path, dest_path)
+        _save_preprocessed_img(src_path, dest_path)
         num_test_samples += 1
 
     _append_num_te_to_organized_data_info(num_test_samples)
@@ -132,9 +132,12 @@ def _append_num_te_to_organized_data_info(num_test_samples):
     save_organized_data_info(data_info, HEIGHT)
 
 
-def _save_scaled_cropped_img(src, dest):
+def _save_preprocessed_img(src, dest):
     image = load_img(src)
+
+    # todo: preprocess
     image = fit(image, (HEIGHT, WIDTH), method=LANCZOS)
+
     image.save(dest)
 
 
