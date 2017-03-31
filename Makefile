@@ -13,7 +13,6 @@ setup-host:
 
 setup-docker:
 	sed -i "s/head/$(USER)/g" docker-compose.yml
-	sed -i "s/head/$(USER)/g" Dockerfile
 	nvidia-docker-compose build
 
 run:
@@ -23,12 +22,7 @@ stop:
 	nvidia-docker-compose stop
 
 r:
-	nvidia-docker-compose run head $(cmd)
+	nvidia-docker-compose run $(USER) $(cmd)
 
 cli:
 	@$(MAKE) r cmd="/bin/bash; cd $UHOME"
-
-
-
-
-
