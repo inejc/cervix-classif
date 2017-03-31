@@ -1,0 +1,24 @@
+services:
+  head:
+    build: .
+    devices:
+    - /dev/nvidia0
+    - /dev/nvidia1
+    - /dev/nvidia2
+    - /dev/nvidia3
+    - /dev/nvidia4
+    - /dev/nvidia5
+    - /dev/nvidia6
+    - /dev/nvidia7
+    - /dev/nvidiactl
+    - /dev/nvidia-uvm
+    ports:
+    - '22'
+    volumes:
+    - ~:/home/user
+    - /mnt/nfs/kaggle/cervix/data:/home/user/cervix-classif/data
+    - nvidia_driver_367.57:/usr/local/nvidia:ro
+version: '2'
+volumes:
+  nvidia_driver_367.57:
+    external: true

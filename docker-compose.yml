@@ -1,0 +1,11 @@
+version: '2'
+
+services:
+    head:
+        build: .
+        ports: 
+            - "22"
+        volumes:
+            - ~:/home/user
+            - /mnt/nfs/kaggle/cervix/data:/home/user/cervix-classif/data
+
