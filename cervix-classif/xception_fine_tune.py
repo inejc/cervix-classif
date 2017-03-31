@@ -6,6 +6,7 @@ Usage:
 """
 
 from math import ceil
+from os import listdir
 from os.path import join, isfile
 
 import fire
@@ -33,10 +34,13 @@ def create_embeddings():
         y_tr (n_samples,)
         X_val (n_samples, 2048)
         y_val (n_samples,)
+        X_te (n_samples, 2048)
+        te_names (n_samples,)
     """
     if isfile(EMBEDDINGS_FILE):
-        data = np.load(EMBEDDINGS_FILE)
-        return data['X_tr'], data['y_tr'], data['X_val'], data['y_val']
+        d = np.load(EMBEDDINGS_FILE)
+        return d['X_tr'], d['y_tr'], d['X_val'], d['y_val'], d['X_te'],\
+            d['te_names']
 
     data_info = load_organized_data_info(imgs_dim=HEIGHT)
     datagen = ImageDataGenerator(preprocessing_function=preprocess_input)
@@ -53,34 +57,43 @@ def create_embeddings():
 
     model = Xception(weights='imagenet', include_top=False, pooling='avg')
 
-    def embed(dir_, num):
+    def embed(dir_, num, data_is_labeled):
         X = model.predict_generator(
             generator=dir_datagen(dir_),
             steps=ceil(num / batch_size)
         )
 
-        num_per_cls = num_examples_per_class_in_dir(dir_)
-        y_0 = np.zeros(num_per_cls['Type_1'])
-        y_1 = np.zeros(num_per_cls['Type_2']) + 1
-        y_2 = np.zeros(num_per_cls['Type_3']) + 2
-        y = np.hstack((y_0, y_1, y_2))
+        if data_is_labeled:
+            num_per_cls = num_examples_per_class_in_dir(dir_)
+            y_0 = np.zeros(num_per_cls['Type_1'])
+            y_1 = np.zeros(num_per_cls['Type_2']) + 1
+            y_2 = np.zeros(num_per_cls['Type_3']) + 2
+            y = np.hstack((y_0, y_1, y_2))
+            return X, y
 
-        return X, y
+        # unlabeled (test) dataset
+        names = [x for x in listdir(join(dir_, 'all')) if x.endswith('.jpg')]
+        return X, np.array(names)
 
     dir_tr, num_tr = data_info['dir_tr'], data_info['num_tr']
-    X_tr, y_tr = embed(dir_tr, num_tr)
+    X_tr, y_tr = embed(dir_tr, num_tr, data_is_labeled=True)
 
     dir_val, num_val = data_info['dir_val'], data_info['num_val']
-    X_val, y_val = embed(dir_val, num_val)
+    X_val, y_val = embed(dir_val, num_val, data_is_labeled=True)
+
+    dir_te, num_te = data_info['dir_te'], data_info['num_te']
+    X_te, te_names = embed(dir_te, num_te, data_is_labeled=False)
 
     np.savez_compressed(
         file=EMBEDDINGS_FILE,
         X_tr=X_tr,
         y_tr=y_tr,
         X_val=X_val,
-        y_val=y_val
+        y_val=y_val,
+        X_te=X_te,
+        te_names=te_names
     )
-    return X_tr, y_tr, X_val, y_val
+    return X_tr, y_tr, X_val, y_val, X_te, te_names
 
 
 def train_top_classifier():
