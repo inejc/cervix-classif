@@ -93,6 +93,14 @@ def create_embeddings():
         X_te=X_te,
         te_names=te_names
     )
+
+    print("Embedded data shapes:")
+    print("X_tr {0}".format(X_tr.shape))
+    print("y_tr {0}".format(y_tr.shape))
+    print("X_val {0}".format(X_val.shape))
+    print("y_val {0}".format(y_val.shape))
+    print("X_te {0}".format(X_te.shape))
+    print("te_names {0}".format(te_names.shape))
     return X_tr, y_tr, X_val, y_val, X_te, te_names
 
 
