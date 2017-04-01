@@ -5,6 +5,7 @@ Usage:
     python xception_fine_tune.py fine_tune
 """
 
+import os
 from math import ceil
 from os import listdir
 from os.path import join, isfile
@@ -191,4 +192,6 @@ def _top_classifier(l2_reg, input_shape=None):
 
 
 if __name__ == '__main__':
+    # filter out tf info logs
+    os.environ['TF_CPP_MIN_LOG_LEVEL'] = '1'
     fire.Fire()
