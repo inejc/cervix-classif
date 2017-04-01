@@ -5,7 +5,6 @@ Usage:
     python xception_fine_tune.py fine_tune
 """
 
-import os
 from math import ceil
 from os import listdir
 from os.path import join, isfile
@@ -172,26 +171,17 @@ def fine_tune(lr=1e-4, epochs=10, batch_size=32, l2_reg=0,
         model.save(MODEL_FILE)
 
 
-def _top_classifier(l2_reg, input_shape=None):
+def _top_classifier(l2_reg, input_shape):
     model = Sequential()
-    if input_shape is None:
-        dense = Dense(
-            units=3,
-            kernel_regularizer=l2(l=l2_reg),
-            activation='softmax'
-        )
-    else:
-        dense = Dense(
-            units=3,
-            kernel_regularizer=l2(l=l2_reg),
-            activation='softmax',
-            input_shape=input_shape
-        )
+    dense = Dense(
+        units=3,
+        kernel_regularizer=l2(l=l2_reg),
+        activation='softmax',
+        input_shape=input_shape
+    )
     model.add(dense)
     return model
 
 
 if __name__ == '__main__':
-    # filter out tf info logs
-    os.environ['TF_CPP_MIN_LOG_LEVEL'] = '1'
     fire.Fire()
