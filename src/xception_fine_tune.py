@@ -12,10 +12,11 @@ from os.path import join, isfile
 import fire
 import numpy as np
 from keras.applications.xception import Xception, preprocess_input
-from keras.preprocessing.image import ImageDataGenerator
 from keras.layers import Dense
 from keras.models import Sequential
 from keras.optimizers import Adam
+from keras.preprocessing.image import ImageDataGenerator
+from keras.regularizers import l2
 from keras.utils.np_utils import to_categorical
 
 from data_provider import DATA_DIR, num_examples_per_class_in_dir
@@ -108,12 +109,20 @@ def create_embeddings():
     return X_tr, y_tr, X_val, y_val, X_te, te_names
 
 
-def train_top_classifier(lr=0.01, epochs=10, batch_size=32, save_model=True):
+def train_top_classifier(lr=0.01, epochs=10, batch_size=32,
+                         l2_reg=0, save_model=True):
+
     X_tr, y_tr, X_val, y_val, _, _ = create_embeddings()
     y_tr, y_val = to_categorical(y_tr), to_categorical(y_val)
 
     model = Sequential()
-    model.add(Dense(3, activation='softmax', input_shape=X_tr.shape[1:]))
+    dense = Dense(
+        units=3,
+        kernel_regularizer=l2(l=l2_reg),
+        activation='softmax',
+        input_shape=X_tr.shape[1:]
+    )
+    model.add(dense)
     model.compile(Adam(lr=lr), loss='categorical_crossentropy')
 
     model.fit(
