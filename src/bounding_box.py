@@ -5,7 +5,7 @@ import fire
 import ijroi
 import numpy as np
 from keras.callbacks import ReduceLROnPlateau, ModelCheckpoint
-from keras.layers import Convolution2D, MaxPooling2D, Flatten, Dense
+from keras.layers import Conv2D, MaxPooling2D, Flatten, Dense
 from keras.models import Sequential
 from keras.preprocessing.image import ImageDataGenerator, load_img, \
     img_to_array
@@ -75,13 +75,13 @@ def _convert_from_roi(fname):
 def _cnn():
     model = Sequential()
 
-    model.add(Convolution2D(32, 3, 3, input_shape=(HEIGHT, WIDTH),
+    model.add(Conv2D(32, 3, 3, input_shape=(HEIGHT, WIDTH, 3),
                             activation='relu', border_mode='same'))
-    model.add(Convolution2D(32, 3, 3, activation='relu', border_mode='same'))
+    model.add(Conv2D(32, 3, 3, activation='relu', border_mode='same'))
     model.add(MaxPooling2D(pool_size=(2, 2)))
 
-    model.add(Convolution2D(64, 3, 3, activation='relu', border_mode='same'))
-    model.add(Convolution2D(64, 3, 3, activation='relu', border_mode='same'))
+    model.add(Conv2D(64, 3, 3, activation='relu', border_mode='same'))
+    model.add(Conv2D(64, 3, 3, activation='relu', border_mode='same'))
     model.add(MaxPooling2D(pool_size=(2, 2)))
 
     model.add(Flatten())
