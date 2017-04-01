@@ -7,6 +7,7 @@ TRAIN_DIR = join(DATA_DIR, 'train')
 TEST_DIR = join(DATA_DIR, 'test')
 SUBMISSIONS_DIR = join(dirname(dirname(__file__)), 'submissions')
 MODELS_DIR = join(dirname(dirname(__file__)), 'models')
+EXPERIMENTS_DIR = join(dirname(dirname(__file__)), 'experiments')
 
 CLASSES = ['Type_1', 'Type_2', 'Type_3']
 ORGANIZED_DATA_INFO_FILE = 'organized_data_info_.json'

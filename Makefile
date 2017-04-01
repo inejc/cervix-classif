@@ -9,7 +9,8 @@ setup-host:
 	    . env/bin/activate && \
 	    pip install -U pip setuptools wheel && \
 	    pip install -r requirements.txt && \
-	    mkdir models
+	    mkdir models && \
+	    mkdir experiments
 
 setup-docker:
 	sed -i "s/head/$(USER)/g" docker-compose.yml
