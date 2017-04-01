@@ -22,7 +22,9 @@ from keras.regularizers import l2
 from keras.utils.np_utils import to_categorical
 
 from data_provider import DATA_DIR, num_examples_per_class_in_dir
-from data_provider import MODELS_DIR, load_organized_data_info, EXPERIMENTS_DIR
+from data_provider import EXPERIMENTS_DIR, SUBMISSIONS_DIR
+from data_provider import MODELS_DIR, load_organized_data_info
+from utils import create_submission_file
 
 HEIGHT, WIDTH = 299, 299
 
@@ -129,6 +131,20 @@ def train_top_classifier(lr=0.01, epochs=10, batch_size=32,
 
     if save_model:
         model.save(TOP_CLASSIFIER_FILE)
+
+
+def make_submission_top_classifier():
+    _, _, _, _, X_te, te_names = create_embeddings()
+
+    model = _top_classifier(l2_reg=0, input_shape=X_te.shape[1:])
+    model.load_weights(TOP_CLASSIFIER_FILE)
+
+    probs_pred = model.predict_proba(X_te)
+    create_submission_file(
+        image_names=te_names,
+        probs=probs_pred,
+        file_name=join(SUBMISSIONS_DIR, 'xception_top_classifier.csv')
+    )
 
 
 def fine_tune(lr=1e-4, reduce_lr_factor=0.1, epochs=10, batch_size=32, l2_reg=0,
