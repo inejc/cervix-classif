@@ -13,6 +13,7 @@ import fire
 import numpy as np
 from keras.applications.xception import Xception, preprocess_input
 from keras.layers import Dense
+from keras.models import Model
 from keras.models import Sequential
 from keras.optimizers import Adam
 from keras.preprocessing.image import ImageDataGenerator
@@ -115,14 +116,7 @@ def train_top_classifier(lr=0.01, epochs=10, batch_size=32,
     X_tr, y_tr, X_val, y_val, _, _ = create_embeddings()
     y_tr, y_val = to_categorical(y_tr), to_categorical(y_val)
 
-    model = Sequential()
-    dense = Dense(
-        units=3,
-        kernel_regularizer=l2(l=l2_reg),
-        activation='softmax',
-        input_shape=X_tr.shape[1:]
-    )
-    model.add(dense)
+    model = _top_classifier(l2_reg, X_tr.shape[1:])
     model.compile(Adam(lr=lr), loss='categorical_crossentropy')
 
     model.fit(
@@ -136,9 +130,60 @@ def train_top_classifier(lr=0.01, epochs=10, batch_size=32,
         model.save(TOP_CLASSIFIER_FILE)
 
 
-def fine_tune():
-    # todo
-    pass
+def fine_tune(lr=1e-4, epochs=10, batch_size=32,
+              l2_reg=0, save_model=True):
+
+    data_info = load_organized_data_info(HEIGHT)
+    datagen = ImageDataGenerator(preprocessing_function=preprocess_input)
+    batch_size = 32
+
+    def dir_datagen(dir_):
+        return datagen.flow_from_directory(
+            directory=dir_,
+            target_size=(HEIGHT, WIDTH),
+            class_mode='categorical',
+            batch_size=batch_size,
+            shuffle=True
+        )
+
+    dir_tr, num_tr = data_info['dir_tr'], data_info['num_tr']
+    dir_val, num_val = data_info['dir_val'], data_info['num_val']
+
+    model = Xception(weights='imagenet', include_top=False, pooling='avg')
+    top_classifier = _top_classifier(l2_reg, input_shape=(2048,))
+    top_classifier.load_weights(TOP_CLASSIFIER_FILE)
+    model = Model(inputs=model.input, outputs=top_classifier(model.output))
+    model.compile(Adam(lr=lr), loss='categorical_crossentropy')
+
+    model.fit_generator(
+        generator=dir_datagen(dir_tr),
+        steps_per_epoch=ceil(num_tr / batch_size),
+        epochs=epochs,
+        validation_data=dir_datagen(dir_val),
+        validation_steps=ceil(num_val / batch_size),
+    )
+
+    if save_model:
+        model.save(MODEL_FILE)
+
+
+def _top_classifier(l2_reg, input_shape=None):
+    model = Sequential()
+    if input_shape is None:
+        dense = Dense(
+            units=3,
+            kernel_regularizer=l2(l=l2_reg),
+            activation='softmax'
+        )
+    else:
+        dense = Dense(
+            units=3,
+            kernel_regularizer=l2(l=l2_reg),
+            activation='softmax',
+            input_shape=input_shape
+        )
+    model.add(dense)
+    return model
 
 
 if __name__ == '__main__':
