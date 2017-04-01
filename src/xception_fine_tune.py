@@ -131,7 +131,7 @@ def train_top_classifier(lr=0.01, epochs=10, batch_size=32,
         model.save(TOP_CLASSIFIER_FILE)
 
 
-def fine_tune(lr=1e-4, epochs=10, batch_size=32, l2_reg=0,
+def fine_tune(lr=1e-4, reduce_lr_factor=0.1, epochs=10, batch_size=32, l2_reg=0,
               num_freeze_layers=0):
 
     data_info = load_organized_data_info(HEIGHT)
@@ -161,7 +161,7 @@ def fine_tune(lr=1e-4, epochs=10, batch_size=32, l2_reg=0,
         layer.trainable = False
 
     callbacks = [
-        ReduceLROnPlateau(),
+        ReduceLROnPlateau(factor=reduce_lr_factor),
         ModelCheckpoint(MODEL_FILE, save_best_only=True),
         TensorBoard(
             log_dir=join(EXPERIMENTS_DIR, 'xception_fine_tune'),
