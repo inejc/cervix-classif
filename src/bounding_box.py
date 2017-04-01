@@ -90,21 +90,13 @@ def _cnn():
     return model
 
 
-def _load_images():
-    X, Y = _get_tagged_images()
-    print(Y)
-    print(X.shape, Y.shape)
-    img = load_img(join(), target_size=(HEIGHT, WIDTH))
-    return img_to_array()
-
-
 def train_simple(reduce_lr_factor=1e-1, epochs=10):
-    X_train, Y_train = _load_images()
+    X, Y = _get_tagged_images()
 
     def _image_generator():
+        # TODO Training has to be done on all 4 values
         return generator.flow(
-            X_train,
-            Y_train,
+            X, Y[:, 0],
             batch_size=32,
             shuffle=True,
         )
@@ -119,12 +111,12 @@ def train_simple(reduce_lr_factor=1e-1, epochs=10):
     ]
     model.fit_generator(
         generator=_image_generator(),
-        steps_per_epoch=len(X_train),
+        steps_per_epoch=len(X),
         epochs=epochs,
         callbacks=callbacks,
         # TODO Don't validate on train data.
         validation_data=_image_generator(),
-        validation_steps=len(X_train),
+        validation_steps=len(X),
     )
 
 
