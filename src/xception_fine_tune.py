@@ -12,6 +12,7 @@ from os.path import join, isfile
 import fire
 import numpy as np
 from keras.applications.xception import Xception, preprocess_input
+from keras.callbacks import ModelCheckpoint
 from keras.layers import Dense
 from keras.models import Model
 from keras.models import Sequential
@@ -131,7 +132,7 @@ def train_top_classifier(lr=0.01, epochs=10, batch_size=32,
 
 
 def fine_tune(lr=1e-4, epochs=10, batch_size=32, l2_reg=0,
-              num_freeze_layers=0, save_model=True):
+              num_freeze_layers=0):
 
     data_info = load_organized_data_info(HEIGHT)
     datagen = ImageDataGenerator(preprocessing_function=preprocess_input)
@@ -159,16 +160,19 @@ def fine_tune(lr=1e-4, epochs=10, batch_size=32, l2_reg=0,
     for layer in model.layers[:num_freeze_layers]:
         layer.trainable = False
 
+    callbacks = [
+        ModelCheckpoint(MODEL_FILE, save_best_only=True),
+        # TensorBoard(log_dir=join(EXPERIMENTS_DIR, 'xception_fine_tune'))
+    ]
+
     model.fit_generator(
         generator=dir_datagen(dir_tr),
         steps_per_epoch=ceil(num_tr / batch_size),
         epochs=epochs,
         validation_data=dir_datagen(dir_val),
         validation_steps=ceil(num_val / batch_size),
+        callbacks=callbacks
     )
-
-    if save_model:
-        model.save(MODEL_FILE)
 
 
 def _top_classifier(l2_reg, input_shape):
