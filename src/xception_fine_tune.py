@@ -130,8 +130,8 @@ def train_top_classifier(lr=0.01, epochs=10, batch_size=32,
         model.save(TOP_CLASSIFIER_FILE)
 
 
-def fine_tune(lr=1e-4, epochs=10, batch_size=32,
-              l2_reg=0, save_model=True):
+def fine_tune(lr=1e-4, epochs=10, batch_size=32, l2_reg=0,
+              num_freeze_layers=0, save_model=True):
 
     data_info = load_organized_data_info(HEIGHT)
     datagen = ImageDataGenerator(preprocessing_function=preprocess_input)
@@ -154,6 +154,10 @@ def fine_tune(lr=1e-4, epochs=10, batch_size=32,
     top_classifier.load_weights(TOP_CLASSIFIER_FILE)
     model = Model(inputs=model.input, outputs=top_classifier(model.output))
     model.compile(Adam(lr=lr), loss='categorical_crossentropy')
+
+    # model has 134 layers
+    for layer in model.layers[:num_freeze_layers]:
+        layer.trainable = False
 
     model.fit_generator(
         generator=dir_datagen(dir_tr),
