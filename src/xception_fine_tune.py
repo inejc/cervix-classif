@@ -12,7 +12,7 @@ from os.path import join, isfile
 import fire
 import numpy as np
 from keras.applications.xception import Xception, preprocess_input
-from keras.callbacks import ModelCheckpoint
+from keras.callbacks import ModelCheckpoint, ReduceLROnPlateau, TensorBoard
 from keras.layers import Dense
 from keras.models import Model
 from keras.models import Sequential
@@ -22,7 +22,7 @@ from keras.regularizers import l2
 from keras.utils.np_utils import to_categorical
 
 from data_provider import DATA_DIR, num_examples_per_class_in_dir
-from data_provider import MODELS_DIR, load_organized_data_info
+from data_provider import MODELS_DIR, load_organized_data_info, EXPERIMENTS_DIR
 
 HEIGHT, WIDTH = 299, 299
 
@@ -161,8 +161,12 @@ def fine_tune(lr=1e-4, epochs=10, batch_size=32, l2_reg=0,
         layer.trainable = False
 
     callbacks = [
+        ReduceLROnPlateau(),
         ModelCheckpoint(MODEL_FILE, save_best_only=True),
-        # TensorBoard(log_dir=join(EXPERIMENTS_DIR, 'xception_fine_tune'))
+        TensorBoard(
+            log_dir=join(EXPERIMENTS_DIR, 'xception_fine_tune'),
+            write_graph=False
+        )
     ]
 
     model.fit_generator(
