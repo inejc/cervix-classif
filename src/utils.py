@@ -1,4 +1,7 @@
+from functools import partial
+
 import numpy as np
+from sklearn.model_selection import cross_val_score
 
 
 def is_green(image):
@@ -14,6 +17,20 @@ def is_green(image):
     pixels = h * w
 
     return np.linalg.norm(new_image) / pixels < 1e-3
+
+
+def cross_val_scores(classifiers, X, y, scoring='neg_log_loss', k=5):
+    cv = partial(
+        cross_val_score, X=X, y=y, cv=k, scoring=scoring, n_jobs=-1
+    )
+    all_clfs_scores = [cv(clf[1]) for clf in classifiers]
+
+    all_mean_clfs_scores = []
+    for clf, scores in zip(classifiers, all_clfs_scores):
+        mean_score = np.mean(np.abs(scores))
+        all_mean_clfs_scores.append((clf[0], mean_score))
+
+    return all_mean_clfs_scores
 
 
 def create_submission_file(image_names, probs, file_name):

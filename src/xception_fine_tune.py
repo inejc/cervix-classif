@@ -20,11 +20,15 @@ from keras.optimizers import Adam
 from keras.preprocessing.image import ImageDataGenerator
 from keras.regularizers import l2
 from keras.utils.np_utils import to_categorical
+from sklearn.dummy import DummyClassifier
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.linear_model import LogisticRegression
+from sklearn.svm import SVC
 
 from data_provider import DATA_DIR, num_examples_per_class_in_dir
 from data_provider import EXPERIMENTS_DIR, SUBMISSIONS_DIR
 from data_provider import MODELS_DIR, load_organized_data_info
-from utils import create_submission_file
+from utils import create_submission_file, cross_val_scores
 
 HEIGHT, WIDTH = 299, 299
 
@@ -145,6 +149,22 @@ def make_submission_top_classifier():
         probs=probs_pred,
         file_name=join(SUBMISSIONS_DIR, 'xception_top_classifier.csv')
     )
+
+
+def cross_validate_embeddings(k=5):
+    X_tr, y_tr, X_val, y_val, _, _ = create_embeddings()
+    X = np.vstack((X_tr, X_val))
+    y = np.hstack((y_tr, y_val))
+
+    softmax = LogisticRegression(multi_class='multinomial', solver='lbfgs')
+    classifiers = [
+        ('dummy', DummyClassifier(strategy='stratified')),
+        ('softmax', softmax),
+        ('svm', SVC(probability=True)),
+        ('random forest', RandomForestClassifier(n_estimators=150, n_jobs=-1)),
+    ]
+    for score in cross_val_scores(classifiers, X, y, k=k):
+        print(score)
 
 
 def fine_tune(lr=1e-4, reduce_lr_factor=0.1, epochs=10, batch_size=32, l2_reg=0,
