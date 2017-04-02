@@ -37,9 +37,10 @@ def _get_tagged_images():
     # Get the file names of the tagged image files
     img_dict = OrderedDict()
     for class_ in CLASSES:
-        img_dict.update({splitext(f)[0]: join(TRAINING_DIR, class_, f)
-                         for f in listdir(join(TRAINING_DIR, class_))
-                         if splitext(f)[0] in roi_dict})
+        for f in listdir(join(TRAINING_DIR, class_)):
+            img_id = splitext(f)[0]
+            if img_id in roi_dict:
+                img_dict[img_id] = join(TRAINING_DIR, class_, f)
     # Initialize X and Y (contains 4 values x, y, w, h)
     X = np.zeros((len(img_dict), HEIGHT, WIDTH, 3))
     Y = np.zeros((len(img_dict), 4))
