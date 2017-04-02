@@ -53,41 +53,6 @@ def _get_dict_untagged_images():
     return d
 
 
-
-def _get_tagged_images():
-    """Read images, tags and labels for any images that have been tagged.
-
-    Return
-    ------
-    labels : array
-    X : np.array
-        Images
-    Y : np.array
-        Bounding boxes in format [x, y, w, h]
-
-    """
-    roi_dict = _get_dict_roi()
-    # Get the file names of the tagged image files
-    img_dict = OrderedDict()
-    for class_ in CLASSES:
-        for f in listdir(join(TRAINING_DIR, class_)):
-            img_id = splitext(f)[0]
-            if img_id in roi_dict:
-                img_dict[img_id] = join(TRAINING_DIR, class_, f)
-    # Initialize X and Y (contains 4 values x, y, w, h)
-    X = np.zeros((len(img_dict), HEIGHT, WIDTH, 3))
-    Y = np.zeros((len(img_dict), 4))
-    labels = []
-    # Load the image files into a nice data array
-    for idx, key in enumerate(img_dict):
-        img = load_img(img_dict[key], target_size=(HEIGHT, WIDTH))
-        labels.append(key)
-        X[idx] = img_to_array(img)
-        Y[idx] = _convert_from_roi(roi_dict[key])
-
-    return labels, X, Y
-
-
 def _convert_from_roi(fname):
     """Convert a roi file to a numpy array [x, y, w, h].
 
@@ -107,6 +72,51 @@ def _convert_from_roi(fname):
         height, width = bottom - top, right - left
 
         return np.array([top, left, width, height])
+
+
+def _get_tagged_images():
+    """Read images, tags and labels for any images that have been tagged.
+
+    Return
+    ------
+    labels : array
+    X : np.array
+        Images
+    Y : np.array
+        Bounding boxes in format [x, y, w, h]
+
+    """
+    roi_dict, img_dict = _get_dict_roi(), _get_dict_tagged_images()
+    # Initialize X and Y (contains 4 values x, y, w, h)
+    X = np.zeros((len(img_dict), HEIGHT, WIDTH, 3))
+    Y = np.zeros((len(img_dict), 4))
+    # Load the image files into a nice data array
+    for idx, key in enumerate(img_dict):
+        img = load_img(img_dict[key], target_size=(HEIGHT, WIDTH))
+        X[idx] = img_to_array(img)
+        Y[idx] = _convert_from_roi(roi_dict[key])
+
+    return list(img_dict.keys()), X, Y
+
+
+def _load_images(fnames):
+    X = np.zeros((len(fnames), HEIGHT, WIDTH, 3))
+    for idx, fname in enumerate(fnames):
+        X[idx] = load_img(join(TRAINING_DIR, fname))
+    return fnames, X
+
+
+def _get_untagged_images():
+    img_dict = _get_dict_untagged_images()
+    X = np.zeros((len(img_dict), HEIGHT, WIDTH, 3))
+    for idx, img_id in enumerate(img_dict):
+        X[idx] = load_img(img_dict[img_id])
+    return list(img_dict.keys()), X
+
+
+def test():
+    print(_get_tagged_images()[1].shape)
+    print(_get_untagged_images()[1].shape)
 
 
 def _small_cnn():
