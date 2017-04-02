@@ -88,18 +88,17 @@ def _cnn():
     model.add(MaxPooling2D(pool_size=(2, 2)))
 
     model.add(Flatten())
-    model.add(Dense(1))
+    model.add(Dense(4))
 
     return model
 
 
 def train_simple(reduce_lr_factor=1e-1, epochs=10):
-    X, Y = _get_tagged_images()
+    _, X, Y = _get_tagged_images()
 
     def _image_generator():
-        # TODO Training has to be done on all 4 values
         return generator.flow(
-            X, Y[:, 0],
+            X, Y,
             batch_size=32,
             shuffle=True,
         )
