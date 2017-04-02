@@ -21,19 +21,52 @@ CLASSES = ['Type_1', 'Type_2', 'Type_3']
 TRAINING_DIR = join('..', 'data', 'train_299')
 
 
+def _get_dict_roi():
+    d = OrderedDict()
+    for f in listdir(IJ_ROI_DIR):
+        d[splitext(f)[0]] = join(IJ_ROI_DIR, f)
+    return d
+
+
+def _get_dict_all_images():
+    d = OrderedDict()
+    for class_ in CLASSES:
+        for f in listdir(join(TRAINING_DIR, class_)):
+            img_id = splitext(f)[0]
+            d[img_id] = join(TRAINING_DIR, class_, f)
+    return d
+
+
+def _get_dict_tagged_images():
+    all_images, tagged_roi = _get_dict_all_images(), _get_dict_roi()
+    d = OrderedDict()
+    for img_id in all_images:
+        if img_id in tagged_roi:
+            d[img_id] = all_images[img_id]
+    return d
+
+
+def _get_dict_untagged_images():
+    d = _get_dict_all_images()
+    for img_id in _get_dict_tagged_images():
+        del d[img_id]
+    return d
+
+
+
 def _get_tagged_images():
-    """Read image data.
+    """Read images, tags and labels for any images that have been tagged.
 
     Return
     ------
+    labels : array
     X : np.array
-        Image data
+        Images
     Y : np.array
         Bounding boxes in format [x, y, w, h]
 
     """
-    roi_dict = {splitext(f)[0]: join(IJ_ROI_DIR, f)
-                for f in listdir(IJ_ROI_DIR)}
+    roi_dict = _get_dict_roi()
     # Get the file names of the tagged image files
     img_dict = OrderedDict()
     for class_ in CLASSES:
@@ -76,7 +109,7 @@ def _convert_from_roi(fname):
         return np.array([top, left, width, height])
 
 
-def _cnn():
+def _small_cnn():
     model = Sequential()
 
     model.add(Conv2D(32, 3, 3, input_shape=(HEIGHT, WIDTH, 3),
@@ -104,7 +137,8 @@ def train_simple(reduce_lr_factor=1e-1, epochs=10):
             shuffle=True,
         )
 
-    model = _cnn()
+    model = _small_cnn()
+    # TODO See if an L1 loss does any better
     model.compile(loss='mean_squared_error', optimizer='adam')
 
     generator = ImageDataGenerator()
