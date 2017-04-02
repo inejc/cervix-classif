@@ -43,5 +43,4 @@ def create_submission_file(image_names, probs, file_name):
         lines.append(line)
 
     with open(file_name, 'w') as f:
-
         f.writelines(lines)

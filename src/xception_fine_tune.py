@@ -2,7 +2,9 @@
 Usage:
     python xception_fine_tune.py create_embeddings
     python xception_fine_tune.py train_top_classifier
+    python xception_fine_tune.py make_submission_top_classifier
     python xception_fine_tune.py fine_tune
+    python xception_fine_tune.py make_submission_xception
 """
 
 from math import ceil
@@ -13,22 +15,17 @@ import fire
 import numpy as np
 from keras.applications.xception import Xception, preprocess_input
 from keras.callbacks import ModelCheckpoint, ReduceLROnPlateau, TensorBoard
-from keras.layers import Dense
-from keras.models import Model
-from keras.models import Sequential
+from keras.layers import Dense, Dropout
+from keras.models import Model, Sequential
 from keras.optimizers import Adam
 from keras.preprocessing.image import ImageDataGenerator
 from keras.regularizers import l2
 from keras.utils.np_utils import to_categorical
-from sklearn.dummy import DummyClassifier
-from sklearn.ensemble import RandomForestClassifier
-from sklearn.linear_model import LogisticRegression
-from sklearn.svm import SVC
 
 from data_provider import DATA_DIR, num_examples_per_class_in_dir
 from data_provider import EXPERIMENTS_DIR, SUBMISSIONS_DIR
 from data_provider import MODELS_DIR, load_organized_data_info
-from utils import create_submission_file, cross_val_scores
+from utils import create_submission_file
 
 HEIGHT, WIDTH = 299, 299
 
@@ -118,12 +115,16 @@ def create_embeddings():
 
 
 def train_top_classifier(lr=0.01, epochs=10, batch_size=32,
-                         l2_reg=0, save_model=True):
+                         l2_reg=0, dropout_p=0.5, save_model=True):
 
     X_tr, y_tr, X_val, y_val, _, _ = create_embeddings()
     y_tr, y_val = to_categorical(y_tr), to_categorical(y_val)
 
-    model = _top_classifier(l2_reg, X_tr.shape[1:])
+    model = _top_classifier(
+        l2_reg=l2_reg,
+        dropout_p=dropout_p,
+        input_shape=X_tr.shape[1:]
+    )
     model.compile(Adam(lr=lr), loss='categorical_crossentropy')
 
     model.fit(
@@ -137,10 +138,14 @@ def train_top_classifier(lr=0.01, epochs=10, batch_size=32,
         model.save(TOP_CLASSIFIER_FILE)
 
 
-def make_submission_top_classifier():
+def make_submission_top_classifier(dropout_p):
     _, _, _, _, X_te, te_names = create_embeddings()
 
-    model = _top_classifier(l2_reg=0, input_shape=X_te.shape[1:])
+    model = _top_classifier(
+        l2_reg=0,
+        dropout_p=dropout_p,
+        input_shape=X_te.shape[1:]
+    )
     model.load_weights(TOP_CLASSIFIER_FILE)
 
     probs_pred = model.predict_proba(X_te)
@@ -151,31 +156,24 @@ def make_submission_top_classifier():
     )
 
 
-def cross_validate_embeddings(k=5):
-    X_tr, y_tr, X_val, y_val, _, _ = create_embeddings()
-    X = np.vstack((X_tr, X_val))
-    y = np.hstack((y_tr, y_val))
-
-    softmax = LogisticRegression(multi_class='multinomial', solver='lbfgs')
-    classifiers = [
-        ('dummy', DummyClassifier(strategy='stratified')),
-        ('softmax', softmax),
-        ('svm', SVC(probability=True)),
-        ('random forest', RandomForestClassifier(n_estimators=150, n_jobs=-1)),
-    ]
-    for score in cross_val_scores(classifiers, X, y, k=k):
-        print(score)
-
-
-def fine_tune(lr=1e-4, reduce_lr_factor=0.1, epochs=10, batch_size=32, l2_reg=0,
-              num_freeze_layers=0):
+def fine_tune(lr=1e-4, reduce_lr_factor=0.1, reduce_lr_patience=3, epochs=10,
+              batch_size=32, l2_reg=0, dropout_p=0.5, num_freeze_layers=0):
 
     data_info = load_organized_data_info(HEIGHT)
-    datagen = ImageDataGenerator(preprocessing_function=preprocess_input)
+    tr_datagen = ImageDataGenerator(
+        preprocessing_function=preprocess_input,
+        rotation_range=180,
+        vertical_flip=True,
+        horizontal_flip=True,
+        # zoom_range=0.1,
+        # width_shift_range=0.1,
+        # height_shift_range=0.1,
+    )
+    val_datagen = ImageDataGenerator(preprocessing_function=preprocess_input)
     batch_size = 32
 
-    def dir_datagen(dir_):
-        return datagen.flow_from_directory(
+    def dir_datagen(dir_, gen):
+        return gen.flow_from_directory(
             directory=dir_,
             target_size=(HEIGHT, WIDTH),
             class_mode='categorical',
@@ -187,7 +185,11 @@ def fine_tune(lr=1e-4, reduce_lr_factor=0.1, epochs=10, batch_size=32, l2_reg=0,
     dir_val, num_val = data_info['dir_val'], data_info['num_val']
 
     model = Xception(weights='imagenet', include_top=False, pooling='avg')
-    top_classifier = _top_classifier(l2_reg, input_shape=(2048,))
+    top_classifier = _top_classifier(
+        l2_reg=l2_reg,
+        dropout_p=dropout_p,
+        input_shape=(2048,)
+    )
     top_classifier.load_weights(TOP_CLASSIFIER_FILE)
     model = Model(inputs=model.input, outputs=top_classifier(model.output))
     model.compile(Adam(lr=lr), loss='categorical_crossentropy')
@@ -197,7 +199,7 @@ def fine_tune(lr=1e-4, reduce_lr_factor=0.1, epochs=10, batch_size=32, l2_reg=0,
         layer.trainable = False
 
     callbacks = [
-        ReduceLROnPlateau(factor=reduce_lr_factor),
+        ReduceLROnPlateau(factor=reduce_lr_factor, patience=reduce_lr_patience),
         ModelCheckpoint(MODEL_FILE, save_best_only=True),
         TensorBoard(
             log_dir=join(EXPERIMENTS_DIR, 'xception_fine_tune'),
@@ -206,22 +208,57 @@ def fine_tune(lr=1e-4, reduce_lr_factor=0.1, epochs=10, batch_size=32, l2_reg=0,
     ]
 
     model.fit_generator(
-        generator=dir_datagen(dir_tr),
+        generator=dir_datagen(dir_tr, tr_datagen),
         steps_per_epoch=ceil(num_tr / batch_size),
         epochs=epochs,
-        validation_data=dir_datagen(dir_val),
+        validation_data=dir_datagen(dir_val, val_datagen),
         validation_steps=ceil(num_val / batch_size),
         callbacks=callbacks
     )
 
 
-def _top_classifier(l2_reg, input_shape):
+def make_submission_xception(model_name, dropout_p):
+    data_info = load_organized_data_info(HEIGHT)
+    _, _, _, _, _, te_names = create_embeddings()
+    batch_size = 32
+
+    datagen = ImageDataGenerator(preprocessing_function=preprocess_input)
+    datagen = datagen.flow_from_directory(
+        directory=data_info['dir_te'],
+        target_size=(HEIGHT, WIDTH),
+        class_mode=None,
+        batch_size=batch_size,
+        shuffle=False
+    )
+
+    model = Xception(weights='imagenet', include_top=False, pooling='avg')
+    top_classifier = _top_classifier(
+        l2_reg=0,
+        dropout_p=dropout_p,
+        input_shape=(2048,)
+    )
+    model = Model(inputs=model.input, outputs=top_classifier(model.output))
+    model.load_weights(join(MODELS_DIR, model_name))
+
+    probs_pred = model.predict_generator(
+        generator=datagen,
+        steps=ceil(data_info['num_te'] / batch_size)
+    )
+
+    create_submission_file(
+        image_names=te_names,
+        probs=probs_pred,
+        file_name=join(SUBMISSIONS_DIR, 'xception_fine_tuned.csv')
+    )
+
+
+def _top_classifier(l2_reg, dropout_p, input_shape):
     model = Sequential()
+    model.add(Dropout(rate=dropout_p, input_shape=input_shape))
     dense = Dense(
         units=3,
         kernel_regularizer=l2(l=l2_reg),
-        activation='softmax',
-        input_shape=input_shape
+        activation='softmax'
     )
     model.add(dense)
     return model
