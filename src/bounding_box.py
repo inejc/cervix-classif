@@ -1,6 +1,6 @@
+from collections import OrderedDict
 from os import listdir
 from os.path import join, splitext
-from collections import OrderedDict
 
 import fire
 import ijroi
@@ -19,6 +19,8 @@ MODEL_FILE = join(MODELS_DIR, 'simple_localizer.h5')
 
 CLASSES = ['Type_1', 'Type_2', 'Type_3']
 TRAINING_DIR = join('..', 'data', 'train_299')
+
+__all__ = ['number_tagged', 'train_simple', 'predict']
 
 
 def _get_dict_roi():
@@ -54,7 +56,7 @@ def _get_dict_untagged_images():
 
 
 def _convert_from_roi(fname):
-    """Convert a roi file to a numpy array [x, y, w, h].
+    """Convert a roi file to a numpy array [x, y, h, w].
 
     Parameters
     ----------
@@ -71,7 +73,7 @@ def _convert_from_roi(fname):
         bottom, right = roi[2]
         height, width = bottom - top, right - left
 
-        return np.array([top, left, width, height])
+        return np.array([top, left, height, width])
 
 
 def _get_tagged_images():
@@ -83,7 +85,7 @@ def _get_tagged_images():
     X : np.array
         Images
     Y : np.array
-        Bounding boxes in format [x, y, w, h]
+        Bounding boxes in format [y, x, h, w]
 
     """
     roi_dict, img_dict = _get_dict_roi(), _get_dict_tagged_images()
@@ -114,9 +116,9 @@ def _get_untagged_images():
     return list(img_dict.keys()), X
 
 
-def test():
-    print(_get_tagged_images()[1].shape)
-    print(_get_untagged_images()[1].shape)
+def number_tagged():
+    print('Number of tagged images', _get_tagged_images()[1].shape[0])
+    print('Number of untagged images', _get_untagged_images()[1].shape[0])
 
 
 def _small_cnn():
@@ -137,7 +139,7 @@ def _small_cnn():
     return model
 
 
-def train_simple(reduce_lr_factor=1e-1, epochs=10):
+def train_simple(reduce_lr_factor=1e-1, epochs=5):
     _, X, Y = _get_tagged_images()
 
     def _image_generator():
@@ -165,6 +167,20 @@ def train_simple(reduce_lr_factor=1e-1, epochs=10):
         validation_data=_image_generator(),
         validation_steps=len(X),
     )
+
+
+def predict():
+    model = _small_cnn()
+    model.load_weights(MODEL_FILE)
+    labels, X = _get_untagged_images()
+
+    print(labels[:20])
+    predictions = model.predict(X)
+
+    print(predictions[:5])
+    print(predictions.shape)
+
+    np.save('predictions.npy', predictions)
 
 
 if __name__ == '__main__':
