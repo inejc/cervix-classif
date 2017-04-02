@@ -1,5 +1,6 @@
 from os import listdir
 from os.path import join, splitext
+from collections import OrderedDict
 
 import fire
 import ijroi
@@ -22,19 +23,19 @@ TRAINING_DIR = join('..', 'data', 'train_299')
 
 def _get_tagged_images():
     """Read image data.
-    
+
     Return
     ------
     X : np.array
         Image data
     Y : np.array
         Bounding boxes in format [x, y, w, h]
-    
+
     """
     roi_dict = {splitext(f)[0]: join(IJ_ROI_DIR, f)
                 for f in listdir(IJ_ROI_DIR)}
     # Get the file names of the tagged image files
-    img_dict = {}
+    img_dict = OrderedDict()
     for class_ in CLASSES:
         img_dict.update({splitext(f)[0]: join(TRAINING_DIR, class_, f)
                          for f in listdir(join(TRAINING_DIR, class_))
@@ -42,23 +43,25 @@ def _get_tagged_images():
     # Initialize X and Y (contains 4 values x, y, w, h)
     X = np.zeros((len(img_dict), HEIGHT, WIDTH, 3))
     Y = np.zeros((len(img_dict), 4))
+    labels = []
     # Load the image files into a nice data array
     for idx, key in enumerate(img_dict):
         img = load_img(img_dict[key], target_size=(HEIGHT, WIDTH))
+        labels.append(key)
         X[idx] = img_to_array(img)
         Y[idx] = _convert_from_roi(roi_dict[key])
 
-    return X, Y
+    return labels, X, Y
 
 
 def _convert_from_roi(fname):
     """Convert a roi file to a numpy array [x, y, w, h].
-    
+
     Parameters
     ----------
     fname : string
         If ends with `.roi`, we assume a full path is given
-    
+
     """
     if not fname.endswith('.roi'):
         fname = '%s.roi' % join(IJ_ROI_DIR, fname)
@@ -76,7 +79,7 @@ def _cnn():
     model = Sequential()
 
     model.add(Conv2D(32, 3, 3, input_shape=(HEIGHT, WIDTH, 3),
-                            activation='relu', border_mode='same'))
+                     activation='relu', border_mode='same'))
     model.add(Conv2D(32, 3, 3, activation='relu', border_mode='same'))
     model.add(MaxPooling2D(pool_size=(2, 2)))
 
