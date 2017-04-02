@@ -107,7 +107,7 @@ def train_simple(reduce_lr_factor=1e-1, epochs=10):
     model = _cnn()
     model.compile(loss='mean_squared_error', optimizer='adam')
 
-    generator = ImageDataGenerator(horizontal_flip=True)
+    generator = ImageDataGenerator()
     callbacks = [
         ReduceLROnPlateau(factor=reduce_lr_factor),
         ModelCheckpoint(MODEL_FILE, save_best_only=True),
