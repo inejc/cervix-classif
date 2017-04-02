@@ -14,21 +14,16 @@ import numpy as np
 from keras.applications.xception import Xception, preprocess_input
 from keras.callbacks import ModelCheckpoint, ReduceLROnPlateau, TensorBoard
 from keras.layers import Dense, Dropout
-from keras.models import Model
-from keras.models import Sequential
+from keras.models import Model, Sequential, load_model
 from keras.optimizers import Adam
 from keras.preprocessing.image import ImageDataGenerator
 from keras.regularizers import l2
 from keras.utils.np_utils import to_categorical
-from sklearn.dummy import DummyClassifier
-from sklearn.ensemble import RandomForestClassifier
-from sklearn.linear_model import LogisticRegression
-from sklearn.svm import SVC
 
 from data_provider import DATA_DIR, num_examples_per_class_in_dir
 from data_provider import EXPERIMENTS_DIR, SUBMISSIONS_DIR
 from data_provider import MODELS_DIR, load_organized_data_info
-from utils import create_submission_file, cross_val_scores
+from utils import create_submission_file
 
 HEIGHT, WIDTH = 299, 299
 
@@ -159,22 +154,6 @@ def make_submission_top_classifier(dropout_p=0.5):
     )
 
 
-def cross_validate_embeddings(k=5):
-    X_tr, y_tr, X_val, y_val, _, _ = create_embeddings()
-    X = np.vstack((X_tr, X_val))
-    y = np.hstack((y_tr, y_val))
-
-    softmax = LogisticRegression(multi_class='multinomial', solver='lbfgs')
-    classifiers = [
-        ('dummy', DummyClassifier(strategy='stratified')),
-        ('softmax', softmax),
-        ('svm', SVC(probability=True)),
-        ('random forest', RandomForestClassifier(n_estimators=150, n_jobs=-1)),
-    ]
-    for score in cross_val_scores(classifiers, X, y, k=k):
-        print(score)
-
-
 def fine_tune(lr=1e-4, reduce_lr_factor=0.1, reduce_lr_patience=3, epochs=10,
               batch_size=32, l2_reg=0, dropout_p=0.5, num_freeze_layers=0):
 
@@ -233,6 +212,32 @@ def fine_tune(lr=1e-4, reduce_lr_factor=0.1, reduce_lr_patience=3, epochs=10,
         validation_data=dir_datagen(dir_val, val_datagen),
         validation_steps=ceil(num_val / batch_size),
         callbacks=callbacks
+    )
+
+
+def make_submission_xception(model_name):
+    data_info = load_organized_data_info(HEIGHT)
+    _, _, _, _, _, te_names = create_embeddings()
+    datagen = ImageDataGenerator(preprocessing_function=preprocess_input)
+    batch_size = 32
+    datagen = datagen.flow_from_directory(
+        directory=data_info['dir_te'],
+        target_size=(HEIGHT, WIDTH),
+        class_mode=None,
+        batch_size=batch_size,
+        shuffle=False
+    )
+
+    model = load_model(join(MODELS_DIR, model_name))
+    probs_pred = model.predict_generator(
+        generator=datagen,
+        steps=ceil(data_info['num_te'] / batch_size)
+    )
+
+    create_submission_file(
+        image_names=te_names,
+        probs=probs_pred,
+        file_name=join(SUBMISSIONS_DIR, 'xception_fine_tuned.csv')
     )
 
 
