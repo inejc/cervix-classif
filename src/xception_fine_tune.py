@@ -171,11 +171,20 @@ def fine_tune(lr=1e-4, reduce_lr_factor=0.1, epochs=10, batch_size=32, l2_reg=0,
               num_freeze_layers=0):
 
     data_info = load_organized_data_info(HEIGHT)
-    datagen = ImageDataGenerator(preprocessing_function=preprocess_input)
+    tr_datagen = ImageDataGenerator(
+        preprocessing_function=preprocess_input,
+        rotation_range=180,
+        vertical_flip=True,
+        horizontal_flip=True,
+        # zoom_range=0.1,
+        # width_shift_range=0.1,
+        # height_shift_range=0.1,
+    )
+    val_datagen = ImageDataGenerator(preprocessing_function=preprocess_input)
     batch_size = 32
 
-    def dir_datagen(dir_):
-        return datagen.flow_from_directory(
+    def dir_datagen(dir_, gen):
+        return gen.flow_from_directory(
             directory=dir_,
             target_size=(HEIGHT, WIDTH),
             class_mode='categorical',
@@ -206,10 +215,10 @@ def fine_tune(lr=1e-4, reduce_lr_factor=0.1, epochs=10, batch_size=32, l2_reg=0,
     ]
 
     model.fit_generator(
-        generator=dir_datagen(dir_tr),
+        generator=dir_datagen(dir_tr, tr_datagen),
         steps_per_epoch=ceil(num_tr / batch_size),
         epochs=epochs,
-        validation_data=dir_datagen(dir_val),
+        validation_data=dir_datagen(dir_val, val_datagen),
         validation_steps=ceil(num_val / batch_size),
         callbacks=callbacks
     )
