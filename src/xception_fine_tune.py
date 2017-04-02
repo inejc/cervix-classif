@@ -13,7 +13,7 @@ import fire
 import numpy as np
 from keras.applications.xception import Xception, preprocess_input
 from keras.callbacks import ModelCheckpoint, ReduceLROnPlateau, TensorBoard
-from keras.layers import Dense
+from keras.layers import Dense, BatchNormalization, Activation
 from keras.models import Model
 from keras.models import Sequential
 from keras.optimizers import Adam
@@ -229,10 +229,11 @@ def _top_classifier(l2_reg, input_shape):
     dense = Dense(
         units=3,
         kernel_regularizer=l2(l=l2_reg),
-        activation='softmax',
         input_shape=input_shape
     )
     model.add(dense)
+    model.add(BatchNormalization())
+    model.add(Activation(activation='softmax'))
     return model
 
 
