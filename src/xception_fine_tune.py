@@ -167,8 +167,8 @@ def cross_validate_embeddings(k=5):
         print(score)
 
 
-def fine_tune(lr=1e-4, reduce_lr_factor=0.1, epochs=10, batch_size=32, l2_reg=0,
-              num_freeze_layers=0):
+def fine_tune(lr=1e-4, reduce_lr_factor=0.1, reduce_lr_patience=3, epochs=10,
+              batch_size=32, l2_reg=0, num_freeze_layers=0):
 
     data_info = load_organized_data_info(HEIGHT)
     tr_datagen = ImageDataGenerator(
@@ -206,7 +206,7 @@ def fine_tune(lr=1e-4, reduce_lr_factor=0.1, epochs=10, batch_size=32, l2_reg=0,
         layer.trainable = False
 
     callbacks = [
-        ReduceLROnPlateau(factor=reduce_lr_factor),
+        ReduceLROnPlateau(factor=reduce_lr_factor, patience=reduce_lr_patience),
         ModelCheckpoint(MODEL_FILE, save_best_only=True),
         TensorBoard(
             log_dir=join(EXPERIMENTS_DIR, 'xception_fine_tune'),
