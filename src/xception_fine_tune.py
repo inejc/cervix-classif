@@ -2,7 +2,9 @@
 Usage:
     python xception_fine_tune.py create_embeddings
     python xception_fine_tune.py train_top_classifier
+    python xception_fine_tune.py make_submission_top_classifier
     python xception_fine_tune.py fine_tune
+    python xception_fine_tune.py make_submission_xception
 """
 
 from math import ceil
@@ -14,7 +16,7 @@ import numpy as np
 from keras.applications.xception import Xception, preprocess_input
 from keras.callbacks import ModelCheckpoint, ReduceLROnPlateau, TensorBoard
 from keras.layers import Dense, Dropout
-from keras.models import Model, Sequential, load_model
+from keras.models import Model, Sequential
 from keras.optimizers import Adam
 from keras.preprocessing.image import ImageDataGenerator
 from keras.regularizers import l2
@@ -136,7 +138,7 @@ def train_top_classifier(lr=0.01, epochs=10, batch_size=32,
         model.save(TOP_CLASSIFIER_FILE)
 
 
-def make_submission_top_classifier(dropout_p=0.5):
+def make_submission_top_classifier(dropout_p):
     _, _, _, _, X_te, te_names = create_embeddings()
 
     model = _top_classifier(
@@ -215,11 +217,12 @@ def fine_tune(lr=1e-4, reduce_lr_factor=0.1, reduce_lr_patience=3, epochs=10,
     )
 
 
-def make_submission_xception(model_name):
+def make_submission_xception(model_name, dropout_p):
     data_info = load_organized_data_info(HEIGHT)
     _, _, _, _, _, te_names = create_embeddings()
-    datagen = ImageDataGenerator(preprocessing_function=preprocess_input)
     batch_size = 32
+
+    datagen = ImageDataGenerator(preprocessing_function=preprocess_input)
     datagen = datagen.flow_from_directory(
         directory=data_info['dir_te'],
         target_size=(HEIGHT, WIDTH),
@@ -228,7 +231,15 @@ def make_submission_xception(model_name):
         shuffle=False
     )
 
-    model = load_model(join(MODELS_DIR, model_name))
+    model = Xception(weights='imagenet', include_top=False, pooling='avg')
+    top_classifier = _top_classifier(
+        l2_reg=0,
+        dropout_p=dropout_p,
+        input_shape=(2048,)
+    )
+    model = Model(inputs=model.input, outputs=top_classifier(model.output))
+    model.load_weights(join(MODELS_DIR, model_name))
+
     probs_pred = model.predict_generator(
         generator=datagen,
         steps=ceil(data_info['num_te'] / batch_size)
