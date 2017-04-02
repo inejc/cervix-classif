@@ -116,6 +116,14 @@ def _get_untagged_images():
     return list(img_dict.keys()), X
 
 
+def _get_all_images():
+    img_dict = _get_dict_all_images()
+    X = np.zeros((len(img_dict), HEIGHT, WIDTH, 3))
+    for idx, img_id in enumerate(img_dict):
+        X[idx] = load_img(img_dict[img_id])
+    return list(img_dict.keys()), X
+
+
 def number_tagged():
     print('Number of tagged images', _get_tagged_images()[1].shape[0])
     print('Number of untagged images', _get_untagged_images()[1].shape[0])
@@ -172,7 +180,7 @@ def train_simple(reduce_lr_factor=1e-1, epochs=5):
 def predict():
     model = _small_cnn()
     model.load_weights(MODEL_FILE)
-    labels, X = _get_untagged_images()
+    labels, X = _get_all_images()
 
     print(labels[:20])
     predictions = model.predict(X)
