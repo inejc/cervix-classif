@@ -24,7 +24,7 @@
 
 ### Project setup
 
-## Initial setup
+#### Initial setup
 This should be performed only once (unless you change `Dockerfile` then you
 have to run `make setup-docker` again.
 
@@ -38,7 +38,7 @@ Since mounting of data folder assumes specific path, it's best if you clone `cer
 repository directly into your home directory on `ocean`. If you have a sudden
 change of heart, you can change mounted directory in `docker-compose.yml` file.
 
-## Everytime you start working
+#### Everytime you start working
 At the start of the day, you should run `make run`. This runs docker container
 in the background. You can see if it is running by running `docker ps`. By
 default it's named after your `$USER` on the server.
@@ -52,12 +52,12 @@ There's a shortcut with running any command with `make r cmd='<your command>'.
 However we noticed some issues with that, you're better off just using the above
 approach.
 
-## Additional commands
+#### Additional commands
 `make stop` - stops any docker container you might be running.
 
-## Using GPUs
+### Using GPUs
 Sharing is caring! Limit your process to your own GPU. This can be done with the
-`CUDA_VISIBLE_DEVICES=id` flag when using TensorFlow and with `THEANO_FLAGS=device=gpu*id*`
+`CUDA_VISIBLE_DEVICES=id` flag when using TensorFlow and with `THEANO_FLAGS=device=gpuid`
 when using Theano. To see which GPUs are currently free or in use, you can use
 `nvidia-smi` to get an overview of running processes.
 
