@@ -29,7 +29,6 @@ from utils import create_submission_file
 
 HEIGHT, WIDTH = 299, 299
 
-MODEL_FILE = join(MODELS_DIR, 'xception_fine_tuned.h5')
 TOP_CLASSIFIER_FILE = join(MODELS_DIR, 'xception_top_classifier.h5')
 EMBEDDINGS_FILE = join(DATA_DIR, 'xception_embeddings.npz')
 
@@ -156,8 +155,9 @@ def make_submission_top_classifier(dropout_p):
     )
 
 
-def fine_tune(lr=1e-4, reduce_lr_factor=0.1, reduce_lr_patience=3, epochs=10,
-              batch_size=32, l2_reg=0, dropout_p=0.5, num_freeze_layers=0):
+def fine_tune(model_name, lr=1e-4, reduce_lr_factor=0.1, reduce_lr_patience=3,
+              epochs=10, batch_size=32, l2_reg=0, dropout_p=0.5,
+              num_freeze_layers=0):
 
     data_info = load_organized_data_info(HEIGHT)
     tr_datagen = ImageDataGenerator(
@@ -200,9 +200,9 @@ def fine_tune(lr=1e-4, reduce_lr_factor=0.1, reduce_lr_patience=3, epochs=10,
 
     callbacks = [
         ReduceLROnPlateau(factor=reduce_lr_factor, patience=reduce_lr_patience),
-        ModelCheckpoint(MODEL_FILE, save_best_only=True),
+        ModelCheckpoint(join(MODELS_DIR, model_name), save_best_only=True),
         TensorBoard(
-            log_dir=join(EXPERIMENTS_DIR, 'xception_fine_tune'),
+            log_dir=join(EXPERIMENTS_DIR, model_name),
             write_graph=False
         )
     ]
