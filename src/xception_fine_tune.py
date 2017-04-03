@@ -217,7 +217,7 @@ def fine_tune(model_name, lr=1e-4, reduce_lr_factor=0.1, reduce_lr_patience=3,
     )
 
 
-def make_submission_xception(model_name, dropout_p):
+def make_submission_xception(model_name, dropout_p, file_name):
     data_info = load_organized_data_info(HEIGHT)
     _, _, _, _, _, te_names = create_embeddings()
     batch_size = 32
@@ -248,7 +248,7 @@ def make_submission_xception(model_name, dropout_p):
     create_submission_file(
         image_names=te_names,
         probs=probs_pred,
-        file_name=join(SUBMISSIONS_DIR, 'xception_fine_tuned.csv')
+        file_name=join(SUBMISSIONS_DIR, file_name)
     )
 
 
