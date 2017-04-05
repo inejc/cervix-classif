@@ -7,9 +7,9 @@ import ijroi
 import cv2
 import numpy as np
 
-from .keras_frcnn.simple_parser import get_data
-from .keras_frcnn.data_generators import get_new_img_size
-from .keras_frcnn.data_augment import augment
+from keras_frcnn.simple_parser import get_data
+from keras_frcnn.data_generators import get_new_img_size
+from keras_frcnn.data_augment import augment
 
 roi_file_path = "./../data/roi/roi_bbox.txt"
 mean_pixel_file_path = './../data/roi/mean_pixel_color.txt'
