@@ -86,7 +86,7 @@ except:
         'https://github.com/fchollet/deep-learning-models/releases/download/v0.2/resnet50_weights_tf_dim_ordering_tf_kernels_notop.h5'
     ))
 
-optimizer = Adam(lr=0.0001, decay=1e-6)
+optimizer = Adam(lr=0.0001)
 model.compile(optimizer=optimizer,
               loss=[losses.rpn_loss_cls(num_anchors), losses.rpn_loss_regr(num_anchors), losses.class_loss_cls,
                     losses.class_loss_regr(C.num_rois, len(classes_count) - 1)],
@@ -97,7 +97,7 @@ callbacks = [EarlyStopping(monitor='val_loss', patience=20, verbose=0),
              ModelCheckpoint(C.model_path, monitor='val_loss', save_best_only=True, verbose=0),
              ReduceLROnPlateau(monitor='loss', factor=0.1, patience=5, min_lr=1e-7, verbose=1)]
 
-batch_size = 32
+batch_size = 1
 nb_epochs = 500
 train_samples_per_epoch = len(train_imgs)
 nb_val_samples = len(val_imgs)

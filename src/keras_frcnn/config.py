@@ -11,7 +11,7 @@ class Config:
         self.use_vertical_flips = False
         self.scale_augment = True
         self.random_rotate = True
-        self.random_rotate_scale = 50.
+        self.random_rotate_scale = 10.
 
         # anchor box scales
         # self.anchor_box_scales = [128, 256, 512]
