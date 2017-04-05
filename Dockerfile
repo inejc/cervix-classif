@@ -5,6 +5,11 @@ ENV DEBIAN_FRONTEND noninteractive
 RUN apt-get update -y && apt-get install -y git openssh-server python3-pip   \
     python-virtualenv gcc gfortran binutils python3-dev libffi-dev libzmq3-dev locate libglib2.0-0
 
+ENV CUDNN_VERSION 6.0.20
+LABEL com.nvidia.cudnn.version="${CUDNN_VERSION}"
+RUN apt-get install -y --no-install-recommends \
+            libcudnn6=$CUDNN_VERSION-1+cuda8.0
+
 WORKDIR /
 RUN apt-get install -y libopenblas-dev
 
