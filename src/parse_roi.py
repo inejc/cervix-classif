@@ -7,9 +7,9 @@ import ijroi
 import cv2
 import numpy as np
 
-from keras_frcnn.simple_parser import get_data
-from keras_frcnn.data_generators import get_new_img_size
-from keras_frcnn.data_augment import augment
+from .keras_frcnn.simple_parser import get_data
+from .keras_frcnn.data_generators import get_new_img_size
+from .keras_frcnn.data_augment import augment
 
 
 def process_roi():
@@ -18,7 +18,7 @@ def process_roi():
 
 
 def generate_mean_pixel_file():
-    from keras_frcnn.config import Config
+    from .keras_frcnn.config import Config
     C = Config()
     all_imgs, _, _ = get_data("./../tmp/roi_bbox.txt")
 
@@ -49,14 +49,14 @@ def generate_roi_file():
         for roi_file in roi_files:
             with open(roi_file, "rb") as f:
                 roi = ijroi.read_roi(f)
-                out.write("./data" + roi_file[5:-3] + "jpg" + ", ")
+                out.write(roi_file.replace("roi/", "").replace(".roi", ".jpg") + ", ")
                 out.write(", ".join(map(str, roi[0][::-1])) + ", ")
                 out.write(", ".join(map(str, roi[2][::-1])) + ", ")
                 out.write("cervix\n")
 
 
 def get_average_roi_size():
-    #TODO TIM
+    # TODO TIM
     with open('./../tmp/roi_bbox.txt', 'r') as f:
         width = []
         height = []

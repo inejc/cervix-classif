@@ -1,9 +1,9 @@
-import random
-import pprint
-import sys
 import json
-from keras_frcnn import config
 import os
+import random
+import sys
+
+from .keras_frcnn import config
 
 os.environ["CUDA_VISIBLE_DEVICES"] = "0"
 
@@ -11,17 +11,17 @@ sys.setrecursionlimit(40000)
 
 C = config.Config()
 
-from keras_frcnn.simple_parser import get_data
+from .keras_frcnn.simple_parser import get_data
 
 # file_path = sys.argv[1]
-file_path = "./tmp/roi_bbox.txt"
+file_path = "./../tmp/roi_bbox.txt"
 all_imgs, classes_count, class_mapping = get_data(file_path)
 
 if 'bg' not in classes_count:
     classes_count['bg'] = 0
     class_mapping['bg'] = len(class_mapping)
 
-with open('./tmp/classes.json', 'w') as class_data_json:
+with open('./../tmp/classes.json', 'w') as class_data_json:
     json.dump(class_mapping, class_data_json)
 
 inv_map = {v: k for k, v in class_mapping.items()}
@@ -38,7 +38,7 @@ val_imgs = [s for s in all_imgs if s['imageset'] == 'test']
 print('Num train samples {}'.format(len(train_imgs)))
 print('Num val samples {}'.format(len(val_imgs)))
 
-from keras_frcnn import data_generators
+from .keras_frcnn import data_generators
 from keras import backend as K
 
 data_gen_train = data_generators.get_anchor_gt(train_imgs, class_mapping, classes_count, C, K.image_dim_ordering(),
@@ -46,12 +46,12 @@ data_gen_train = data_generators.get_anchor_gt(train_imgs, class_mapping, classe
 data_gen_val = data_generators.get_anchor_gt(val_imgs, class_mapping, classes_count, C, K.image_dim_ordering(),
                                              mode='val')
 
-from keras_frcnn import resnet as nn
+from .keras_frcnn import resnet as nn
 from keras.optimizers import Adam
 from keras.layers import Input
 from keras.models import Model
 from keras.callbacks import EarlyStopping, ModelCheckpoint
-from keras_frcnn import losses
+from .keras_frcnn import losses
 from keras.callbacks import ReduceLROnPlateau
 
 if K.image_dim_ordering() == 'th':

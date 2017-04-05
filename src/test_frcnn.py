@@ -6,7 +6,7 @@ import sys
 import cv2
 import numpy as np
 
-from keras_frcnn import config
+from .keras_frcnn import config
 
 sys.setrecursionlimit(40000)
 C = config.Config()
@@ -37,7 +37,7 @@ def format_img(img):
     return img
 
 
-with open('./tmp/classes.json', 'r') as class_data_json:
+with open('./../tmp/classes.json', 'r') as class_data_json:
     class_mapping = json.load(class_data_json)
 
 if 'bg' not in class_mapping:
@@ -48,11 +48,11 @@ class_mapping = {v: k for k, v in class_mapping.items()}
 class_to_color = {class_mapping[v]: np.random.randint(0, 255, 3) for v in class_mapping}
 num_rois = C.num_rois
 
-import keras_frcnn.resnet as nn
+from .keras_frcnn import resnet as nn
 from keras import backend as K
 from keras.layers import Input
 from keras.models import Model
-from keras_frcnn import roi_helpers
+from .keras_frcnn import roi_helpers
 
 if K.image_dim_ordering() == 'th':
     input_shape_img = (3, None, None)

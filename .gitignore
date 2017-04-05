@@ -94,5 +94,6 @@ ENV/
 # custom
 data
 models
+tmp
 *.7z
 .ipynb_checkpoints
