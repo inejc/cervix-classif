@@ -1,7 +1,10 @@
 """
 Usage:
-    python data_dirs_organizer.py organize
-    python data_dirs_organizer.py clean
+    python data_dirs_organizer.py organize --imgs_dim 299 --name 'cleaned'
+                                  --val_size_fraction 0.1 --te_dir 'test'
+                                  'train' 'additional'
+
+    python data_dirs_organizer.py clean --imgs_dim 299 --name 'cleaned'
 """
 
 from os import mkdir, listdir, makedirs, remove
@@ -16,128 +19,165 @@ from PIL.ImageOps import fit
 from keras.preprocessing.image import load_img
 from sklearn.model_selection import StratifiedShuffleSplit
 
-from data_provider import TRAIN_DIR, TEST_DIR, DATA_DIR, CLASSES
+from data_provider import DATA_DIR, CLASSES
 from data_provider import organized_data_info_file
 from data_provider import save_organized_data_info, load_organized_data_info
-
-HEIGHT, WIDTH = 299, 299
-
-NEW_TRAIN_DIR = join(DATA_DIR, 'train_{:d}'.format(HEIGHT))
-NEW_VAL_DIR = join(DATA_DIR, 'val_{:d}'.format(HEIGHT))
-# put test images in 'all' dir for keras generator
-NEW_TEST_DIR = join(DATA_DIR, 'test_{:d}'.format(HEIGHT))
-NEW_TEST_DIR = join(NEW_TEST_DIR, 'all')
-
-VAL_SIZE_FRACTION = 0.1
 
 ImageFile.LOAD_TRUNCATED_IMAGES = True
 
 
-def organize():
-    """Splits labeled images into training and validation sets in a stratified
-    manner (size of the validation set is VAL_SIZE_FRACTION). Additionally
-    resizes each image to HEIGHTxWIDTH pixels.
-    """
-    _organize_train_dir()
-    _organize_test_dir()
-
-
-def clean():
+def clean(imgs_dim=299, name=''):
     """Deletes all resized images datasests (i.e. train, val, test) and the
     info file.
     """
-    data_info = load_organized_data_info(HEIGHT)
+    data_info = load_organized_data_info(imgs_dim, name)
     rmtree(data_info['dir_tr'])
     rmtree(data_info['dir_val'])
     rmtree(data_info['dir_te'])
-    remove(organized_data_info_file(HEIGHT))
+    remove(organized_data_info_file(imgs_dim, name))
 
 
-def _organize_train_dir():
-    paths, labels = _load_paths_labels_from_train_dir()
-    ind_tr, ind_val = _train_val_split_indices(paths, labels)
-    _save_images_to_dir(NEW_TRAIN_DIR, paths[ind_tr], labels[ind_tr])
-    _save_images_to_dir(NEW_VAL_DIR, paths[ind_val], labels[ind_val])
+def organize(imgs_dim=299, name='', val_size_fraction=0.1,
+             te_dir=None, *tr_dirs):
+    """Splits labeled images into training and validation sets in a stratified
+    manner. Additionally cleans and preprocesses the data.
+    """
+    new_dir_tr = join(DATA_DIR, 'train_{:d}{:s}'.format(imgs_dim, '_' + name))
+    new_dir_val = join(DATA_DIR, 'val_{:d}{:s}'.format(imgs_dim, '_' + name))
+
+    _make_labeled_dir_structure(new_dir_tr)
+    _make_labeled_dir_structure(new_dir_val)
+
+    _organize_train_dirs(
+        tr_dirs,
+        val_size_fraction,
+        imgs_dim,
+        name,
+        new_dir_tr,
+        new_dir_val
+    )
+
+    if te_dir is not None:
+        new_dir_te = join(
+            DATA_DIR,
+            'test_{:d}{:s}'.format(imgs_dim, '_' + name)
+        )
+        # put test images in 'all' dir for keras generator
+        new_dir_te = join(new_dir_te, 'all')
+        _organize_test_dir(imgs_dim, name, te_dir, new_dir_te)
 
 
-def _load_paths_labels_from_train_dir():
+def _make_labeled_dir_structure(dest_dir):
+    mkdir(dest_dir)
+    for class_ in CLASSES:
+        class_dir = join(dest_dir, str(class_))
+        mkdir(class_dir)
+
+
+def _organize_train_dirs(dirs, val_size_fraction, imgs_dim, name, new_dir_tr,
+                         new_dir_val):
+    paths, labels = [], []
+    for dir_ in dirs:
+        dir_paths, dir_labels = _load_paths_labels_from_train_dir(dir_)
+        paths = np.hstack((paths, dir_paths))
+        labels = np.hstack((labels, dir_labels))
+
+    ind_tr, ind_val = _train_val_split_indices(val_size_fraction, paths, labels)
+    _save_organized_data_info(
+        imgs_dim,
+        name,
+        len(ind_tr),
+        len(ind_val),
+        new_dir_tr,
+        new_dir_val
+    )
+
+    _save_images_to_dir(imgs_dim, new_dir_tr, paths[ind_tr], labels[ind_tr])
+    _save_images_to_dir(imgs_dim, new_dir_val, paths[ind_val], labels[ind_val])
+
+
+def _load_paths_labels_from_train_dir(dir_):
     paths, labels = [], []
 
     for class_dir in CLASSES:
-        for file_name in listdir(join(TRAIN_DIR, class_dir)):
+        for file_name in listdir(join(DATA_DIR, dir_, class_dir)):
 
             if not file_name.endswith('.jpg'):
                 continue
 
-            abspath_ = abspath(join(TRAIN_DIR, class_dir, file_name))
+            abspath_ = abspath(join(DATA_DIR, dir_, class_dir, file_name))
             paths.append(abspath_)
             labels.append(class_dir)
 
     return np.array(paths), np.array(labels)
 
 
-def _train_val_split_indices(paths, labels):
+def _train_val_split_indices(val_size_fraction, paths, labels):
     split = StratifiedShuffleSplit(
-        n_splits=1, test_size=VAL_SIZE_FRACTION, random_state=0)
-    indices_tr, indices_val = next(split.split(paths, labels))
-
-    _save_organized_data_info(len(indices_tr), len(indices_val))
-    return indices_tr, indices_val
+        n_splits=1, test_size=val_size_fraction, random_state=0)
+    return next(split.split(paths, labels))
 
 
-def _save_organized_data_info(num_tr, num_val):
+def _save_organized_data_info(imgs_dim, name, num_tr, num_val, new_dir_tr,
+                              new_dir_val):
     info = {
-        'dir_tr': NEW_TRAIN_DIR,
+        'dir_tr': new_dir_tr,
         'num_tr': num_tr,
-        'dir_val': NEW_VAL_DIR,
+        'dir_val': new_dir_val,
         'num_val': num_val,
         'num_classes': len(CLASSES),
-        'dir_te': dirname(NEW_TEST_DIR)
     }
-    save_organized_data_info(info, HEIGHT)
+    save_organized_data_info(info, imgs_dim, name)
 
 
-def _save_images_to_dir(dest_dir, src_paths, labels):
-    mkdir(dest_dir)
-
-    for class_ in CLASSES:
-        class_dir = join(dest_dir, str(class_))
-        mkdir(class_dir)
-
+def _save_images_to_dir(imgs_dim, dest_dir, src_paths, labels):
     for src_path, label in zip(src_paths, labels):
-        dest_path = join(join(dest_dir, label), basename(src_path))
-        _save_preprocessed_img(src_path, dest_path)
+        file_name = '{:s}_{:s}'.format(
+            basename(dirname(dirname(src_path))),
+            basename(src_path)
+        )
+        dest_path = join(join(dest_dir, label), file_name)
+        _save_preprocessed_img(imgs_dim, src_path, dest_path, clean_=True)
 
 
-def _organize_test_dir():
-    makedirs(NEW_TEST_DIR)
+def _organize_test_dir(imgs_dim, name, te_dir, new_dir_te):
+    makedirs(new_dir_te)
 
     num_test_samples = 0
-    for file_name in listdir(TEST_DIR):
+    for file_name in listdir(join(DATA_DIR, te_dir)):
 
         if not file_name.endswith('.jpg'):
             continue
 
-        src_path = abspath(join(TEST_DIR, file_name))
-        dest_path = join(NEW_TEST_DIR, file_name)
-        _save_preprocessed_img(src_path, dest_path)
+        src_path = abspath(join(DATA_DIR, te_dir, file_name))
+        dest_path = join(new_dir_te, file_name)
+        _save_preprocessed_img(imgs_dim, src_path, dest_path, clean_=False)
         num_test_samples += 1
 
-    _append_num_te_to_organized_data_info(num_test_samples)
+    _add_test_info_to_organized_data_info(
+        imgs_dim,
+        name,
+        num_test_samples,
+        new_dir_te
+    )
 
 
-def _append_num_te_to_organized_data_info(num_test_samples):
-    data_info = load_organized_data_info(HEIGHT)
+def _add_test_info_to_organized_data_info(imgs_dim, name, num_test_samples,
+                                          new_dir_te):
+    data_info = load_organized_data_info(imgs_dim, name)
+    data_info['dir_te'] = dirname(new_dir_te)
     data_info['num_te'] = num_test_samples
-    save_organized_data_info(data_info, HEIGHT)
+    save_organized_data_info(data_info, imgs_dim, name)
 
 
-def _save_preprocessed_img(src, dest):
+def _save_preprocessed_img(imgs_dim, src, dest, clean_):
     image = load_img(src)
 
     # todo: preprocess
-    image = fit(image, (HEIGHT, WIDTH), method=LANCZOS)
+    if clean_:
+        pass
 
+    image = fit(image, (imgs_dim, imgs_dim), method=LANCZOS)
     image.save(dest)
 
 
