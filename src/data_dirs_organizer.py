@@ -13,7 +13,6 @@ from shutil import rmtree
 
 import fire
 import numpy as np
-from PIL import ImageFile
 from PIL.Image import LANCZOS
 from PIL.ImageOps import fit
 from keras.preprocessing.image import load_img
@@ -22,8 +21,6 @@ from sklearn.model_selection import StratifiedShuffleSplit
 from data_provider import DATA_DIR, CLASSES
 from data_provider import organized_data_info_file
 from data_provider import save_organized_data_info, load_organized_data_info
-
-ImageFile.LOAD_TRUNCATED_IMAGES = True
 
 
 def clean(imgs_dim=299, name=''):
@@ -40,7 +37,7 @@ def clean(imgs_dim=299, name=''):
 def organize(imgs_dim=299, name='', val_size_fraction=0.1,
              te_dir=None, *tr_dirs):
     """Splits labeled images into training and validation sets in a stratified
-    manner. Additionally cleans and preprocesses the data.
+    manner.
     """
     new_dir_tr = join(DATA_DIR, 'train_{:d}{:s}'.format(imgs_dim, '_' + name))
     new_dir_val = join(DATA_DIR, 'val_{:d}{:s}'.format(imgs_dim, '_' + name))
@@ -67,10 +64,10 @@ def organize(imgs_dim=299, name='', val_size_fraction=0.1,
         _organize_test_dir(imgs_dim, name, te_dir, new_dir_te)
 
 
-def _make_labeled_dir_structure(dest_dir):
-    mkdir(dest_dir)
+def _make_labeled_dir_structure(dir_):
+    mkdir(dir_)
     for class_ in CLASSES:
-        class_dir = join(dest_dir, str(class_))
+        class_dir = join(dir_, str(class_))
         mkdir(class_dir)
 
 
@@ -137,7 +134,7 @@ def _save_images_to_dir(imgs_dim, dest_dir, src_paths, labels):
             basename(src_path)
         )
         dest_path = join(join(dest_dir, label), file_name)
-        _save_preprocessed_img(imgs_dim, src_path, dest_path, clean_=True)
+        _save_preprocessed_img(imgs_dim, src_path, dest_path)
 
 
 def _organize_test_dir(imgs_dim, name, te_dir, new_dir_te):
@@ -151,7 +148,7 @@ def _organize_test_dir(imgs_dim, name, te_dir, new_dir_te):
 
         src_path = abspath(join(DATA_DIR, te_dir, file_name))
         dest_path = join(new_dir_te, file_name)
-        _save_preprocessed_img(imgs_dim, src_path, dest_path, clean_=False)
+        _save_preprocessed_img(imgs_dim, src_path, dest_path)
         num_test_samples += 1
 
     _add_test_info_to_organized_data_info(
@@ -170,13 +167,10 @@ def _add_test_info_to_organized_data_info(imgs_dim, name, num_test_samples,
     save_organized_data_info(data_info, imgs_dim, name)
 
 
-def _save_preprocessed_img(imgs_dim, src, dest, clean_):
+def _save_preprocessed_img(imgs_dim, src, dest):
     image = load_img(src)
 
     # todo: preprocess
-    if clean_:
-        pass
-
     image = fit(image, (imgs_dim, imgs_dim), method=LANCZOS)
     image.save(dest)
 

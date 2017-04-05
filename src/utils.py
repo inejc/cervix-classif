@@ -44,3 +44,11 @@ def create_submission_file(image_names, probs, file_name):
 
     with open(file_name, 'w') as f:
         f.writelines(lines)
+
+
+def read_lines(file_name, line_func=None):
+    with open(file_name, 'r') as f:
+        if line_func is None:
+            return list(f)
+        else:
+            return [line_func(l) for l in list(f)]
