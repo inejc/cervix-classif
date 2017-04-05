@@ -1,9 +1,9 @@
-FROM nvidia/cuda:8.0-cudnn5-devel
+FROM nvidia/cuda:8.0-cudnn6-devel
 
 ENV DEBIAN_FRONTEND noninteractive
 
 RUN apt-get update -y && apt-get install -y git openssh-server python3-pip   \
-    python-virtualenv gcc gfortran binutils python3-dev libffi-dev libzmq3-dev locate
+    python-virtualenv gcc gfortran binutils python3-dev libffi-dev libzmq3-dev locate libglib2.0-0
 
 WORKDIR /
 RUN apt-get install -y libopenblas-dev
