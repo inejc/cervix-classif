@@ -14,14 +14,15 @@ C = config.Config()
 from .keras_frcnn.simple_parser import get_data
 
 # file_path = sys.argv[1]
-file_path = "./../tmp/roi_bbox.txt"
-all_imgs, classes_count, class_mapping = get_data(file_path)
+roi_file_path = "./../data/roi/roi_bbox.txt"
+
+all_imgs, classes_count, class_mapping = get_data(roi_file_path)
 
 if 'bg' not in classes_count:
     classes_count['bg'] = 0
     class_mapping['bg'] = len(class_mapping)
 
-with open('./../tmp/classes.json', 'w') as class_data_json:
+with open('./../data/roi/classes.json', 'w') as class_data_json:
     json.dump(class_mapping, class_data_json)
 
 inv_map = {v: k for k, v in class_mapping.items()}

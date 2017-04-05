@@ -82,10 +82,9 @@ classifier = nn.classifier(feature_map_input, roi_input, num_rois, nb_classes=le
 model_rpn = Model(img_input, rpn + [shared_layers])
 model_classifier = Model([feature_map_input, roi_input], classifier)
 
-weights_path = './models/model_frcnn.hdf5'
 
-model_rpn.load_weights(weights_path, by_name=True)
-model_classifier.load_weights(weights_path, by_name=True)
+model_rpn.load_weights(C.model_path, by_name=True)
+model_classifier.load_weights(C.model_path, by_name=True)
 
 model_rpn.compile(optimizer='sgd', loss='mse')
 model_classifier.compile(optimizer='sgd', loss='mse')
@@ -98,6 +97,7 @@ visualise = False
 
 print('Parsing annotation files')
 # img_path = sys.argv[1]
+#FIXME TIM
 img_path = "./data/train/Type_1/"
 
 for idx, img_name in enumerate(sorted(glob.glob(os.path.join(img_path, '*.jpg')))):

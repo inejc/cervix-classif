@@ -42,16 +42,16 @@ class Config:
         self.classifier_min_overlap = 0.1
         self.classifier_max_overlap = 0.5
 
-        if os.path.isfile('./tmp/mean_pixel_color.txt'):
-            self.mean_pixel = np.loadtxt('./tmp/mean_pixel_color.txt', delimiter=',')
+        if os.path.isfile('./../data/roi/mean_pixel_color.txt'):
+            self.mean_pixel = np.loadtxt('./../data/roi/mean_pixel_color.txt', delimiter=',')
 
         # location of pretrained weights for the base network
         # weight files can be found at:
         # https://github.com/fchollet/deep-learning-models/releases/download/v0.2/resnet50_weights_th_dim_ordering_th_kernels_notop.h5
         # https://github.com/fchollet/deep-learning-models/releases/download/v0.2/resnet50_weights_tf_dim_ordering_tf_kernels_notop.h5
         if K.image_dim_ordering() == 'th':
-            self.base_net_weights = './models/resnet50_weights_th_dim_ordering_th_kernels_notop.h5'
+            self.base_net_weights = './../models/resnet50_weights_th_dim_ordering_th_kernels_notop.h5'
         else:
-            self.base_net_weights = './models/resnet50_weights_tf_dim_ordering_tf_kernels_notop.h5'
+            self.base_net_weights = './../models/resnet50_weights_tf_dim_ordering_tf_kernels_notop.h5'
 
-        self.model_path = './models/model_frcnn.hdf5'
+        self.model_path = './../models/model_frcnn.hdf5'

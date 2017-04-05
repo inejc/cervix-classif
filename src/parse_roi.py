@@ -11,6 +11,9 @@ from .keras_frcnn.simple_parser import get_data
 from .keras_frcnn.data_generators import get_new_img_size
 from .keras_frcnn.data_augment import augment
 
+roi_file_path = "./../data/roi/roi_bbox.txt"
+mean_pixel_file_path = './../data/roi/mean_pixel_color.txt'
+roi_files_dir = './../data/roi/train/*/*.roi'
 
 def process_roi():
     generate_roi_file()
@@ -20,7 +23,7 @@ def process_roi():
 def generate_mean_pixel_file():
     from .keras_frcnn.config import Config
     C = Config()
-    all_imgs, _, _ = get_data("./../tmp/roi_bbox.txt")
+    all_imgs, _, _ = get_data(roi_file_path)
 
     avg = [0, 0, 0]
     for img_data in all_imgs:
@@ -39,13 +42,12 @@ def generate_mean_pixel_file():
         avg[1] += np.sum(x_img[:, :, 1]) / pixels
         avg[2] += np.sum(x_img[:, :, 2]) / pixels
     avg = [a / len(all_imgs) for a in list(avg)]
-    np.savetxt('./../tmp/mean_pixel_color.txt', avg, delimiter=',')
+    np.savetxt(mean_pixel_file_path, avg, delimiter=',')
 
 
 def generate_roi_file():
-    roi_files = glob.glob('./../data/roi/train/*/*.roi')
-
-    with open('./../tmp/roi_bbox.txt', 'w') as out:
+    roi_files = glob.glob(roi_files_dir)
+    with open(roi_file_path, 'w') as out:
         for roi_file in roi_files:
             with open(roi_file, "rb") as f:
                 roi = ijroi.read_roi(f)
@@ -57,7 +59,7 @@ def generate_roi_file():
 
 def get_average_roi_size():
     # TODO TIM
-    with open('./../tmp/roi_bbox.txt', 'r') as f:
+    with open(roi_file_path, 'r') as f:
         width = []
         height = []
         ratios = []
