@@ -57,9 +57,9 @@ approach.
 
 ### Using GPUs
 Sharing is caring! Limit your process to your own GPU. This can be done with the
-`CUDA_VISIBLE_DEVICES=id` flag when using TensorFlow and with `THEANO_FLAGS=device=gpuid`
+`CUDA_VISIBLE_DEVICES=gpuid` flag when using TensorFlow and with `THEANO_FLAGS=device=gpuid`
 when using Theano. To see which GPUs are currently free or in use, you can use
-`nvidia-smi` to get an overview of running processes.
+`nvidia-smi` to get an overview of running processes (list gpus with ids).
 
 ### Training and validation split
 Be careful with this on server since your data directory is just a symlink to everyone's shared directory :). Run `python data_dirs_organizer.py organize` to split the dataset into training and validation sets. Currently each image's smallest dimension is resized to 299 pixels and then cropped at the center of the larger dimension (obtaining 299x299 images). We can call the detection functionality from here later. Similarly run `python data_dirs_organizer.py clean` to delete all resized and organized images (i.e. to undo organize).
