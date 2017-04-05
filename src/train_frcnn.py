@@ -97,7 +97,7 @@ callbacks = [EarlyStopping(monitor='val_loss', patience=20, verbose=0),
              ModelCheckpoint(C.model_path, monitor='val_loss', save_best_only=True, verbose=0),
              ReduceLROnPlateau(monitor='loss', factor=0.1, patience=5, min_lr=1e-7, verbose=1)]
 
-batch_size = 1
+batch_size = 32
 nb_epochs = 500
 train_samples_per_epoch = len(train_imgs)
 nb_val_samples = len(val_imgs)
