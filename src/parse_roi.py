@@ -15,13 +15,14 @@ roi_file_path = "./../data/roi/roi_bbox.txt"
 mean_pixel_file_path = './../data/roi/mean_pixel_color.txt'
 roi_files_dir = './../data/roi/train/*/*.roi'
 
+
 def process_roi():
     generate_roi_file()
     generate_mean_pixel_file()
 
 
 def generate_mean_pixel_file():
-    from .keras_frcnn.config import Config
+    from keras_frcnn.config import Config
     C = Config()
     all_imgs, _, _ = get_data(roi_file_path)
 
