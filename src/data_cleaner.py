@@ -5,7 +5,7 @@ from shutil import copyfile
 import fire
 from PIL import Image
 
-from data_provider import DATA_DIR, CLASSES
+from data_provider import DATA_DIR, CLASSES, IMAGES_BLACKLIST_FILE
 from utils import read_lines
 
 
@@ -16,7 +16,7 @@ def clean(dir_):
     _make_labeled_dir_structure(dir_junk)
 
     black_list = read_lines(
-        'images_black_list.txt',
+        IMAGES_BLACKLIST_FILE,
         line_func=lambda l: l.rstrip()
     )
 
@@ -47,12 +47,12 @@ def _make_labeled_dir_structure(dir_):
 
 def _is_clean_image(black_list, file_path):
     # blacklisted images
-    black_list_format_path = join(
+    blacklist_format_path = join(
         basename(dirname(dirname(file_path))),
         basename(dirname(file_path)),
         basename(file_path)
     )
-    if black_list_format_path in black_list:
+    if blacklist_format_path in black_list:
         return False
 
     # empty images

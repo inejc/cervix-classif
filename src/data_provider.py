@@ -13,6 +13,11 @@ EXPERIMENTS_DIR = join(dirname(dirname(__file__)), 'experiments')
 CLASSES = ['Type_1', 'Type_2', 'Type_3']
 ORGANIZED_DATA_INFO_FILE = 'organized_data_info_.json'
 
+IMAGES_BLACKLIST_FILE = join(
+    dirname(dirname(__file__)),
+    'src', 'images_blacklist.txt'
+)
+
 
 def load_organized_data_info(imgs_dim, name=''):
     """Loads the train, val, test datasets info file.
