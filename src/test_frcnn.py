@@ -8,7 +8,7 @@ import numpy as np
 
 from keras_frcnn import config
 
-os.environ["CUDA_VISIBLE_DEVICES"] = "2"
+os.environ["CUDA_VISIBLE_DEVICES"] = "1"
 
 sys.setrecursionlimit(40000)
 C = config.Config()
@@ -17,7 +17,7 @@ C.use_vertical_flips = False
 
 
 def format_img(img):
-    img_min_side = 600.0
+    img_min_side = C.im_size
     (height, width, _) = img.shape
 
     if width <= height:
@@ -36,7 +36,15 @@ def format_img(img):
     img[:, 0, :, :] -= C.mean_pixel[0]  # used to be 103.939
     img[:, 1, :, :] -= C.mean_pixel[1]  # used to be 116.779
     img[:, 2, :, :] -= C.mean_pixel[2]  # used to be 123.68
-    return img
+    return img, new_width, new_height
+
+
+def resize_bounding_box(width_ratio, height_ratio, x1, x2, y1, y2):
+    x1 *= width_ratio
+    x2 *= width_ratio
+    y1 *= height_ratio
+    y2 *= height_ratio
+    return x1, x2, y1, y2
 
 
 with open('./../data/roi/classes.json', 'r') as class_data_json:
@@ -105,8 +113,12 @@ for idx, img_name in enumerate(sorted(glob.glob(os.path.join(img_path, '*.jpg'))
     print("Processing image " + img_name + "...")
 
     img = cv2.imread(img_name)
+    height, width, _ = img.shape
 
-    X = format_img(img)
+    X, new_width, new_height = format_img(img)
+
+    width_ratio = width / new_width
+    height_ratio = height / new_height
 
     img_scaled = np.transpose(X[0, (2, 1, 0), :, :], (1, 2, 0)).copy()
     img_scaled[:, :, 0] += C.mean_pixel[2]
@@ -180,15 +192,16 @@ for idx, img_name in enumerate(sorted(glob.glob(os.path.join(img_path, '*.jpg'))
 
         # TODO TIM: check if box makes sense
         best_match = new_boxes[np.argmax(new_probs), :]
-
+        best_match = resize_bounding_box(width_ratio, height_ratio, *best_match)
         if visualise:
             (x1, y1, x2, y2) = best_match
-            cv2.rectangle(img_scaled, (x1, y1), (x2, y2), (0, 255, 0), 2)
+            cv2.rectangle(img, (x1, y1), (x2, y2), (0, 255, 0), 2)
             for jk in range(new_boxes.shape[0]):
                 (x1, y1, x2, y2) = new_boxes[jk, :]
+                x1, x2, y1, y2 = resize_bounding_box()
 
                 # FIXME TIM: class_to_color[key] namesto hardcodane barve
-                cv2.rectangle(img_scaled, (x1, y1), (x2, y2), (255, 0, 0), 2)
+                cv2.rectangle(img, (x1, y1), (x2, y2), (255, 0, 0), 2)
 
                 textLabel = '{}:{}'.format(key, int(100 * new_probs[jk]))
                 if key not in all_dets:
@@ -199,21 +212,21 @@ for idx, img_name in enumerate(sorted(glob.glob(os.path.join(img_path, '*.jpg'))
                 (retval, baseLine) = cv2.getTextSize(textLabel, cv2.FONT_HERSHEY_COMPLEX, 1, 1)
                 textOrg = (x1, y1 + 20)
 
-                cv2.rectangle(img_scaled, (textOrg[0] - 5, textOrg[1] + baseLine - 5),
+                cv2.rectangle(img, (textOrg[0] - 5, textOrg[1] + baseLine - 5),
                               (textOrg[0] + retval[0] + 5, textOrg[1] - retval[1] - 5), (0, 0, 0),
                               2)
-                cv2.rectangle(img_scaled, (textOrg[0] - 5, textOrg[1] + baseLine - 5),
+                cv2.rectangle(img, (textOrg[0] - 5, textOrg[1] + baseLine - 5),
                               (textOrg[0] + retval[0] + 5, textOrg[1] - retval[1] - 5),
                               (255, 255, 255), -1)
-                cv2.putText(img_scaled, textLabel, textOrg, cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 0),
+                cv2.putText(img, textLabel, textOrg, cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 0),
                             1)
 
     if best_match is not None:
         (x1, y1, x2, y2) = best_match
-        cv2.imwrite(img_name.replace("/train", "/cropped/train"), img_scaled[y1:y2, x1:x2])
+        cv2.imwrite(img_name.replace("/train", "/cropped/train"), img[y1:y2, x1:x2])
     else:
         print("Could not find ROI on image " + img_name)
-        cv2.imwrite(img_name.replace("/train", "/cropped/train"), img_scaled)
+        cv2.imwrite(img_name.replace("/train", "/cropped/train"), img)
 
     if visualise and best_match is not None:
         cv2.imshow('img', img_scaled)
