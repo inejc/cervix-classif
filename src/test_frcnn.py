@@ -86,7 +86,7 @@ def get_model_classifier(class_mapping, input_shape_features):
     return model_classifier
 
 
-def crop(dir_with_images="./../data/train/Type_1/", overlap_thresh=0.9, visualise=False):
+def crop(dir_with_images="./../data/test/", overlap_thresh=0.9, visualise=False):
     class_mapping = get_class_mappings()
 
     if K.image_dim_ordering() == 'th':
@@ -208,12 +208,18 @@ def crop(dir_with_images="./../data/train/Type_1/", overlap_thresh=0.9, visualis
                     cv2.putText(img, textLabel, textOrg, cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 0),
                                 1)
 
+        if "/train" in img_name:
+            new_image_path = img_name.replace("/train", "/cropped/train")
+        elif "/test" in img_name:
+            new_image_path = img_name.replace("/test", "/cropped/test")
+        else:
+            raise RuntimeError("Wrong dir name!")
         if best_match is not None:
             (x1, y1, x2, y2) = best_match
-            cv2.imwrite(img_name.replace("/train", "/cropped/train"), img[y1:y2, x1:x2])
+            cv2.imwrite(new_image_path, img[y1:y2, x1:x2])
         else:
             print("Could not find ROI on image " + img_name)
-            cv2.imwrite(img_name.replace("/train", "/cropped/train"), img)
+            cv2.imwrite(new_image_path, img)
 
         if visualise and best_match is not None:
             cv2.imshow('img', img_scaled)
