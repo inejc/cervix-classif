@@ -39,11 +39,12 @@ def format_img(img):
     return img, new_width, new_height
 
 
-def resize_bounding_box(width_ratio, height_ratio, x1, x2, y1, y2):
-    x1 *= width_ratio
-    x2 *= width_ratio
-    y1 *= height_ratio
-    y2 *= height_ratio
+def resize_bounding_box(width_ratio, height_ratio, coordinates):
+    """coordinates: (x1, x2, y1, y2) """
+    x1 = max(0, coordinates[0] * width_ratio)
+    x2 = max(0, coordinates[1] * width_ratio)
+    y1 = max(0, coordinates[2] * height_ratio)
+    y2 = max(0, coordinates[3] * height_ratio)
     return int(x1), int(x2), int(y1), int(y2)
 
 
@@ -192,13 +193,12 @@ for idx, img_name in enumerate(sorted(glob.glob(os.path.join(img_path, '108.jpg'
 
         # TODO TIM: check if box makes sense
         best_match = new_boxes[np.argmax(new_probs), :]
-        best_match = resize_bounding_box(width_ratio, height_ratio, *best_match)
+        best_match = resize_bounding_box(width_ratio, height_ratio, best_match)
         if visualise:
             (x1, y1, x2, y2) = best_match
             cv2.rectangle(img, (x1, y1), (x2, y2), (0, 255, 0), 2)
             for jk in range(new_boxes.shape[0]):
-                (x1, y1, x2, y2) = new_boxes[jk, :]
-                x1, x2, y1, y2 = resize_bounding_box()
+                x1, x2, y1, y2 = resize_bounding_box(width_ratio, height_ratio, new_boxes[jk, :])
 
                 # FIXME TIM: class_to_color[key] namesto hardcodane barve
                 cv2.rectangle(img, (x1, y1), (x2, y2), (255, 0, 0), 2)
@@ -223,12 +223,10 @@ for idx, img_name in enumerate(sorted(glob.glob(os.path.join(img_path, '108.jpg'
 
     if best_match is not None:
         (x1, y1, x2, y2) = best_match
-        print(best_match)
-        ret = cv2.imwrite(img_name.replace("/train", "/cropped/train"), img[y1:y2, x1:x2])
+        cv2.imwrite(img_name.replace("/train", "/cropped/train"), img[y1:y2, x1:x2])
     else:
         print("Could not find ROI on image " + img_name)
-        ret = cv2.imwrite(img_name.replace("/train", "/cropped/train"), img)
-    print("imwrite returned: " + ret)
+        cv2.imwrite(img_name.replace("/train", "/cropped/train"), img)
 
     if visualise and best_match is not None:
         cv2.imshow('img', img_scaled)
