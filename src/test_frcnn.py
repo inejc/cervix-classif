@@ -39,7 +39,7 @@ def format_img(img):
     return img
 
 
-with open('./../tmp/classes.json', 'r') as class_data_json:
+with open('./../data/roi/classes.json', 'r') as class_data_json:
     class_mapping = json.load(class_data_json)
 
 if 'bg' not in class_mapping:
