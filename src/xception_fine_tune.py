@@ -42,7 +42,7 @@ from utils import create_submission_file
 HEIGHT, WIDTH = 299, 299
 EMBEDDINGS_FILE = 'xception_embeddings_{:s}.npz'
 TOP_CLASSIFIER_FILE = 'xception_top_classifier_{:s}.h5'
-MODEL_FILE = 'xception_fine_tuned_{:s}.h5'
+MODEL_FILE = 'xception_fine_tuned_{:s}_{:s}.h5'
 
 
 def create_embeddings(name):
@@ -173,7 +173,7 @@ def make_submission_top_classifier(name, dropout_p):
     )
 
 
-def fine_tune(name, lr=1e-4, reduce_lr_factor=0.1, reduce_lr_patience=3,
+def fine_tune(name, name_ext, lr=1e-4, reduce_lr_factor=0.1, reduce_lr_patience=3,
               epochs=10, batch_size=32, l2_reg=0, dropout_p=0.5,
               num_freeze_layers=0):
 
@@ -203,7 +203,8 @@ def fine_tune(name, lr=1e-4, reduce_lr_factor=0.1, reduce_lr_patience=3,
     dir_val, num_val = data_info['dir_val'], data_info['num_val']
 
     top_classifier_file = join(MODELS_DIR, TOP_CLASSIFIER_FILE.format(name))
-    model_file = join(MODELS_DIR, MODEL_FILE.format(name))
+    model_file = join(MODELS_DIR, MODEL_FILE.format(name, name_ext))
+
     model = Xception(weights='imagenet', include_top=False, pooling='avg')
     top_classifier = _top_classifier(
         l2_reg=l2_reg,
@@ -238,7 +239,7 @@ def fine_tune(name, lr=1e-4, reduce_lr_factor=0.1, reduce_lr_patience=3,
     )
 
 
-def make_submission_xception(name, dropout_p):
+def make_submission_xception(name, name_ext, dropout_p):
     data_info = load_organized_data_info(imgs_dim=HEIGHT, name=name)
     _, _, _, _, _, te_names = create_embeddings(name)
     batch_size = 32
@@ -252,7 +253,7 @@ def make_submission_xception(name, dropout_p):
         shuffle=False
     )
 
-    model_file = join(MODELS_DIR, MODEL_FILE.format(name))
+    model_file = join(MODELS_DIR, MODEL_FILE.format(name, name_ext))
     model = Xception(weights='imagenet', include_top=False, pooling='avg')
     top_classifier = _top_classifier(
         l2_reg=0,
