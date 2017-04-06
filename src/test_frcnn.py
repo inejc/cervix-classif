@@ -86,7 +86,7 @@ def get_model_classifier(class_mapping, input_shape_features):
     return model_classifier
 
 
-def crop(dir_with_images="./../data/train/Type_2/", overlap_thresh=0.9, visualise=False):
+def crop(dir_with_images="./../data/train/Type_1/", overlap_thresh=0.9, visualise=False):
     class_mapping = get_class_mappings()
 
     if K.image_dim_ordering() == 'th':
@@ -100,6 +100,7 @@ def crop(dir_with_images="./../data/train/Type_2/", overlap_thresh=0.9, visualis
     model_classifier = get_model_classifier(class_mapping, input_shape_features)
 
     images = sorted(glob.glob(os.path.join(dir_with_images, '*.jpg')))
+    print("Found " + str(len(images)) + " images...")
     for idx, img_name in tqdm(enumerate(images), total=len(images)):
 
         img = cv2.imread(img_name)
