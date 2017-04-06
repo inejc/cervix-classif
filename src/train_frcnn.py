@@ -5,7 +5,7 @@ import sys
 
 from keras_frcnn import config
 
-os.environ["CUDA_VISIBLE_DEVICES"] = "0"
+os.environ["CUDA_VISIBLE_DEVICES"] = "1"
 
 sys.setrecursionlimit(40000)
 
@@ -111,3 +111,5 @@ print('Starting training')
 model.fit_generator(data_gen_train, steps_per_epoch=train_samples_per_epoch/batch_size, epochs=nb_epochs,
                     validation_data=data_gen_val, validation_steps=nb_val_samples, callbacks=callbacks,
                     max_q_size=1, workers=1)
+
+# 574/574 [==============================] - 295s - loss: 0.2950 - rpn_out_class_loss: 0.0048 - rpn_out_regress_loss: 0.0366 - dense_class_2_loss: 0.2463 - dense_regress_2_loss: 0.0072 - val_loss: 0.4471 - val_rpn_out_class_loss: 0.0061 - val_rpn_out_regress_loss: 0.0660 - val_dense_class_2_loss: 0.3663 - val_dense_regress_2_loss: 0.0086
