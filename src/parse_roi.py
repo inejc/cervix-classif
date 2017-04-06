@@ -1,7 +1,4 @@
-import fire
-
 import glob
-import os
 
 import ijroi
 import cv2
@@ -78,4 +75,4 @@ def get_average_roi_size():
 
 
 if __name__ == '__main__':
-    fire.Fire()
+    process_roi()

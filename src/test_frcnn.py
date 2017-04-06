@@ -111,7 +111,6 @@ print('Parsing annotation files')
 img_path = "./../data/train/Type_3/"
 
 for idx, img_name in enumerate(sorted(glob.glob(os.path.join(img_path, '*.jpg')))):
-    print("Processing image " + img_name + "...")
 
     img = cv2.imread(img_name)
     height, width, _ = img.shape
