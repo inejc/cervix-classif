@@ -53,6 +53,4 @@ class Config:
             self.base_net_weights = './../models/resnet50_weights_th_dim_ordering_th_kernels_notop.h5'
         else:
             self.base_net_weights = './../models/resnet50_weights_tf_dim_ordering_tf_kernels_notop.h5'
-        #FIXME TIM: switch
-        # self.model_path = './../models/model_frcnn.hdf5'
-        self.model_path = './../models/model_frcnn1.hdf5'
+        self.model_path = './../models/model_frcnn.hdf5'
