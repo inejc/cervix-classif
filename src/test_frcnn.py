@@ -44,7 +44,7 @@ def resize_bounding_box(width_ratio, height_ratio, x1, x2, y1, y2):
     x2 *= width_ratio
     y1 *= height_ratio
     y2 *= height_ratio
-    return x1, x2, y1, y2
+    return int(x1), int(x2), int(y1), int(y2)
 
 
 with open('./../data/roi/classes.json', 'r') as class_data_json:
