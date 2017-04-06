@@ -9,12 +9,12 @@ fine_tune --lr 1e-4 --reduce_lr_factor 0.1 --reduce_lr_patience 1 --epochs 100 -
 (0.8039 val_loss, 0.76231 public score)
 fine_tune --lr 1e-5 --reduce_lr_factor 0.1 --reduce_lr_patience 100 --epochs 100 --batch_size 256 --l2_reg 0 --dropout_p 0.6 --num_freeze_layers 126
 
-106 frozen layers, dropout_p 0.7: overfit
-116 frozen layers, dropout_p 0.7: overfit
-126 frozen layers, dropout_p 0.5: overfit
-126 frozen layers, dropout_p 0.7: underfit?
-
-CLEANED DATA 0.1 train val split
---------------------------------
+CLEANED DATA 0.1 train val split (additional data in val set)
+-------------------------------------------------------------
 (0.7627 val_loss, 0.87526 public score)
 train_top_classifier --name 'cleaned' --lr 0.0001 --epochs 2700 --batch_size 1332 --l2_reg 0 --dropout_p 0.5 --save_model True
+
+CLEANED DATA 0.1 train val split (only train data in val set)
+-------------------------------------------------------------
+(0.8359 val_loss, 0.87120 public score)
+train_top_classifier --name 'cleaned' --lr 0.0001 --epochs 1000 --batch_size 1024 --l2_reg 0 --dropout_p 0.5 --save_model True
