@@ -3,6 +3,7 @@ import json
 import os
 import sys
 
+import fire
 import cv2
 import keras_frcnn.resnet as nn
 import numpy as np
@@ -61,7 +62,31 @@ def get_class_mappings():
     return {v: k for k, v in class_mapping.items()}
 
 
-def crop(img_path="./../data/train/Type_2/", overlap_thresh=0.9, visualise=False):
+def get_model_rpn(input_shape_img):
+    img_input = Input(shape=input_shape_img)
+    # define the base network (resnet here, can be VGG, Inception, etc)
+    shared_layers = nn.nn_base(img_input)
+    # define the RPN, built on the base layers
+    num_anchors = len(C.anchor_box_scales) * len(C.anchor_box_ratios)
+    rpn = nn.rpn(shared_layers, num_anchors)
+    model_rpn = Model(img_input, rpn + [shared_layers])
+    model_rpn.load_weights(C.model_path, by_name=True)
+    model_rpn.compile(optimizer='sgd', loss='mse')
+    return model_rpn
+
+
+def get_model_classifier(class_mapping, input_shape_features):
+    feature_map_input = Input(shape=input_shape_features)
+    roi_input = Input(shape=(C.num_rois, 4))
+    classifier = nn.classifier(feature_map_input, roi_input, C.num_rois,
+                               nb_classes=len(class_mapping))
+    model_classifier = Model([feature_map_input, roi_input], classifier)
+    model_classifier.load_weights(C.model_path, by_name=True)
+    model_classifier.compile(optimizer='sgd', loss='mse')
+    return model_classifier
+
+
+def crop(dir_with_images="./../data/train/Type_2/", overlap_thresh=0.9, visualise=False):
     class_mapping = get_class_mappings()
 
     if K.image_dim_ordering() == 'th':
@@ -74,7 +99,7 @@ def crop(img_path="./../data/train/Type_2/", overlap_thresh=0.9, visualise=False
     model_rpn = get_model_rpn(input_shape_img)
     model_classifier = get_model_classifier(class_mapping, input_shape_features)
 
-    images = sorted(glob.glob(os.path.join(img_path, '*.jpg')))
+    images = sorted(glob.glob(os.path.join(dir_with_images, '*.jpg')))
     for idx, img_name in tqdm(enumerate(images), total=len(images)):
 
         img = cv2.imread(img_name)
@@ -124,14 +149,11 @@ def crop(img_path="./../data/train/Type_2/", overlap_thresh=0.9, visualise=False
             P_regr = P_regr / C.std_scaling
 
             for ii in range(P_cls.shape[1]):
-
-                # FIXME TIM:  only one bounding box with max P_cls
                 if np.max(P_cls[0, ii, :]) < 0.5 or np.argmax(P_cls[0, ii, :]) == (
                             P_cls.shape[2] - 1):
                     continue
 
                 cls_name = class_mapping[np.argmax(P_cls[0, ii, :])]
-
                 if cls_name not in bboxes:
                     bboxes[cls_name] = []
                     probs[cls_name] = []
@@ -145,14 +167,11 @@ def crop(img_path="./../data/train/Type_2/", overlap_thresh=0.9, visualise=False
                 bboxes[cls_name].append([16 * x, 16 * y, 16 * (x + w), 16 * (y + h)])
                 probs[cls_name].append(np.max(P_cls[0, ii, :]))
 
-        all_dets = {}
-
         best_match = None
+        all_dets = {}
 
         for key in bboxes:
             bbox = np.array(bboxes[key])
-
-            # TODO TIM: change overlapTrashold
             new_boxes, new_probs = roi_helpers.non_max_suppression_fast(bbox, np.array(probs[key]),
                                                                         overlapThresh=overlap_thresh)
 
@@ -200,25 +219,5 @@ def crop(img_path="./../data/train/Type_2/", overlap_thresh=0.9, visualise=False
             cv2.waitKey(0)
 
 
-def get_model_rpn(input_shape_img):
-    img_input = Input(shape=input_shape_img)
-    # define the base network (resnet here, can be VGG, Inception, etc)
-    shared_layers = nn.nn_base(img_input)
-    # define the RPN, built on the base layers
-    num_anchors = len(C.anchor_box_scales) * len(C.anchor_box_ratios)
-    rpn = nn.rpn(shared_layers, num_anchors)
-    model_rpn = Model(img_input, rpn + [shared_layers])
-    model_rpn.load_weights(C.model_path, by_name=True)
-    model_rpn.compile(optimizer='sgd', loss='mse')
-    return model_rpn
-
-
-def get_model_classifier(class_mapping, input_shape_features):
-    feature_map_input = Input(shape=input_shape_features)
-    roi_input = Input(shape=(C.num_rois, 4))
-    classifier = nn.classifier(feature_map_input, roi_input, C.num_rois,
-                               nb_classes=len(class_mapping))
-    model_classifier = Model([feature_map_input, roi_input], classifier)
-    model_classifier.load_weights(C.model_path, by_name=True)
-    model_classifier.compile(optimizer='sgd', loss='mse')
-    return model_classifier
+if __name__ == '__main__':
+    fire.Fire()
