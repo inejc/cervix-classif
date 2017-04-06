@@ -223,10 +223,12 @@ for idx, img_name in enumerate(sorted(glob.glob(os.path.join(img_path, '108.jpg'
 
     if best_match is not None:
         (x1, y1, x2, y2) = best_match
-        cv2.imwrite(img_name.replace("/train", "/cropped/train"), img[y1:y2, x1:x2])
+        print(best_match)
+        ret = cv2.imwrite(img_name.replace("/train", "/cropped/train"), img[y1:y2, x1:x2])
     else:
         print("Could not find ROI on image " + img_name)
-        cv2.imwrite(img_name.replace("/train", "/cropped/train"), img)
+        ret = cv2.imwrite(img_name.replace("/train", "/cropped/train"), img)
+    print("imwrite returned: " + ret)
 
     if visualise and best_match is not None:
         cv2.imshow('img', img_scaled)
