@@ -1,5 +1,6 @@
 """
-Usage:
+Example usage
+-------------
     python data_dirs_organizer.py organize --imgs_dim 299 --name 'cleaned'
                                   --val_size_fraction 0.1 --te_dir 'test'
                                   'train' 'additional'
