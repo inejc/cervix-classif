@@ -4,9 +4,10 @@ from shutil import copyfile
 
 import fire
 from PIL import Image
+from keras.preprocessing.image import img_to_array
 
 from data_provider import DATA_DIR, CLASSES, IMAGES_BLACKLIST_FILE
-from utils import read_lines
+from utils import read_lines, is_green
 
 
 def clean(dir_):
@@ -64,6 +65,10 @@ def _is_clean_image(black_list, file_path):
     try:
         image.load()
     except IOError:
+        return False
+
+    # green images
+    if is_green(img_to_array(image)):
         return False
 
     return True
