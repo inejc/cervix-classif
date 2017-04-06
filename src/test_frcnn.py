@@ -6,6 +6,8 @@ import sys
 import cv2
 import numpy as np
 
+from tqdm import tqdm
+
 from keras_frcnn import config
 
 os.environ["CUDA_VISIBLE_DEVICES"] = "1"
@@ -110,7 +112,7 @@ print('Parsing annotation files')
 # FIXME TIM
 img_path = "./../data/train/Type_3/"
 
-for idx, img_name in enumerate(sorted(glob.glob(os.path.join(img_path, '*.jpg')))):
+for idx, img_name in tqdm(enumerate(sorted(glob.glob(os.path.join(img_path, '*.jpg'))))):
 
     img = cv2.imread(img_name)
     height, width, _ = img.shape

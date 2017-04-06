@@ -23,5 +23,6 @@ simplegeneric==0.8.1
 six==1.10.0
 tensorflow==1.0.0
 tensorflow-gpu==1.0.1
+tqdm==4.11.2
 traitlets==4.3.2
 wcwidth==0.1.7
