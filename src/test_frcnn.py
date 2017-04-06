@@ -112,7 +112,8 @@ print('Parsing annotation files')
 # FIXME TIM
 img_path = "./../data/train/Type_3/"
 
-for idx, img_name in tqdm(enumerate(sorted(glob.glob(os.path.join(img_path, '*.jpg'))))):
+images = sorted(glob.glob(os.path.join(img_path, '*.jpg')))
+for idx, img_name in tqdm(enumerate(images), total=len(images)):
 
     img = cv2.imread(img_name)
     height, width, _ = img.shape
