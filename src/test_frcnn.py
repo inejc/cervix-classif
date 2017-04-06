@@ -8,7 +8,7 @@ import numpy as np
 
 from keras_frcnn import config
 
-os.environ["CUDA_VISIBLE_DEVICES"] = "1"
+os.environ["CUDA_VISIBLE_DEVICES"] = "2"
 
 sys.setrecursionlimit(40000)
 C = config.Config()
@@ -176,7 +176,7 @@ for idx, img_name in enumerate(sorted(glob.glob(os.path.join(img_path, '*.jpg'))
 
         # TODO TIM: change overlapTrashold
         new_boxes, new_probs = roi_helpers.non_max_suppression_fast(bbox, np.array(probs[key]),
-                                                                    overlapThresh=0.5)
+                                                                    overlapThresh=0.9)
 
         # TODO TIM: check if box makes sense
         best_match = new_boxes[np.argmax(new_probs), :]
