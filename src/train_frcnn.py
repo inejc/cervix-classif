@@ -3,15 +3,23 @@ import os
 import random
 import sys
 
+from keras import backend as K
+from keras.callbacks import EarlyStopping, ModelCheckpoint
+from keras.callbacks import ReduceLROnPlateau
+from keras.layers import Input
+from keras.models import Model
+from keras.optimizers import Adam
 from keras_frcnn import config
+from keras_frcnn import data_generators
+from keras_frcnn import losses
+from keras_frcnn import resnet as nn
+from keras_frcnn.simple_parser import get_data
 
 os.environ["CUDA_VISIBLE_DEVICES"] = "1"
 
 sys.setrecursionlimit(40000)
 
 C = config.Config()
-
-from keras_frcnn.simple_parser import get_data
 
 # file_path = sys.argv[1]
 roi_file_path = "./../data/roi/roi_bbox.txt"
@@ -31,29 +39,16 @@ inv_map = {v: k for k, v in class_mapping.items()}
 print('Num classes (including bg) = {}'.format(len(classes_count)))
 random.shuffle(all_imgs)
 
-num_imgs = len(all_imgs)
-
 train_imgs = [s for s in all_imgs if s['imageset'] == 'trainval']
 val_imgs = [s for s in all_imgs if s['imageset'] == 'test']
 
 print('Num train samples {}'.format(len(train_imgs)))
 print('Num val samples {}'.format(len(val_imgs)))
 
-from keras_frcnn import data_generators
-from keras import backend as K
-
-data_gen_train = data_generators.get_anchor_gt(train_imgs, class_mapping, classes_count, C, K.image_dim_ordering(),
-                                               mode='train')
-data_gen_val = data_generators.get_anchor_gt(val_imgs, class_mapping, classes_count, C, K.image_dim_ordering(),
-                                             mode='val')
-
-from keras_frcnn import resnet as nn
-from keras.optimizers import Adam
-from keras.layers import Input
-from keras.models import Model
-from keras.callbacks import EarlyStopping, ModelCheckpoint
-from keras_frcnn import losses
-from keras.callbacks import ReduceLROnPlateau
+data_gen_train = data_generators.get_anchor_gt(train_imgs, class_mapping, classes_count,
+                                               C, K.image_dim_ordering(), mode='train')
+data_gen_val = data_generators.get_anchor_gt(val_imgs, class_mapping, classes_count,
+                                             C, K.image_dim_ordering(), mode='val')
 
 if K.image_dim_ordering() == 'th':
     input_shape_img = (3, None, None)
@@ -72,7 +67,8 @@ num_anchors = len(C.anchor_box_scales) * len(C.anchor_box_ratios)
 rpn = nn.rpn(shared_layers, num_anchors)
 
 # the classifier is build on top of the base layers + the ROI pooling layer + extra layers
-classifier = nn.classifier(shared_layers, roi_input, C.num_rois, nb_classes=len(classes_count), trainable=True)
+classifier = nn.classifier(shared_layers, roi_input, C.num_rois, nb_classes=len(classes_count),
+                           trainable=True)
 
 # define the full model
 model = Model([img_input, roi_input], rpn + classifier)
@@ -92,10 +88,10 @@ except:
 
 optimizer = Adam(lr=0.0001, decay=0.001)
 model.compile(optimizer=optimizer,
-              loss=[losses.rpn_loss_cls(num_anchors), losses.rpn_loss_regr(num_anchors), losses.class_loss_cls,
+              loss=[losses.rpn_loss_cls(num_anchors), losses.rpn_loss_regr(num_anchors),
+                    losses.class_loss_cls,
                     losses.class_loss_regr(C.num_rois, len(classes_count) - 1)],
               metrics={'dense_class_{}_loss'.format(len(classes_count)): 'accuracy'})
-
 
 callbacks = [EarlyStopping(monitor='val_loss', patience=20, verbose=0),
              ModelCheckpoint(C.model_path, monitor='val_loss', save_best_only=True, verbose=0),
@@ -108,8 +104,9 @@ nb_val_samples = len(val_imgs)
 
 print('Starting training')
 
-model.fit_generator(data_gen_train, steps_per_epoch=train_samples_per_epoch/batch_size, epochs=nb_epochs,
-                    validation_data=data_gen_val, validation_steps=nb_val_samples, callbacks=callbacks,
+model.fit_generator(data_gen_train, steps_per_epoch=train_samples_per_epoch / batch_size,
+                    epochs=nb_epochs,
+                    validation_data=data_gen_val, validation_steps=nb_val_samples,
+                    callbacks=callbacks,
                     max_q_size=1, workers=1)
 
-# 574/574 [==============================] - 295s - loss: 0.2950 - rpn_out_class_loss: 0.0048 - rpn_out_regress_loss: 0.0366 - dense_class_2_loss: 0.2463 - dense_regress_2_loss: 0.0072 - val_loss: 0.4471 - val_rpn_out_class_loss: 0.0061 - val_rpn_out_regress_loss: 0.0660 - val_dense_class_2_loss: 0.3663 - val_dense_regress_2_loss: 0.0086

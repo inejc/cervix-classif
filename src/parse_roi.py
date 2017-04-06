@@ -1,12 +1,12 @@
 import glob
 
-import ijroi
 import cv2
+import ijroi
 import numpy as np
-
-from keras_frcnn.simple_parser import get_data
-from keras_frcnn.data_generators import get_new_img_size
+from keras_frcnn.config import Config
 from keras_frcnn.data_augment import augment
+from keras_frcnn.data_generators import get_new_img_size
+from keras_frcnn.simple_parser import get_data
 
 roi_file_path = "./../data/roi/roi_bbox.txt"
 mean_pixel_file_path = './../data/roi/mean_pixel_color.txt'
@@ -19,7 +19,6 @@ def process_roi():
 
 
 def generate_mean_pixel_file():
-    from keras_frcnn.config import Config
     C = Config()
     all_imgs, _, _ = get_data(roi_file_path)
 
