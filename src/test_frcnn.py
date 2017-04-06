@@ -8,6 +8,8 @@ import numpy as np
 
 from keras_frcnn import config
 
+os.environ["CUDA_VISIBLE_DEVICES"] = "1"
+
 sys.setrecursionlimit(40000)
 C = config.Config()
 C.use_horizontal_flips = False
@@ -100,6 +102,8 @@ print('Parsing annotation files')
 img_path = "./../data/train/Type_3/"
 
 for idx, img_name in enumerate(sorted(glob.glob(os.path.join(img_path, '*.jpg')))):
+    print("Processing image " + img_name + "...")
+
     img = cv2.imread(img_name)
 
     X = format_img(img)
@@ -206,10 +210,10 @@ for idx, img_name in enumerate(sorted(glob.glob(os.path.join(img_path, '*.jpg'))
 
     if best_match is not None:
         (x1, y1, x2, y2) = best_match
-        cv2.imwrite("./../data/cropped" + img_name[9:], img_scaled[y1:y2, x1:x2])
+        cv2.imwrite(img_name.replace("/train", "/cropped/train"), img_scaled[y1:y2, x1:x2])
     else:
         print("Could not find ROI on image " + img_name)
-        cv2.imwrite("./../data/roi/cropped" + img_name[9:], img_scaled)
+        cv2.imwrite(img_name.replace("/train", "/cropped/train"), img_scaled)
 
     if visualise and best_match is not None:
         cv2.imshow('img', img_scaled)
