@@ -38,7 +38,8 @@ def clean(imgs_dim=299, name=''):
 def organize(imgs_dim=299, name='', val_size_fraction=0.1,
              te_dir=None, *tr_dirs):
     """Splits labeled images into training and validation sets in a stratified
-    manner.
+    manner, train dir should be the first arg to tr_dirs (additional, gan, ...
+    should follow).
     """
     new_dir_tr = join(DATA_DIR, 'train_{:d}{:s}'.format(imgs_dim, '_' + name))
     new_dir_val = join(DATA_DIR, 'val_{:d}{:s}'.format(imgs_dim, '_' + name))
@@ -74,24 +75,38 @@ def _make_labeled_dir_structure(dir_):
 
 def _organize_train_dirs(dirs, val_size_fraction, imgs_dim, name, new_dir_tr,
                          new_dir_val):
-    paths, labels = [], []
-    for dir_ in dirs:
-        dir_paths, dir_labels = _load_paths_labels_from_train_dir(dir_)
-        paths = np.hstack((paths, dir_paths))
-        labels = np.hstack((labels, dir_labels))
 
-    ind_tr, ind_val = _train_val_split_indices(val_size_fraction, paths, labels)
+    train_paths, train_labels = _load_paths_labels_from_train_dir(dirs[0])
+
+    other_paths, other_labels = [], []
+    for dir_ in dirs[1:]:
+        dir_paths, dir_labels = _load_paths_labels_from_train_dir(dir_)
+        other_paths = np.hstack((other_paths, dir_paths))
+        other_labels = np.hstack((other_labels, dir_labels))
+
+    ind_tr, ind_val = _train_val_split_indices(
+        val_size_fraction,
+        train_paths,
+        train_labels
+    )
+
+    # use only data from train dir for validation
+    all_train_paths = np.hstack((train_paths[ind_tr], other_paths))
+    all_train_labels = np.hstack((train_labels[ind_tr], other_labels))
+    val_paths = train_paths[ind_val]
+    val_labels = train_labels[ind_val]
+
     _save_organized_data_info(
         imgs_dim,
         name,
-        len(ind_tr),
-        len(ind_val),
+        len(all_train_paths),
+        len(val_paths),
         new_dir_tr,
         new_dir_val
     )
 
-    _save_images_to_dir(imgs_dim, new_dir_tr, paths[ind_tr], labels[ind_tr])
-    _save_images_to_dir(imgs_dim, new_dir_val, paths[ind_val], labels[ind_val])
+    _save_images_to_dir(imgs_dim, new_dir_tr, all_train_paths, all_train_labels)
+    _save_images_to_dir(imgs_dim, new_dir_val, val_paths, val_labels)
 
 
 def _load_paths_labels_from_train_dir(dir_):
