@@ -79,7 +79,11 @@ model = Model([img_input, roi_input], rpn + classifier)
 
 try:
     print('loading weights from ', C.base_net_weights)
-    model.load_weights(C.base_net_weights, by_name=True)
+    if os.path.isfile(C.model_path):
+        model.load_weights(C.model_path, by_name=True)
+    else:
+        model.load_weights(C.base_net_weights, by_name=True)
+
 except:
     print('Could not load pretrained model weights. Weights can be found at {} and {}'.format(
         'https://github.com/fchollet/deep-learning-models/releases/download/v0.2/resnet50_weights_th_dim_ordering_th_kernels_notop.h5',
