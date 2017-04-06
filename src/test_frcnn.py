@@ -109,7 +109,7 @@ print('Parsing annotation files')
 # FIXME TIM
 img_path = "./../data/train/Type_3/"
 
-for idx, img_name in enumerate(sorted(glob.glob(os.path.join(img_path, '*.jpg')))):
+for idx, img_name in enumerate(sorted(glob.glob(os.path.join(img_path, '108.jpg')))):
     print("Processing image " + img_name + "...")
 
     img = cv2.imread(img_name)
