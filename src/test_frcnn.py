@@ -82,7 +82,6 @@ classifier = nn.classifier(feature_map_input, roi_input, num_rois, nb_classes=le
 model_rpn = Model(img_input, rpn + [shared_layers])
 model_classifier = Model([feature_map_input, roi_input], classifier)
 
-
 model_rpn.load_weights(C.model_path, by_name=True)
 model_classifier.load_weights(C.model_path, by_name=True)
 
@@ -97,8 +96,8 @@ visualise = False
 
 print('Parsing annotation files')
 # img_path = sys.argv[1]
-#FIXME TIM
-img_path = "./data/train/Type_1/"
+# FIXME TIM
+img_path = "./../data/train/Type_3/"
 
 for idx, img_name in enumerate(sorted(glob.glob(os.path.join(img_path, '*.jpg')))):
     img = cv2.imread(img_name)
@@ -166,17 +165,16 @@ for idx, img_name in enumerate(sorted(glob.glob(os.path.join(img_path, '*.jpg'))
 
     all_dets = {}
 
-    if len(bboxes) == 0:
-        print("Could not find ROI on image " + img_name)
-
     best_match = None
 
     for key in bboxes:
         bbox = np.array(bboxes[key])
 
-        #TODO TIM: change overlapTrashold
-        new_boxes, new_probs = roi_helpers.non_max_suppression_fast(bbox, np.array(probs[key]), overlapThresh=0.5)
+        # TODO TIM: change overlapTrashold
+        new_boxes, new_probs = roi_helpers.non_max_suppression_fast(bbox, np.array(probs[key]),
+                                                                    overlapThresh=0.5)
 
+        # TODO TIM: check if box makes sense
         best_match = new_boxes[np.argmax(new_probs), :]
 
         if visualise:
@@ -198,16 +196,20 @@ for idx, img_name in enumerate(sorted(glob.glob(os.path.join(img_path, '*.jpg'))
                 textOrg = (x1, y1 + 20)
 
                 cv2.rectangle(img_scaled, (textOrg[0] - 5, textOrg[1] + baseLine - 5),
-                              (textOrg[0] + retval[0] + 5, textOrg[1] - retval[1] - 5), (0, 0, 0), 2)
+                              (textOrg[0] + retval[0] + 5, textOrg[1] - retval[1] - 5), (0, 0, 0),
+                              2)
                 cv2.rectangle(img_scaled, (textOrg[0] - 5, textOrg[1] + baseLine - 5),
-                              (textOrg[0] + retval[0] + 5, textOrg[1] - retval[1] - 5), (255, 255, 255), -1)
-                cv2.putText(img_scaled, textLabel, textOrg, cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 0), 1)
+                              (textOrg[0] + retval[0] + 5, textOrg[1] - retval[1] - 5),
+                              (255, 255, 255), -1)
+                cv2.putText(img_scaled, textLabel, textOrg, cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 0),
+                            1)
 
     if best_match is not None:
         (x1, y1, x2, y2) = best_match
-        cv2.imwrite("./roi/cropped" + img_name[6:], img_scaled[y1:y2, x1:x2])
+        cv2.imwrite("./../data/cropped" + img_name[9:], img_scaled[y1:y2, x1:x2])
     else:
-        cv2.imwrite("./roi/cropped" + img_name[6:], img_scaled)
+        print("Could not find ROI on image " + img_name)
+        cv2.imwrite("./../data/roi/cropped" + img_name[9:], img_scaled)
 
     if visualise and best_match is not None:
         cv2.imshow('img', img_scaled)
