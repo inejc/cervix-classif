@@ -14,8 +14,6 @@ from keras_frcnn import config
 from keras_frcnn import roi_helpers
 from tqdm import tqdm
 
-os.environ["CUDA_VISIBLE_DEVICES"] = "1"
-
 sys.setrecursionlimit(40000)
 C = config.Config()
 C.use_horizontal_flips = False

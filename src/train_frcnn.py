@@ -15,8 +15,6 @@ from keras_frcnn import losses
 from keras_frcnn import resnet as nn
 from keras_frcnn.simple_parser import get_data
 
-os.environ["CUDA_VISIBLE_DEVICES"] = "1"
-
 sys.setrecursionlimit(40000)
 
 C = config.Config()
