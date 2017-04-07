@@ -11,12 +11,12 @@ fine_tune --lr 1e-5 --reduce_lr_factor 0.1 --reduce_lr_patience 100 --epochs 100
 
 
 CLEANED DATA (NEW VAL DATA) 0.1 train val split (additional data in val set)
--------------------------------------------------------------
+----------------------------------------------------------------------------
 (0.7627 val_loss, 0.87526 public score)
 train_top_classifier --name 'cleaned' --lr 0.0001 --epochs 2700 --batch_size 1332 --l2_reg 0 --dropout_p 0.5 --save_model True
 
 CLEANED DATA (NEW VAL DATA) 0.1 train val split (only train data in val set)
--------------------------------------------------------------
+----------------------------------------------------------------------------
 (0.8359 val_loss, 0.87120 public score)
 train_top_classifier --name 'cleaned' --lr 0.0001 --epochs 1000 --batch_size 1024 --l2_reg 0 --dropout_p 0.5 --save_model True
 
@@ -32,4 +32,14 @@ fine_tune --name 'cleaned' --name_ext 'frozen_116_dropout_0_6' --lr 1e-5 --reduc
 Epoch 32 - loss: 0.4252 - val_loss: 0.7355
 
 fine_tune --name 'cleaned' --name_ext 'frozen_106_dropout_0_6' --lr 1e-5 --reduce_lr_factor 0.1 --reduce_lr_patience 100 --epochs 100 --batch_size 256 --l2_reg 0 --dropout_p 0.6 --num_freeze_layers 106
-Epoch 24 - 179s - loss: 0.5405 - val_loss: 0.7193
+Epoch 24 - 179s - loss: 0.5405 - val_loss: 0.7193 (0.73764 public score)
+
+fine_tune --name 'cleaned' --name_ext 'frozen_106_dropout_0_6_all_epochs' --lr 1e-5 --reduce_lr_factor 0.1 --reduce_lr_patience 100 --epochs 40 --batch_size 256 --l2_reg 0 --dropout_p 0.6 --num_freeze_layers 106 --save_best_only False
+Epoch 40 - loss: 0.3254 - val_loss: 0.8379 (public score 0.77236)
+
+fine_tune --name 'cleaned' --name_ext 'frozen_96_dropout_0_6' --lr 1e-5 --reduce_lr_factor 0.1 --reduce_lr_patience 100 --epochs 100 --batch_size 256 --l2_reg 0 --dropout_p 0.6 --num_freeze_layers 96
+Epoch 26 - loss: 0.5313 - val_loss: 0.7404
+
+CLEANED CROPPED DATA
+--------------------
+fine_tune --name 'cleaned_frcnn_cropped' --name_ext 'frozen_106_dropout_0_6' --lr 1e-5 --reduce_lr_factor 0.1 --reduce_lr_patience 100 --epochs 100 --batch_size 256 --l2_reg 0 --dropout_p 0.6 --num_freeze_layers 106
