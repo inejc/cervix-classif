@@ -29,7 +29,7 @@ fine_tune --name 'cleaned' --name_ext 'frozen_116' --lr 1e-5 --reduce_lr_factor 
 Epoch 20 - loss: 0.5719 - val_loss: 0.7696
 
 fine_tune --name 'cleaned' --name_ext 'frozen_116_dropout_0_6' --lr 1e-5 --reduce_lr_factor 0.1 --reduce_lr_patience 100 --epochs 100 --batch_size 256 --l2_reg 0 --dropout_p 0.6 --num_freeze_layers 116
-Epoch 32 - loss: 0.4252 - val_loss: 0.7355
+Epoch 32 - loss: 0.4252 - val_loss: 0.7355 (public score 0.74836)
 
 fine_tune --name 'cleaned' --name_ext 'frozen_106_dropout_0_6' --lr 1e-5 --reduce_lr_factor 0.1 --reduce_lr_patience 100 --epochs 100 --batch_size 256 --l2_reg 0 --dropout_p 0.6 --num_freeze_layers 106
 Epoch 24 - 179s - loss: 0.5405 - val_loss: 0.7193 (0.73764 public score)
@@ -38,8 +38,4 @@ fine_tune --name 'cleaned' --name_ext 'frozen_106_dropout_0_6_all_epochs' --lr 1
 Epoch 40 - loss: 0.3254 - val_loss: 0.8379 (public score 0.77236)
 
 fine_tune --name 'cleaned' --name_ext 'frozen_96_dropout_0_6' --lr 1e-5 --reduce_lr_factor 0.1 --reduce_lr_patience 100 --epochs 100 --batch_size 256 --l2_reg 0 --dropout_p 0.6 --num_freeze_layers 96
-Epoch 26 - loss: 0.5313 - val_loss: 0.7404
-
-CLEANED CROPPED DATA
---------------------
-fine_tune --name 'cleaned_frcnn_cropped' --name_ext 'frozen_106_dropout_0_6' --lr 1e-5 --reduce_lr_factor 0.1 --reduce_lr_patience 100 --epochs 100 --batch_size 256 --l2_reg 0 --dropout_p 0.6 --num_freeze_layers 106
+Epoch 26 - loss: 0.5313 - val_loss: 0.7404 (public score 0.72837)
