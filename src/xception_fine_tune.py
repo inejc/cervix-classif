@@ -173,9 +173,9 @@ def make_submission_top_classifier(name, dropout_p):
     )
 
 
-def fine_tune(name, name_ext, lr=1e-4, reduce_lr_factor=0.1, reduce_lr_patience=3,
-              epochs=10, batch_size=32, l2_reg=0, dropout_p=0.5,
-              num_freeze_layers=0):
+def fine_tune(name, name_ext, lr=1e-4, reduce_lr_factor=0.1,
+              reduce_lr_patience=3, epochs=10, batch_size=32, l2_reg=0,
+              dropout_p=0.5, num_freeze_layers=0):
 
     data_info = load_organized_data_info(imgs_dim=HEIGHT, name=name)
     tr_datagen = ImageDataGenerator(
@@ -183,9 +183,9 @@ def fine_tune(name, name_ext, lr=1e-4, reduce_lr_factor=0.1, reduce_lr_patience=
         rotation_range=180,
         vertical_flip=True,
         horizontal_flip=True,
-        # zoom_range=0.1,
-        # width_shift_range=0.1,
-        # height_shift_range=0.1,
+        zoom_range=0.1,
+        width_shift_range=0.1,
+        height_shift_range=0.1,
     )
     val_datagen = ImageDataGenerator(preprocessing_function=preprocess_input)
     batch_size = 32

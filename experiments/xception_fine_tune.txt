@@ -20,4 +20,19 @@ CLEANED DATA (NEW VAL DATA) 0.1 train val split (only train data in val set)
 (0.8359 val_loss, 0.87120 public score)
 train_top_classifier --name 'cleaned' --lr 0.0001 --epochs 1000 --batch_size 1024 --l2_reg 0 --dropout_p 0.5 --save_model True
 
-todo
+fine_tune --name 'cleaned' --name_ext 'frozen_126' --lr 1e-5 --reduce_lr_factor 0.1 --reduce_lr_patience 100 --epochs 100 --batch_size 256 --l2_reg 0 --dropout_p 0.5 --num_freeze_layers 126
+Epoch 27 - loss: 0.4802 - val_loss: 0.7614
+
+fine_tune --name 'cleaned' --name_ext 'frozen_116' --lr 1e-5 --reduce_lr_factor 0.1 --reduce_lr_patience 100 --epochs 100 --batch_size 256 --l2_reg 0 --dropout_p 0.5 --num_freeze_layers 116
+Epoch 20 - loss: 0.5719 - val_loss: 0.7696
+
+fine_tune --name 'cleaned' --name_ext 'frozen_116_dropout_0_6' --lr 1e-5 --reduce_lr_factor 0.1 --reduce_lr_patience 100 --epochs 100 --batch_size 256 --l2_reg 0 --dropout_p 0.6 --num_freeze_layers 116
+Epoch 32 - loss: 0.4252 - val_loss: 0.7355
+
+xx
+fine_tune --name 'cleaned' --name_ext 'frozen_106_dropout_0_6' --lr 1e-5 --reduce_lr_factor 0.1 --reduce_lr_patience 100 --epochs 100 --batch_size 256 --l2_reg 0 --dropout_p 0.6 --num_freeze_layers 106
+
+x
+fine_tune --name 'cleaned' --name_ext 'frozen_106_dropout_0_7' --lr 1e-5 --reduce_lr_factor 0.1 --reduce_lr_patience 100 --epochs 100 --batch_size 256 --l2_reg 0 --dropout_p 0.7 --num_freeze_layers 106
+
+todo (class distribution, data augmentation)
