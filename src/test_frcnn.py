@@ -86,7 +86,7 @@ def get_model_classifier(class_mapping, input_shape_features):
     return model_classifier
 
 
-def crop(dir_with_images="./../data/test/", overlap_thresh=0.9, visualise=False):
+def crop(dir_with_images="./../data/train/*/", overlap_thresh=0.9, visualise=False):
     class_mapping = get_class_mappings()
 
     if K.image_dim_ordering() == 'th':
@@ -208,10 +208,12 @@ def crop(dir_with_images="./../data/test/", overlap_thresh=0.9, visualise=False)
                     cv2.putText(img, textLabel, textOrg, cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 0),
                                 1)
 
-        if "/train" in img_name:
-            new_image_path = img_name.replace("/train", "/cropped/train")
+        if "/train_cleaned" in img_name:
+            new_image_path = img_name.replace("/train_cleaned", "/train_cleaned_frcnn_cropped")
         elif "/test" in img_name:
-            new_image_path = img_name.replace("/test", "/cropped/test")
+            new_image_path = img_name.replace("/test", "/test_frcnn_cropped")
+        elif "/additional_cleaned" in img_name:
+            new_image_path = img_name.replace("/additional_cleaned", "/additional_cleaned_frcnn_cropped")
         else:
             raise RuntimeError("Wrong dir name!")
         if best_match is not None:
