@@ -1,10 +1,22 @@
 """
-Usage:
-    python xception_fine_tune.py create_embeddings
-    python xception_fine_tune.py train_top_classifier
-    python xception_fine_tune.py make_submission_top_classifier
-    python xception_fine_tune.py fine_tune
-    python xception_fine_tune.py make_submission_xception
+Example usage
+-------------
+    python xception_fine_tune.py create_embeddings --name 'cleaned'
+
+    python xception_fine_tune.py train_top_classifier --name 'cleaned'
+                                 --lr 0.0001 --epochs 3 --batch_size 32
+                                 --l2_reg 0 --dropout_p 0.5 --save_model=True
+
+    python xception_fine_tune.py make_submission_top_classifier --name 'cleaned'
+                                 --dropout_p 0.5
+
+    python xception_fine_tune.py fine_tune --name 'cleaned' --lr 1e-4
+                                 --reduce_lr_factor 0.1 --reduce_lr_patience 3
+                                 --epochs 2 --batch_size 32 --l2_reg 0
+                                 --dropout_p 0.5 --num_freeze_layers 133
+
+    python xception_fine_tune.py make_submission_xception --name 'cleaned'
+                                 --dropout_p 0.5
 """
 
 from math import ceil
@@ -28,12 +40,12 @@ from data_provider import MODELS_DIR, load_organized_data_info
 from utils import create_submission_file
 
 HEIGHT, WIDTH = 299, 299
+EMBEDDINGS_FILE = 'xception_embeddings_{:s}.npz'
+TOP_CLASSIFIER_FILE = 'xception_top_classifier_{:s}.h5'
+MODEL_FILE = 'xception_fine_tuned_{:s}_{:s}.h5'
 
-TOP_CLASSIFIER_FILE = join(MODELS_DIR, 'xception_top_classifier.h5')
-EMBEDDINGS_FILE = join(DATA_DIR, 'xception_embeddings.npz')
 
-
-def create_embeddings():
+def create_embeddings(name):
     """Returns xception embeddings (outputs of the last conv layer).
 
     Returns
@@ -46,12 +58,14 @@ def create_embeddings():
         X_te (n_samples, 2048)
         te_names (n_samples,)
     """
-    if isfile(EMBEDDINGS_FILE):
-        d = np.load(EMBEDDINGS_FILE)
+    embeddings_file = join(DATA_DIR, EMBEDDINGS_FILE.format(name))
+
+    if isfile(embeddings_file):
+        d = np.load(embeddings_file)
         return d['X_tr'], d['y_tr'], d['X_val'], d['y_val'], d['X_te'],\
             d['te_names']
 
-    data_info = load_organized_data_info(imgs_dim=HEIGHT)
+    data_info = load_organized_data_info(imgs_dim=HEIGHT, name=name)
     datagen = ImageDataGenerator(preprocessing_function=preprocess_input)
     batch_size = 32
 
@@ -94,7 +108,7 @@ def create_embeddings():
     X_te, te_names = embed(dir_te, num_te, data_is_labeled=False)
 
     np.savez_compressed(
-        file=EMBEDDINGS_FILE,
+        file=embeddings_file,
         X_tr=X_tr,
         y_tr=y_tr,
         X_val=X_val,
@@ -113,12 +127,13 @@ def create_embeddings():
     return X_tr, y_tr, X_val, y_val, X_te, te_names
 
 
-def train_top_classifier(lr=0.01, epochs=10, batch_size=32,
+def train_top_classifier(name, lr=0.01, epochs=10, batch_size=32,
                          l2_reg=0, dropout_p=0.5, save_model=True):
 
-    X_tr, y_tr, X_val, y_val, _, _ = create_embeddings()
+    X_tr, y_tr, X_val, y_val, _, _ = create_embeddings(name)
     y_tr, y_val = to_categorical(y_tr), to_categorical(y_val)
 
+    model_file = join(MODELS_DIR, TOP_CLASSIFIER_FILE.format(name))
     model = _top_classifier(
         l2_reg=l2_reg,
         dropout_p=dropout_p,
@@ -134,40 +149,40 @@ def train_top_classifier(lr=0.01, epochs=10, batch_size=32,
     )
 
     if save_model:
-        model.save(TOP_CLASSIFIER_FILE)
+        model.save(model_file)
 
 
-def make_submission_top_classifier(dropout_p):
-    _, _, _, _, X_te, te_names = create_embeddings()
+def make_submission_top_classifier(name, dropout_p):
+    _, _, _, _, X_te, te_names = create_embeddings(name)
 
+    model_file = join(MODELS_DIR, TOP_CLASSIFIER_FILE.format(name))
     model = _top_classifier(
         l2_reg=0,
         dropout_p=dropout_p,
         input_shape=X_te.shape[1:]
     )
-    model.load_weights(TOP_CLASSIFIER_FILE)
+    model.load_weights(model_file)
 
     probs_pred = model.predict_proba(X_te)
+
+    submission_file = 'xception_top_classifier_{:s}.csv'.format(name)
     create_submission_file(
         image_names=te_names,
         probs=probs_pred,
-        file_name=join(SUBMISSIONS_DIR, 'xception_top_classifier.csv')
+        file_name=join(SUBMISSIONS_DIR, submission_file)
     )
 
 
-def fine_tune(model_name, lr=1e-4, reduce_lr_factor=0.1, reduce_lr_patience=3,
-              epochs=10, batch_size=32, l2_reg=0, dropout_p=0.5,
-              num_freeze_layers=0):
+def fine_tune(name, name_ext, lr=1e-4, reduce_lr_factor=0.1,
+              reduce_lr_patience=3, epochs=10, batch_size=32, l2_reg=0,
+              dropout_p=0.5, num_freeze_layers=0, save_best_only=True):
 
-    data_info = load_organized_data_info(HEIGHT)
+    data_info = load_organized_data_info(imgs_dim=HEIGHT, name=name)
     tr_datagen = ImageDataGenerator(
         preprocessing_function=preprocess_input,
         rotation_range=180,
         vertical_flip=True,
-        horizontal_flip=True,
-        # zoom_range=0.1,
-        # width_shift_range=0.1,
-        # height_shift_range=0.1,
+        horizontal_flip=True
     )
     val_datagen = ImageDataGenerator(preprocessing_function=preprocess_input)
     batch_size = 32
@@ -184,13 +199,16 @@ def fine_tune(model_name, lr=1e-4, reduce_lr_factor=0.1, reduce_lr_patience=3,
     dir_tr, num_tr = data_info['dir_tr'], data_info['num_tr']
     dir_val, num_val = data_info['dir_val'], data_info['num_val']
 
+    top_classifier_file = join(MODELS_DIR, TOP_CLASSIFIER_FILE.format(name))
+    model_file = join(MODELS_DIR, MODEL_FILE.format(name, name_ext))
+
     model = Xception(weights='imagenet', include_top=False, pooling='avg')
     top_classifier = _top_classifier(
         l2_reg=l2_reg,
         dropout_p=dropout_p,
         input_shape=(2048,)
     )
-    top_classifier.load_weights(TOP_CLASSIFIER_FILE)
+    top_classifier.load_weights(top_classifier_file)
     model = Model(inputs=model.input, outputs=top_classifier(model.output))
     model.compile(Adam(lr=lr), loss='categorical_crossentropy')
 
@@ -198,11 +216,12 @@ def fine_tune(model_name, lr=1e-4, reduce_lr_factor=0.1, reduce_lr_patience=3,
     for layer in model.layers[:num_freeze_layers]:
         layer.trainable = False
 
+    log_dir = join(EXPERIMENTS_DIR, 'xception_fine_tuned_{:s}'.format(name))
     callbacks = [
         ReduceLROnPlateau(factor=reduce_lr_factor, patience=reduce_lr_patience),
-        ModelCheckpoint(join(MODELS_DIR, model_name), save_best_only=True),
+        ModelCheckpoint(model_file, save_best_only=save_best_only),
         TensorBoard(
-            log_dir=join(EXPERIMENTS_DIR, model_name),
+            log_dir=log_dir,
             write_graph=False
         )
     ]
@@ -217,9 +236,9 @@ def fine_tune(model_name, lr=1e-4, reduce_lr_factor=0.1, reduce_lr_patience=3,
     )
 
 
-def make_submission_xception(model_name, dropout_p, file_name):
-    data_info = load_organized_data_info(HEIGHT)
-    _, _, _, _, _, te_names = create_embeddings()
+def make_submission_xception(name, name_ext, dropout_p):
+    data_info = load_organized_data_info(imgs_dim=HEIGHT, name=name)
+    _, _, _, _, _, te_names = create_embeddings(name)
     batch_size = 32
 
     datagen = ImageDataGenerator(preprocessing_function=preprocess_input)
@@ -231,6 +250,7 @@ def make_submission_xception(model_name, dropout_p, file_name):
         shuffle=False
     )
 
+    model_file = join(MODELS_DIR, MODEL_FILE.format(name, name_ext))
     model = Xception(weights='imagenet', include_top=False, pooling='avg')
     top_classifier = _top_classifier(
         l2_reg=0,
@@ -238,17 +258,18 @@ def make_submission_xception(model_name, dropout_p, file_name):
         input_shape=(2048,)
     )
     model = Model(inputs=model.input, outputs=top_classifier(model.output))
-    model.load_weights(join(MODELS_DIR, model_name))
+    model.load_weights(model_file)
 
     probs_pred = model.predict_generator(
         generator=datagen,
         steps=ceil(data_info['num_te'] / batch_size)
     )
 
+    submission_file = 'xception_fine_tuned_{:s}.csv'.format(name)
     create_submission_file(
         image_names=te_names,
         probs=probs_pred,
-        file_name=join(SUBMISSIONS_DIR, file_name)
+        file_name=join(SUBMISSIONS_DIR, submission_file)
     )
 
 

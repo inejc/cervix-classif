@@ -1,3 +1,9 @@
+"""
+Example usage
+-------------
+    python data_cleaner.py --dir_ 'additional'
+"""
+
 from os import mkdir, listdir, stat
 from os.path import join, basename, dirname
 from shutil import copyfile
@@ -11,6 +17,7 @@ from utils import read_lines, is_green
 
 
 def clean(dir_):
+    """Filters the dir_ directory (splits into dir_cleaned and dir_junk)."""
     dir_cleaned = join(DATA_DIR, dir_ + '_cleaned')
     _make_labeled_dir_structure(dir_cleaned)
     dir_junk = join(DATA_DIR, dir_ + '_junk')
