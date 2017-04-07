@@ -182,10 +182,7 @@ def fine_tune(name, name_ext, lr=1e-4, reduce_lr_factor=0.1,
         preprocessing_function=preprocess_input,
         rotation_range=180,
         vertical_flip=True,
-        horizontal_flip=True,
-        zoom_range=0.1,
-        width_shift_range=0.1,
-        height_shift_range=0.1,
+        horizontal_flip=True
     )
     val_datagen = ImageDataGenerator(preprocessing_function=preprocess_input)
     batch_size = 32
