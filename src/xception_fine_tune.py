@@ -175,7 +175,7 @@ def make_submission_top_classifier(name, dropout_p):
 
 def fine_tune(name, name_ext, lr=1e-4, reduce_lr_factor=0.1,
               reduce_lr_patience=3, epochs=10, batch_size=32, l2_reg=0,
-              dropout_p=0.5, num_freeze_layers=0):
+              dropout_p=0.5, num_freeze_layers=0, save_best_only=True):
 
     data_info = load_organized_data_info(imgs_dim=HEIGHT, name=name)
     tr_datagen = ImageDataGenerator(
@@ -219,7 +219,7 @@ def fine_tune(name, name_ext, lr=1e-4, reduce_lr_factor=0.1,
     log_dir = join(EXPERIMENTS_DIR, 'xception_fine_tuned_{:s}'.format(name))
     callbacks = [
         ReduceLROnPlateau(factor=reduce_lr_factor, patience=reduce_lr_patience),
-        ModelCheckpoint(model_file, save_best_only=True),
+        ModelCheckpoint(model_file, save_best_only=save_best_only),
         TensorBoard(
             log_dir=log_dir,
             write_graph=False
