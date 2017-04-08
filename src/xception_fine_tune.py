@@ -48,11 +48,18 @@ def create_embeddings():
     """
     if isfile(EMBEDDINGS_FILE):
         d = np.load(EMBEDDINGS_FILE)
-        return d['X_tr'], d['y_tr'], d['X_val'], d['y_val'], d['X_te'],\
-            d['te_names']
+        return d['X_tr'], d['y_tr'], d['X_val'], d['y_val'], d['X_te'], d['te_names']
 
     data_info = load_organized_data_info(imgs_dim=HEIGHT)
-    datagen = ImageDataGenerator(preprocessing_function=preprocess_input)
+    datagen = ImageDataGenerator(
+        preprocessing_function=preprocess_input,
+        rotation_range=60,
+        vertical_flip=True,
+        horizontal_flip=False,
+        zoom_range=0.5,
+        width_shift_range=0.3,
+        height_shift_range=0.3,
+    )
     batch_size = 32
 
     def dir_datagen(dir_):
@@ -115,7 +122,6 @@ def create_embeddings():
 
 def train_top_classifier(lr=0.01, epochs=10, batch_size=32,
                          l2_reg=0, dropout_p=0.5, save_model=True):
-
     X_tr, y_tr, X_val, y_val, _, _ = create_embeddings()
     y_tr, y_val = to_categorical(y_tr), to_categorical(y_val)
 
@@ -158,18 +164,25 @@ def make_submission_top_classifier(dropout_p):
 def fine_tune(model_name, lr=1e-4, reduce_lr_factor=0.1, reduce_lr_patience=3,
               epochs=10, batch_size=32, l2_reg=0, dropout_p=0.5,
               num_freeze_layers=0):
-
     data_info = load_organized_data_info(HEIGHT)
     tr_datagen = ImageDataGenerator(
         preprocessing_function=preprocess_input,
-        rotation_range=180,
+        rotation_range=60,
         vertical_flip=True,
-        horizontal_flip=True,
-        # zoom_range=0.1,
-        # width_shift_range=0.1,
-        # height_shift_range=0.1,
+        horizontal_flip=False,
+        zoom_range=0.5,
+        width_shift_range=0.3,
+        height_shift_range=0.3,
     )
-    val_datagen = ImageDataGenerator(preprocessing_function=preprocess_input)
+    val_datagen = ImageDataGenerator(
+        preprocessing_function=preprocess_input,
+        rotation_range=60,
+        vertical_flip=True,
+        horizontal_flip=False,
+        zoom_range=0.5,
+        width_shift_range=0.3,
+        height_shift_range=0.3
+    )
     batch_size = 32
 
     def dir_datagen(dir_, gen):
