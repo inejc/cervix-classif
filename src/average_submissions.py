@@ -7,10 +7,10 @@ from data_provider import SUBMISSIONS_DIR
 from utils import read_lines, create_submission_file
 
 W_SUBMISSIONS = {
-    'xception_fine_tuned_cleaned_0_72837.csv': 8,
-    'xception_fine_tuned_cleaned_0_73764.csv': 7,
-    'xception_fine_tuned_cleaned_0_73830.csv': 7,
-    'xception_fine_tuned_cleaned_0_74836.csv': 6,
+    'xception_fine_tuned_cleaned_0_72837.csv': 6,
+    'xception_fine_tuned_cleaned_0_73764.csv': 5,
+    'xception_fine_tuned_cleaned_0_73830.csv': 5,
+    'xception_fine_tuned_cleaned_0_74836.csv': 4,
     'xception_fine_tuned_0.76231.csv': 2,
     'xception_fine_tuned_0_77085.csv': 1,
     'xception_fine_tuned_cleaned_0_77236.csv': 1,
