@@ -7,8 +7,8 @@ from keras.models import Model
 from keras.preprocessing.image import ImageDataGenerator
 from keras.utils.np_utils import to_categorical
 
-from src.data_provider import load_organized_data_info, MODELS_DIR
-from src.resnet50 import ResNet50
+from data_provider import load_organized_data_info, MODELS_DIR
+from resnet50 import ResNet50
 
 IMGS_DIR = "299_cleaned_frcnn_cropped"
 

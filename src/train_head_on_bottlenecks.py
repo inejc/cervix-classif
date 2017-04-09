@@ -7,7 +7,7 @@ from keras.models import Sequential
 from keras.optimizers import Adam
 from keras.regularizers import l2
 
-from src.data_provider import MODELS_DIR
+from data_provider import MODELS_DIR
 
 IMGS_DIR = "299_cleaned_frcnn_cropped"
 
