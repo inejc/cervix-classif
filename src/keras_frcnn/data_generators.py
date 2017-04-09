@@ -253,8 +253,8 @@ def calcY(C, class_mapping, img_data, width, height, resized_width, resized_heig
 
     num_pos = len(pos_locs[0])
 
-    # one issue is that the RPN has many more negative than positive regions, so we turn off some of the negative
-    # regions. We also limit it to 256 regions.
+    # one issue is that the RPN has many more negative than positive regions,
+    # so we turn off some of the negative regions. We also limit it to 256 regions.
     num_regions = 256
     '''
     if len(pos_locs[0]) > num_regions/2:

@@ -9,8 +9,6 @@ from keras.regularizers import l2
 
 from data_provider import MODELS_DIR
 
-IMGS_DIR = "299_cleaned_frcnn_cropped"
-
 WEIGHTS_PATH = join(MODELS_DIR, 'resnet50_weights_tf_dim_ordering_tf_kernels_notop.h5')
 BOTTLENECKS_FILE = join(MODELS_DIR, "resnet50_bottlenecks.h5")
 LABELS_FILE = join(MODELS_DIR, "resnet50_labels.h5")
@@ -25,7 +23,10 @@ with h5py.File(LABELS_FILE) as hf:
     y_train = hf["train"][:]
     y_valid = hf["valid"][:]
 
-print("Bottlenecks and labels saved!")
+print(X_train.shape)
+print(X_valid.shape)
+print(y_train.shape)
+print(y_valid.shape)
 
 cb = [ModelCheckpoint(MODEL_PATH, save_best_only=True)]
 
@@ -38,8 +39,6 @@ model = Sequential([
 
 model.compile(Adam(lr=0.001, decay=0.01), "categorical_crossentropy", metrics=["accuracy"])
 
-model.fit(X_train, y_train, callbacks=cb,
-          validation_data=(X_valid, y_valid),
-          nb_epoch=100)
+model.fit(X_train, y_train, callbacks=cb, validation_data=(X_valid, y_valid), epoch=100)
 
 print("Finished fitting the model!")
