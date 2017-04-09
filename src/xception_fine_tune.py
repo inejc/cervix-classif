@@ -30,7 +30,11 @@ from utils import create_submission_file
 HEIGHT, WIDTH = 299, 299
 
 TOP_CLASSIFIER_FILE = join(MODELS_DIR, 'xception_top_classifier.h5')
-EMBEDDINGS_FILE = join(DATA_DIR, 'xception_embeddings.npz')
+# FIXME TIM !!!!!!!!!:
+# EMBEDDINGS_FILE = join(DATA_DIR, 'xception_embeddings.npz')
+EMBEDDINGS_FILE = join(MODELS_DIR, 'xception_embeddings.npz')
+
+IMGS_DIR = "299_cleaned_frcnn_cropped"
 
 
 def create_embeddings():
@@ -50,8 +54,9 @@ def create_embeddings():
         d = np.load(EMBEDDINGS_FILE)
         return d['X_tr'], d['y_tr'], d['X_val'], d['y_val'], d['X_te'], d['te_names']
 
-    data_info = load_organized_data_info(imgs_dim=HEIGHT)
-    datagen = ImageDataGenerator(
+    data_info = load_organized_data_info(imgs_dim=IMGS_DIR)
+    test_datagen = ImageDataGenerator(preprocessing_function=preprocess_input)
+    train_datagen = ImageDataGenerator(
         preprocessing_function=preprocess_input,
         rotation_range=60,
         vertical_flip=True,
@@ -62,7 +67,7 @@ def create_embeddings():
     )
     batch_size = 32
 
-    def dir_datagen(dir_):
+    def dir_datagen(datagen, dir_):
         return datagen.flow_from_directory(
             directory=dir_,
             target_size=(HEIGHT, WIDTH),
@@ -73,9 +78,9 @@ def create_embeddings():
 
     model = Xception(weights='imagenet', include_top=False, pooling='avg')
 
-    def embed(dir_, num, data_is_labeled):
+    def embed(datagen, dir_, num, data_is_labeled):
         X = model.predict_generator(
-            generator=dir_datagen(dir_),
+            generator=dir_datagen(datagen, dir_),
             steps=ceil(num / batch_size)
         )
 
@@ -92,13 +97,13 @@ def create_embeddings():
         return X, np.array(names)
 
     dir_tr, num_tr = data_info['dir_tr'], data_info['num_tr']
-    X_tr, y_tr = embed(dir_tr, num_tr, data_is_labeled=True)
+    X_tr, y_tr = embed(train_datagen, dir_tr, num_tr, data_is_labeled=True)
 
     dir_val, num_val = data_info['dir_val'], data_info['num_val']
-    X_val, y_val = embed(dir_val, num_val, data_is_labeled=True)
+    X_val, y_val = embed(train_datagen, dir_val, num_val, data_is_labeled=True)
 
     dir_te, num_te = data_info['dir_te'], data_info['num_te']
-    X_te, te_names = embed(dir_te, num_te, data_is_labeled=False)
+    X_te, te_names = embed(test_datagen, dir_te, num_te, data_is_labeled=False)
 
     np.savez_compressed(
         file=EMBEDDINGS_FILE,
@@ -164,7 +169,7 @@ def make_submission_top_classifier(dropout_p):
 def fine_tune(model_name, lr=1e-4, reduce_lr_factor=0.1, reduce_lr_patience=3,
               epochs=10, batch_size=32, l2_reg=0, dropout_p=0.5,
               num_freeze_layers=0):
-    data_info = load_organized_data_info(HEIGHT)
+    data_info = load_organized_data_info(IMGS_DIR)
     tr_datagen = ImageDataGenerator(
         preprocessing_function=preprocess_input,
         rotation_range=60,
@@ -231,7 +236,7 @@ def fine_tune(model_name, lr=1e-4, reduce_lr_factor=0.1, reduce_lr_patience=3,
 
 
 def make_submission_xception(model_name, dropout_p, file_name):
-    data_info = load_organized_data_info(HEIGHT)
+    data_info = load_organized_data_info(IMGS_DIR)
     _, _, _, _, _, te_names = create_embeddings()
     batch_size = 32
 
