@@ -33,7 +33,7 @@ model = Sequential([
     Dropout(0.6, input_shape=X_train.shape[1:]),
     # Dense(8, init='uniform', activation='relu'),
     # Dense(4, init='uniform', activation='relu'),
-    Dense(2, activation="softmax", W_regularizer=l2(0.05))
+    Dense(3, activation="softmax", W_regularizer=l2(0.05))
 ])
 
 model.compile(Adam(lr=0.001, decay=0.01), "categorical_crossentropy", metrics=["accuracy"])
