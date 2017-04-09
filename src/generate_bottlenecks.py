@@ -22,7 +22,6 @@ dir_tr, num_tr = data_info['dir_tr'], data_info['num_tr']
 dir_val, num_val = data_info['dir_val'], data_info['num_val']
 dir_te, num_te = data_info['dir_te'], data_info['num_te']
 
-
 batch_size = 32
 
 body = ResNet50(input_shape=(299, 299, 3),
@@ -47,15 +46,15 @@ test_batches = gen.flow_from_directory(dir_te, model.input_shape[1:3], shuffle=F
                                        batch_size=batch_size, class_mode=None)
 
 start_time = time.time()
-train_bottleneck = model.predict_generator(train_batches, num_tr)
+train_bottleneck = model.predict_generator(train_batches, train_batches.samples)
 print("--- train bottleneck %s seconds ---" % (time.time() - start_time))
 
 start_time = time.time()
-valid_bottleneck = model.predict_generator(valid_batches, num_val)
+valid_bottleneck = model.predict_generator(valid_batches, valid_batches.samples)
 print("--- valid bottleneck  %s seconds ---" % (time.time() - start_time))
 
 start_time = time.time()
-test_bottleneck = model.predict_generator(test_batches, num_te)
+test_bottleneck = model.predict_generator(test_batches, test_batches.samples)
 print("--- test bottleneck %s seconds ---" % (time.time() - start_time))
 
 start_time = time.time()
