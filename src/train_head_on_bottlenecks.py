@@ -38,7 +38,6 @@ model = Sequential([
 ])
 
 model.compile(Adam(lr=0.001, decay=0.01), "categorical_crossentropy", metrics=["accuracy"])
-
 model.fit(X_train, y_train, callbacks=cb, validation_data=(X_valid, y_valid), epoch=100)
 
 print("Finished fitting the model!")
