@@ -100,7 +100,7 @@ def create_embeddings():
     X_tr, y_tr = embed(train_datagen, dir_tr, num_tr, data_is_labeled=True)
 
     dir_val, num_val = data_info['dir_val'], data_info['num_val']
-    X_val, y_val = embed(train_datagen, dir_val, num_val, data_is_labeled=True)
+    X_val, y_val = embed(test_datagen, dir_val, num_val, data_is_labeled=True)
 
     dir_te, num_te = data_info['dir_te'], data_info['num_te']
     X_te, te_names = embed(test_datagen, dir_te, num_te, data_is_labeled=False)
@@ -176,18 +176,12 @@ def fine_tune(model_name, lr=1e-4, reduce_lr_factor=0.1, reduce_lr_patience=3,
         vertical_flip=True,
         horizontal_flip=False,
         zoom_range=0.5,
-        width_shift_range=0.3,
-        height_shift_range=0.3,
+        width_shift_range=0.1,
+        height_shift_range=0.1,
     )
-    val_datagen = ImageDataGenerator(
-        preprocessing_function=preprocess_input,
-        rotation_range=60,
-        vertical_flip=True,
-        horizontal_flip=False,
-        zoom_range=0.5,
-        width_shift_range=0.3,
-        height_shift_range=0.3
-    )
+    val_datagen = ImageDataGenerator(preprocessing_function=preprocess_input)
+
+    batch_size = 32
 
     def dir_datagen(dir_, gen):
         return gen.flow_from_directory(
