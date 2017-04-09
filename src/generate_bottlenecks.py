@@ -31,7 +31,7 @@ head = body.output
 head = GlobalAveragePooling2D()(head)
 model = Model(body.input, head)
 
-gen = ImageDataGenerator(vertial_flip=True,
+gen = ImageDataGenerator(vertical_flip=True,
                          zoom_range=0.05,
                          fill_mode="constant",
                          channel_shift_range=10,
