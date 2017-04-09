@@ -188,7 +188,6 @@ def fine_tune(model_name, lr=1e-4, reduce_lr_factor=0.1, reduce_lr_patience=3,
         width_shift_range=0.3,
         height_shift_range=0.3
     )
-    batch_size = 32
 
     def dir_datagen(dir_, gen):
         return gen.flow_from_directory(
