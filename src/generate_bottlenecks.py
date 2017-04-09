@@ -46,15 +46,16 @@ test_batches = gen.flow_from_directory(dir_te, model.input_shape[1:3], shuffle=F
                                        batch_size=batch_size, class_mode=None)
 
 start_time = time.time()
-train_bottleneck = model.predict_generator(train_batches, train_batches.samples)
+train_bottleneck = model.predict_generator(train_batches,
+                                           train_batches.samples // train_batches.batch_size)
 print("--- train bottleneck %s seconds ---" % (time.time() - start_time))
 
 start_time = time.time()
-valid_bottleneck = model.predict_generator(valid_batches, valid_batches.samples)
+valid_bottleneck = model.predict_generator(valid_batches, valid_batches.samples // valid_batches.batch_size)
 print("--- valid bottleneck  %s seconds ---" % (time.time() - start_time))
 
 start_time = time.time()
-test_bottleneck = model.predict_generator(test_batches, test_batches.samples)
+test_bottleneck = model.predict_generator(test_batches, test_batches.samples // test_batches.batch_size)
 print("--- test bottleneck %s seconds ---" % (time.time() - start_time))
 
 start_time = time.time()
