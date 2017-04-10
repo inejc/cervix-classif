@@ -180,8 +180,8 @@ def fine_tune(name, name_ext, lr=1e-4, reduce_lr_factor=0.1,
     data_info = load_organized_data_info(imgs_dim=HEIGHT, name=name)
     tr_datagen = ImageDataGenerator(
         preprocessing_function=preprocess_input,
-        rotation_range=180,
-        vertical_flip=True,
+        rotation_range=30,
+        # vertical_flip=True,
         horizontal_flip=True
     )
     val_datagen = ImageDataGenerator(preprocessing_function=preprocess_input)
