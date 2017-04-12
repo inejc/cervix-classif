@@ -5,6 +5,7 @@ from os.path import join, dirname, isfile
 DATA_DIR = join(dirname(dirname(__file__)), 'data')
 TRAIN_DIR = join(DATA_DIR, 'train')
 TEST_DIR = join(DATA_DIR, 'test')
+ADDITIONAL_DIR = join(DATA_DIR, 'additional')
 SUBMISSIONS_DIR = join(dirname(dirname(__file__)), 'submissions')
 MODELS_DIR = join(dirname(dirname(__file__)), 'models')
 EXPERIMENTS_DIR = join(dirname(dirname(__file__)), 'experiments')
@@ -13,7 +14,7 @@ CLASSES = ['Type_1', 'Type_2', 'Type_3']
 ORGANIZED_DATA_INFO_FILE = 'organized_data_info_.json'
 
 
-def load_organized_data_info(imgs_dim):
+def load_organized_data_info(imgs_dim, name=''):
     """Loads the train, val, test datasets info file.
     
     Returns
@@ -27,20 +28,20 @@ def load_organized_data_info(imgs_dim):
         'num_te': number of test images
         'num_classes': number of distinct classes
     """
-    if not isfile(organized_data_info_file(imgs_dim)):
+    if not isfile(organized_data_info_file(imgs_dim, name)):
         raise FileNotFoundError('run data_dirs_organizer.py organize first')
-    with open(organized_data_info_file(imgs_dim), 'r') as f:
+    with open(organized_data_info_file(imgs_dim, name), 'r') as f:
         return load(f)
 
 
-def save_organized_data_info(info, imgs_dim):
-    with open(organized_data_info_file(imgs_dim), 'w') as f:
+def save_organized_data_info(info, imgs_dim, name=''):
+    with open(organized_data_info_file(imgs_dim, name), 'w') as f:
         dump(info, f)
 
 
-def organized_data_info_file(imgs_dim):
+def organized_data_info_file(imgs_dim, name):
     split = ORGANIZED_DATA_INFO_FILE.split('.')
-    split[0] += str(imgs_dim)
+    split[0] += str(imgs_dim) + '_{:s}'.format(name)
     return join(DATA_DIR, '.'.join(split))
 
 
