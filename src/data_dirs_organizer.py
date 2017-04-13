@@ -96,6 +96,8 @@ def _organize_train_dirs(dirs, val_size_fraction, imgs_dim, name, new_dir_tr,
     val_paths = train_paths[ind_val]
     val_labels = train_labels[ind_val]
 
+    # todo weighted examples
+
     _save_organized_data_info(
         imgs_dim,
         name,
