@@ -7,13 +7,9 @@ from data_provider import SUBMISSIONS_DIR
 from utils import read_lines, create_submission_file
 
 W_SUBMISSIONS = {
-    'xception_fine_tuned_cleaned_0_72837.csv': 6,
-    'xception_fine_tuned_cleaned_0_73764.csv': 5,
-    'xception_fine_tuned_cleaned_0_73830.csv': 5,
-    'xception_fine_tuned_cleaned_0_74836.csv': 4,
-    'xception_fine_tuned_0.76231.csv': 2,
-    'xception_fine_tuned_0_77085.csv': 1,
-    'xception_fine_tuned_cleaned_0_77236.csv': 1,
+    'xception_fine_tuned_cleaned_0_71442.csv': 0.4,
+    'xception_fine_tuned_cleaned_0.72094.csv': 0.35,
+    'xception_fine_tuned_cleaned_0_72837.csv': 0.25,
 }
 
 
@@ -44,7 +40,7 @@ def average():
 
     submissions_file = join(
         SUBMISSIONS_DIR,
-        'xception_fine_tuned_best_7_averaged.csv'
+        'xception_fine_tuned_averaged.csv'
     )
     create_submission_file(names, averaged, submissions_file)
 

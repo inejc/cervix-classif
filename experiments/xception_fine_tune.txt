@@ -45,15 +45,23 @@ Epoch 25 - loss: 0.5358 - val_loss: 0.7585 (public score 0.73830)
 
 MORE CLEANED DATA 0.1 train val split (only train data in val set)
 ------------------------------------------------------------------
-(0.7854 val_loss)
-train_top_classifier --name 'cleaned' --lr 0.0001 --epochs 1500 --batch_size 1024 --l2_reg 0 --dropout_p 0.3 --save_model True
 
 fine tuning
 -----------
-0
 fine_tune --name 'cleaned' --name_ext 'frozen_96_dropout_0_6' --lr 1e-5 --reduce_lr_factor 0.1 --reduce_lr_patience 100 --epochs 100 --batch_size 256 --l2_reg 0 --dropout_p 0.6 --num_freeze_layers 96
-Epoch 36 - loss: 0.3216 - val_loss: 0.6145 (public score 0.79816)
+Epoch 18 - loss: 0.5799 - val_loss: 0.7289
+
+fine_tune --name 'cleaned' --name_ext 'frozen_96_dropout_0_5' --lr 1e-5 --reduce_lr_factor 0.1 --reduce_lr_patience 100 --epochs 100 --batch_size 256 --l2_reg 0 --dropout_p 0.5 --num_freeze_layers 96
+Epoch 17 - loss: 0.5828 - val_loss: 0.7368
+
+fine_tune --name 'cleaned' --name_ext 'frozen_96_dropout_0_4' --lr 1e-5 --reduce_lr_factor 0.1 --reduce_lr_patience 100 --epochs 100 --batch_size 256 --l2_reg 0 --dropout_p 0.4 --num_freeze_layers 96
+Epoch 19 - loss: 0.5186 - val_loss: 0.7205 (public score 0.71442)
+
+0
+fine_tune --name 'cleaned' --name_ext 'frozen_86_dropout_0_6' --lr 1e-5 --reduce_lr_factor 0.1 --reduce_lr_patience 100 --epochs 100 --batch_size 256 --l2_reg 0 --dropout_p 0.6 --num_freeze_layers 86
 
 1
-fine_tune --name 'cleaned' --name_ext 'frozen_86_dropout_0_6' --lr 1e-5 --reduce_lr_factor 0.1 --reduce_lr_patience 100 --epochs 100 --batch_size 256 --l2_reg 0 --dropout_p 0.6 --num_freeze_layers 86
-Epoch 23 - loss: 0.5237 - val_loss: 0.6949 (public score 0.72094)
+fine_tune --name 'cleaned' --name_ext 'frozen_86_dropout_0_5' --lr 1e-5 --reduce_lr_factor 0.1 --reduce_lr_patience 100 --epochs 100 --batch_size 256 --l2_reg 0 --dropout_p 0.5 --num_freeze_layers 86
+
+2
+fine_tune --name 'cleaned' --name_ext 'frozen_86_dropout_0_4' --lr 1e-5 --reduce_lr_factor 0.1 --reduce_lr_patience 100 --epochs 100 --batch_size 256 --l2_reg 0 --dropout_p 0.4 --num_freeze_layers 86
