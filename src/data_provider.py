@@ -17,6 +17,10 @@ IMAGES_BLACKLIST_FILE = join(
     dirname(dirname(__file__)),
     'src', 'images_blacklist.txt'
 )
+IMAGES_WEIGHTS_FILE = join(
+    dirname(dirname(__file__)),
+    'src', 'images_weighted_list.txt'
+)
 
 
 def load_organized_data_info(imgs_dim, name=''):

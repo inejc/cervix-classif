@@ -17,11 +17,15 @@ import numpy as np
 from PIL.Image import LANCZOS
 from PIL.ImageOps import fit
 from keras.preprocessing.image import load_img
+from numpy.random import choice, seed
 from sklearn.model_selection import StratifiedShuffleSplit
 
 from data_provider import DATA_DIR, CLASSES
+from data_provider import num_examples_per_class_in_dir
 from data_provider import organized_data_info_file
 from data_provider import save_organized_data_info, load_organized_data_info
+
+seed(0)
 
 
 def clean(imgs_dim=299, name=''):
@@ -55,6 +59,11 @@ def organize(imgs_dim=299, name='', val_size_fraction=0.1,
         new_dir_tr,
         new_dir_val
     )
+
+    num_per_cls_tr = num_examples_per_class_in_dir(new_dir_tr)
+    num_tr = sum(num_per_cls_tr.values())
+    print("Organized training set class distribution:")
+    print({k: v / num_tr for k, v in num_per_cls_tr.items()})
 
     if te_dir is not None:
         new_dir_te = join(
@@ -96,17 +105,31 @@ def _organize_train_dirs(dirs, val_size_fraction, imgs_dim, name, new_dir_tr,
     val_paths = train_paths[ind_val]
     val_labels = train_labels[ind_val]
 
-    _save_organized_data_info(
+    weighted_paths, weighted_labels = _create_duplicated_examples(
+        train_paths[ind_tr],
+        train_labels[ind_tr],
+        num_per_cls={'Type_2': 450, 'Type_3': 375}
+    )
+
+    _save_images_to_dir(
         imgs_dim,
-        name,
-        len(all_train_paths),
-        len(val_paths),
         new_dir_tr,
-        new_dir_val
+        np.array(weighted_paths),
+        np.array(weighted_labels),
+        names_ext='weighted'
     )
 
     _save_images_to_dir(imgs_dim, new_dir_tr, all_train_paths, all_train_labels)
     _save_images_to_dir(imgs_dim, new_dir_val, val_paths, val_labels)
+
+    _save_organized_data_info(
+        imgs_dim,
+        name,
+        len(all_train_paths) + len(weighted_paths),
+        len(val_paths),
+        new_dir_tr,
+        new_dir_val
+    )
 
 
 def _load_paths_labels_from_train_dir(dir_):
@@ -131,6 +154,35 @@ def _train_val_split_indices(val_size_fraction, paths, labels):
     return next(split.split(paths, labels))
 
 
+def _create_duplicated_examples(paths, labels, num_per_cls):
+    weighted_paths, weighted_labels = np.array([]), []
+
+    for class_, num in num_per_cls.items():
+        cls_paths = paths[labels == class_]
+        sample = choice(cls_paths, num, replace=False)
+        weighted_paths = np.hstack((weighted_paths, sample))
+        weighted_labels += [class_] * num
+
+    return weighted_paths, np.array(weighted_labels)
+
+
+def _save_images_to_dir(imgs_dim, dest_dir, src_paths, labels, names_ext=None):
+    for src_path, label in zip(src_paths, labels):
+        if names_ext is not None:
+            file_name = '{:s}_{:s}_{:s}'.format(
+                basename(dirname(dirname(src_path))),
+                names_ext,
+                basename(src_path)
+            )
+        else:
+            file_name = '{:s}_{:s}'.format(
+                basename(dirname(dirname(src_path))),
+                basename(src_path)
+            )
+        dest_path = join(join(dest_dir, label), file_name)
+        _save_preprocessed_img(imgs_dim, src_path, dest_path)
+
+
 def _save_organized_data_info(imgs_dim, name, num_tr, num_val, new_dir_tr,
                               new_dir_val):
     info = {
@@ -141,16 +193,6 @@ def _save_organized_data_info(imgs_dim, name, num_tr, num_val, new_dir_tr,
         'num_classes': len(CLASSES),
     }
     save_organized_data_info(info, imgs_dim, name)
-
-
-def _save_images_to_dir(imgs_dim, dest_dir, src_paths, labels):
-    for src_path, label in zip(src_paths, labels):
-        file_name = '{:s}_{:s}'.format(
-            basename(dirname(dirname(src_path))),
-            basename(src_path)
-        )
-        dest_path = join(join(dest_dir, label), file_name)
-        _save_preprocessed_img(imgs_dim, src_path, dest_path)
 
 
 def _organize_test_dir(imgs_dim, name, te_dir, new_dir_te):
@@ -184,7 +226,11 @@ def _add_test_info_to_organized_data_info(imgs_dim, name, num_test_samples,
 
 
 def _save_preprocessed_img(imgs_dim, src, dest):
-    image = load_img(src)
+    try:
+        image = load_img(src)
+    except FileNotFoundError:
+        print("Image {:s} not found and skipped".format(src))
+        return
 
     # todo: preprocess
     image = fit(image, (imgs_dim, imgs_dim), method=LANCZOS)
