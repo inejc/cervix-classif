@@ -193,16 +193,17 @@ def _regression_head(l2_reg, dropout_p, input_shape):
 
 def train(model_file, reduce_lr_factor=1e-1, epochs=5, name=''):
     data_info = load_organized_data_info(imgs_dim=HEIGHT, name=name)
-    _, X, Y = _get_tagged_images(data_info['dir_tr'])
+    _, X_tr, Y_tr = _get_tagged_images(data_info['dir_tr'])
+    _, X_val, Y_val = _get_tagged_images(data_info['dir_val'])
 
-    def _image_generator():
+    def _image_generator(data, labels):
         return generator.flow(
-            X, Y,
+            data, labels,
             batch_size=32,
             shuffle=True,
         )
 
-    model = _cnn()
+    model = _cnn(model_file)
     # TODO See if an L1 loss does any better
     model.compile(loss='mean_squared_error', optimizer='adam')
 
@@ -212,13 +213,12 @@ def train(model_file, reduce_lr_factor=1e-1, epochs=5, name=''):
         ModelCheckpoint(MODEL_FILE, save_best_only=True),
     ]
     model.fit_generator(
-        generator=_image_generator(),
-        steps_per_epoch=len(X),
+        generator=_image_generator(X_tr, Y_tr),
+        steps_per_epoch=len(X_tr),
         epochs=epochs,
         callbacks=callbacks,
-        # TODO Don't validate on train data.
-        validation_data=_image_generator(),
-        validation_steps=len(X),
+        validation_data=_image_generator(X_val, Y_val),
+        validation_steps=len(X_val),
     )
 
 
