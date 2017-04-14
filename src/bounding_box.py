@@ -3,6 +3,7 @@ from os import listdir
 from os.path import join, splitext
 
 import fire
+import re
 import ijroi
 import numpy as np
 from keras.applications import Xception
@@ -14,36 +15,63 @@ from keras.preprocessing.image import ImageDataGenerator, load_img, \
 from keras.regularizers import l2
 
 from xception_fine_tune import HEIGHT, WIDTH
-from data_provider import MODELS_DIR
+from data_provider import MODELS_DIR, load_organized_data_info
 from xception_fine_tune import _top_classifier
 
-IJ_ROI_DIR = join('..', 'data', 'bounding_boxes_299')
+IJ_ROI_DIR = join('data', 'bounding_boxes_299')
 MODEL_FILE = join(MODELS_DIR, 'localizer.h5')
 
 CLASSES = ['Type_1', 'Type_2', 'Type_3']
-TRAINING_DIR = join('..', 'data', 'train_299')
+TRAINING_DIR = join('data', 'train_299')
 
 __all__ = ['number_tagged', 'train', 'predict']
 
 
-def _get_dict_roi():
+def _get_dict_roi(directory=None):
+    """Get all available images with ROI bounding box.
+    
+    Returns
+    -------
+    dict : {<image_id>: <ROI file path>}
+    
+    """
     d = OrderedDict()
-    for f in listdir(IJ_ROI_DIR):
-        d[splitext(f)[0]] = join(IJ_ROI_DIR, f)
+    for f in listdir(directory or IJ_ROI_DIR):
+        d[splitext(f)[0]] = join(directory or IJ_ROI_DIR, f)
     return d
 
 
-def _get_dict_all_images():
+def _get_dict_all_images(directory=None):
+    """Get all available images witch have an ROI bounding box label.
+    
+    Returns
+    -------
+    dict : {<image_id>: <image file path>}
+    
+    """
     d = OrderedDict()
+    id_pattern = re.compile(r'\d+')
     for class_ in CLASSES:
-        for f in listdir(join(TRAINING_DIR, class_)):
+        for f in listdir(join(directory or TRAINING_DIR, class_)):
             img_id = splitext(f)[0]
-            d[img_id] = join(TRAINING_DIR, class_, f)
+            # Because the clened images sometimes contain other information
+            # e.g. additional or train, we want to extract only the id, so we
+            # match on that.
+            img_id = id_pattern.search(img_id).group(0)
+            d[img_id] = join(directory or TRAINING_DIR, class_, f)
     return d
 
 
-def _get_dict_tagged_images():
-    all_images, tagged_roi = _get_dict_all_images(), _get_dict_roi()
+def _get_dict_tagged_images(directory=None, roi_directory=None):
+    """Get all available images in the training directory.
+    
+    Returns
+    -------
+    dict : {<image_id>: <image file path>}
+    
+    """
+    all_images = _get_dict_all_images(directory)
+    tagged_roi = _get_dict_roi(roi_directory)
     d = OrderedDict()
     for img_id in all_images:
         if img_id in tagged_roi:
@@ -51,9 +79,9 @@ def _get_dict_tagged_images():
     return d
 
 
-def _get_dict_untagged_images():
-    d = _get_dict_all_images()
-    for img_id in _get_dict_tagged_images():
+def _get_dict_untagged_images(directory=None):
+    d = _get_dict_all_images(directory)
+    for img_id in _get_dict_tagged_images(directory):
         del d[img_id]
     return d
 
@@ -79,7 +107,7 @@ def _convert_from_roi(fname):
         return np.array([top, left, height, width])
 
 
-def _get_tagged_images():
+def _get_tagged_images(training_dir, roi_dir=None):
     """Read images, tags and labels for any images that have been tagged.
 
     Return
@@ -91,7 +119,8 @@ def _get_tagged_images():
         Bounding boxes in format [y, x, h, w]
 
     """
-    roi_dict, img_dict = _get_dict_roi(), _get_dict_tagged_images()
+    roi_dict = _get_dict_roi(roi_dir or IJ_ROI_DIR)
+    img_dict = _get_dict_tagged_images(training_dir, roi_dir)
     # Initialize X and Y (contains 4 values x, y, w, h)
     X = np.zeros((len(img_dict), HEIGHT, WIDTH, 3))
     Y = np.zeros((len(img_dict), 4))
@@ -162,8 +191,9 @@ def _regression_head(l2_reg, dropout_p, input_shape):
     return model
 
 
-def train(reduce_lr_factor=1e-1, epochs=5):
-    _, X, Y = _get_tagged_images()
+def train(model_file, reduce_lr_factor=1e-1, epochs=5, name=''):
+    data_info = load_organized_data_info(imgs_dim=HEIGHT, name=name)
+    _, X, Y = _get_tagged_images(data_info['dir_tr'])
 
     def _image_generator():
         return generator.flow(
