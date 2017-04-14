@@ -10,13 +10,15 @@ Example usage
     python xception_fine_tune.py make_submission_top_classifier --name 'cleaned'
                                  --dropout_p 0.5
 
-    python xception_fine_tune.py fine_tune --name 'cleaned' --lr 1e-4
+    python xception_fine_tune.py fine_tune --name 'cleaned'
+                                 --name_ext 'frozen_96_dropout_0_6' --lr 1e-4
                                  --reduce_lr_factor 0.1 --reduce_lr_patience 3
                                  --epochs 2 --batch_size 32 --l2_reg 0
                                  --dropout_p 0.5 --num_freeze_layers 133
 
     python xception_fine_tune.py make_submission_xception --name 'cleaned'
-                                 --dropout_p 0.5
+                                 --name_ext 'frozen_96_dropout_0_6'
+                                 --dropout_p 0.6
 """
 
 from math import ceil
