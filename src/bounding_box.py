@@ -175,7 +175,7 @@ def _cnn(model_file):
     regression_head = _regression_head(
         l2_reg=0.0,
         dropout_p=0.5,
-        input_shape=model.output,
+        input_shape=(2048,),
     )
     return Model(inputs=model.input, outputs=regression_head(model.output))
 
