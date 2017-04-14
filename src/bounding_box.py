@@ -5,22 +5,25 @@ from os.path import join, splitext
 import fire
 import ijroi
 import numpy as np
+from keras.applications import Xception
 from keras.callbacks import ReduceLROnPlateau, ModelCheckpoint
-from keras.layers import Conv2D, MaxPooling2D, Flatten, Dense
-from keras.models import Sequential
+from keras.layers import Dense, Dropout
+from keras.models import Sequential, Model
 from keras.preprocessing.image import ImageDataGenerator, load_img, \
     img_to_array
+from keras.regularizers import l2
 
-from data_dirs_organizer import HEIGHT, WIDTH
+from xception_fine_tune import HEIGHT, WIDTH
 from data_provider import MODELS_DIR
+from xception_fine_tune import _top_classifier
 
 IJ_ROI_DIR = join('..', 'data', 'bounding_boxes_299')
-MODEL_FILE = join(MODELS_DIR, 'simple_localizer.h5')
+MODEL_FILE = join(MODELS_DIR, 'localizer.h5')
 
 CLASSES = ['Type_1', 'Type_2', 'Type_3']
 TRAINING_DIR = join('..', 'data', 'train_299')
 
-__all__ = ['number_tagged', 'train_simple', 'predict']
+__all__ = ['number_tagged', 'train', 'predict']
 
 
 def _get_dict_roi():
@@ -129,25 +132,37 @@ def number_tagged():
     print('Number of untagged images', _get_untagged_images()[1].shape[0])
 
 
-def _small_cnn():
+def _cnn(model_file):
+    # Load the classification model to get the trianed weights
+    model = Xception(weights='imagenet', include_top=False, pooling='avg')
+    top_classifier = _top_classifier(
+        l2_reg=0,
+        dropout_p=0.5,
+        input_shape=(2048,)
+    )
+    model_ = Model(inputs=model.input, outputs=top_classifier(model.output))
+    model_.load_weights(model_file)
+    # Time to chop off the classification head and attach the regression head
+    regression_head = _regression_head(
+        l2_reg=0.0,
+        dropout_p=0.5,
+        input_shape=model.output,
+    )
+    return Model(inputs=model.input, outputs=regression_head(model.output))
+
+
+def _regression_head(l2_reg, dropout_p, input_shape):
     model = Sequential()
-
-    model.add(Conv2D(32, 3, 3, input_shape=(HEIGHT, WIDTH, 3),
-                     activation='relu', border_mode='same'))
-    model.add(Conv2D(32, 3, 3, activation='relu', border_mode='same'))
-    model.add(MaxPooling2D(pool_size=(2, 2)))
-
-    model.add(Conv2D(64, 3, 3, activation='relu', border_mode='same'))
-    model.add(Conv2D(64, 3, 3, activation='relu', border_mode='same'))
-    model.add(MaxPooling2D(pool_size=(2, 2)))
-
-    model.add(Flatten())
-    model.add(Dense(4))
-
+    model.add(Dropout(rate=dropout_p, input_shape=input_shape))
+    dense = Dense(
+        units=4,
+        kernel_regularizer=l2(l=l2_reg),
+    )
+    model.add(dense)
     return model
 
 
-def train_simple(reduce_lr_factor=1e-1, epochs=5):
+def train(reduce_lr_factor=1e-1, epochs=5):
     _, X, Y = _get_tagged_images()
 
     def _image_generator():
@@ -157,7 +172,7 @@ def train_simple(reduce_lr_factor=1e-1, epochs=5):
             shuffle=True,
         )
 
-    model = _small_cnn()
+    model = _cnn()
     # TODO See if an L1 loss does any better
     model.compile(loss='mean_squared_error', optimizer='adam')
 
@@ -178,7 +193,7 @@ def train_simple(reduce_lr_factor=1e-1, epochs=5):
 
 
 def predict():
-    model = _small_cnn()
+    model = _cnn()
     model.load_weights(MODEL_FILE)
     labels, X = _get_all_images()
 
