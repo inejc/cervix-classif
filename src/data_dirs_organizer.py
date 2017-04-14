@@ -19,9 +19,11 @@ from PIL.ImageOps import fit
 from keras.preprocessing.image import load_img
 from sklearn.model_selection import StratifiedShuffleSplit
 
-from data_provider import DATA_DIR, CLASSES
+from data_provider import DATA_DIR, CLASSES, IMAGES_WEIGHTS_FILE
+from data_provider import num_examples_per_class_in_dir
 from data_provider import organized_data_info_file
 from data_provider import save_organized_data_info, load_organized_data_info
+from utils import read_lines
 
 
 def clean(imgs_dim=299, name=''):
@@ -55,6 +57,11 @@ def organize(imgs_dim=299, name='', val_size_fraction=0.1,
         new_dir_tr,
         new_dir_val
     )
+
+    num_per_cls_tr = num_examples_per_class_in_dir(new_dir_tr)
+    num_tr = sum(num_per_cls_tr.values())
+    print("Organized training set class distribution:")
+    print({k: v / num_tr for k, v in num_per_cls_tr.items()})
 
     if te_dir is not None:
         new_dir_te = join(
@@ -96,19 +103,36 @@ def _organize_train_dirs(dirs, val_size_fraction, imgs_dim, name, new_dir_tr,
     val_paths = train_paths[ind_val]
     val_labels = train_labels[ind_val]
 
-    # todo weighted examples
+    # duplicate weighted examples
+    weighted_examples = read_lines(
+        IMAGES_WEIGHTS_FILE,
+        line_func=lambda l: l.rstrip()
+    )
 
-    _save_organized_data_info(
+    weighted_paths, weighted_labels = [], []
+    for w_example in weighted_examples:
+        weighted_paths.append(join(DATA_DIR, w_example))
+        weighted_labels.append(basename(dirname(w_example)))
+
+    _save_images_to_dir(
         imgs_dim,
-        name,
-        len(all_train_paths),
-        len(val_paths),
         new_dir_tr,
-        new_dir_val
+        np.array(weighted_paths),
+        np.array(weighted_labels),
+        names_ext='weighted'
     )
 
     _save_images_to_dir(imgs_dim, new_dir_tr, all_train_paths, all_train_labels)
     _save_images_to_dir(imgs_dim, new_dir_val, val_paths, val_labels)
+
+    _save_organized_data_info(
+        imgs_dim,
+        name,
+        len(all_train_paths) + len(weighted_examples),
+        len(val_paths),
+        new_dir_tr,
+        new_dir_val
+    )
 
 
 def _load_paths_labels_from_train_dir(dir_):
@@ -145,12 +169,19 @@ def _save_organized_data_info(imgs_dim, name, num_tr, num_val, new_dir_tr,
     save_organized_data_info(info, imgs_dim, name)
 
 
-def _save_images_to_dir(imgs_dim, dest_dir, src_paths, labels):
+def _save_images_to_dir(imgs_dim, dest_dir, src_paths, labels, names_ext=None):
     for src_path, label in zip(src_paths, labels):
-        file_name = '{:s}_{:s}'.format(
-            basename(dirname(dirname(src_path))),
-            basename(src_path)
-        )
+        if names_ext is not None:
+            file_name = '{:s}_{:s}_{:s}'.format(
+                basename(dirname(dirname(src_path))),
+                names_ext,
+                basename(src_path)
+            )
+        else:
+            file_name = '{:s}_{:s}'.format(
+                basename(dirname(dirname(src_path))),
+                basename(src_path)
+            )
         dest_path = join(join(dest_dir, label), file_name)
         _save_preprocessed_img(imgs_dim, src_path, dest_path)
 
@@ -186,7 +217,11 @@ def _add_test_info_to_organized_data_info(imgs_dim, name, num_test_samples,
 
 
 def _save_preprocessed_img(imgs_dim, src, dest):
-    image = load_img(src)
+    try:
+        image = load_img(src)
+    except FileNotFoundError:
+        print("Image {:s} not found and skipped".format(src))
+        return
 
     # todo: preprocess
     image = fit(image, (imgs_dim, imgs_dim), method=LANCZOS)

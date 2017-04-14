@@ -1,7 +1,7 @@
 """
 Example usage
 -------------
-    python data_cleaner.py --dir_ 'additional'
+    python data_cleaner.py clean --dir_ 'name_of_dir_in_data_dir'
 """
 
 from os import mkdir, listdir, stat
