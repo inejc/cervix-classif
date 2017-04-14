@@ -191,7 +191,8 @@ def _regression_head(l2_reg, dropout_p, input_shape):
     return model
 
 
-def train(model_file, reduce_lr_factor=1e-1, epochs=5, name=''):
+def train(model_file, reduce_lr_factor=1e-1, num_freeze_layers=0, epochs=10,
+          name=''):
     data_info = load_organized_data_info(imgs_dim=HEIGHT, name=name)
     _, X_tr, Y_tr = _get_tagged_images(data_info['dir_tr'])
     _, X_val, Y_val = _get_tagged_images(data_info['dir_val'])
@@ -206,6 +207,10 @@ def train(model_file, reduce_lr_factor=1e-1, epochs=5, name=''):
     model = _cnn(model_file)
     # TODO See if an L1 loss does any better
     model.compile(loss='mean_squared_error', optimizer='adam')
+
+    # model has 134 layers
+    for layer in model.layers[:num_freeze_layers]:
+        layer.trainable = False
 
     generator = ImageDataGenerator()
     callbacks = [
