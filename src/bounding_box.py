@@ -1,3 +1,13 @@
+"""
+Example usage:
+CUDA_VISIBLE_DEVICES=0 python3 src/bounding_box.py train
+    --name cleaned
+    --model_file models/xception_fine_tuned_cleaned_frozen_96_dropout_0_6_val_loss_0_7404.h5
+    --reg l1
+    --reg_strength 0
+    --dropout 0.5
+    --epochs=10
+"""
 from collections import OrderedDict
 from os import listdir
 from os.path import join, splitext
@@ -19,7 +29,7 @@ from data_provider import MODELS_DIR, load_organized_data_info
 from xception_fine_tune import _top_classifier
 
 IJ_ROI_DIR = join('data', 'bounding_boxes_299')
-MODEL_FILE = join(MODELS_DIR, 'localizer.h5')
+MODEL_FILE = 'localizer_.h5'
 
 CLASSES = ['Type_1', 'Type_2', 'Type_3']
 TRAINING_DIR = join('data', 'train_299')
@@ -161,6 +171,13 @@ def number_tagged():
     print('Number of untagged images', _get_untagged_images()[1].shape[0])
 
 
+def _model_file_name(name, reg, reg_strength, dropout):
+    split = MODEL_FILE.split('.')
+    split[0] += '%s_%s-%s_dropout-%s_'% (name, reg, reg_strength, dropout)
+    split[0] += 'epoch-{epoch:02d}_val_loss-{val_loss:.2f}'
+    return join(MODELS_DIR, '.'.join(split))
+
+
 def _cnn(model_file, reg='l2', reg_strength=0.0, dropout_p=0.5):
     # Load the classification model to get the trianed weights
     model = Xception(weights='imagenet', include_top=False, pooling='avg')
@@ -226,7 +243,9 @@ def train(model_file, reduce_lr_factor=1e-1, num_freeze_layers=0, epochs=10,
     generator = ImageDataGenerator()
     callbacks = [
         ReduceLROnPlateau(factor=reduce_lr_factor),
-        ModelCheckpoint(MODEL_FILE, save_best_only=True),
+        ModelCheckpoint(_model_file_name(
+            name, reg, reg_strength, dropout
+        ), save_best_only=True),
         TensorBoard(log_dir='./logs', histogram_freq=0, write_graph=True),
     ]
     model.fit_generator(
