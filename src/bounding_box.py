@@ -12,7 +12,7 @@ from keras.layers import Dense, Dropout
 from keras.models import Sequential, Model
 from keras.preprocessing.image import ImageDataGenerator, load_img, \
     img_to_array
-from keras.regularizers import l2
+from keras.regularizers import l2, l1
 
 from xception_fine_tune import HEIGHT, WIDTH
 from data_provider import MODELS_DIR, load_organized_data_info
@@ -161,7 +161,7 @@ def number_tagged():
     print('Number of untagged images', _get_untagged_images()[1].shape[0])
 
 
-def _cnn(model_file):
+def _cnn(model_file, reg='l2', reg_strength=0.0, dropout_p=0.5):
     # Load the classification model to get the trianed weights
     model = Xception(weights='imagenet', include_top=False, pooling='avg')
     top_classifier = _top_classifier(
@@ -173,26 +173,33 @@ def _cnn(model_file):
     model_.load_weights(model_file)
     # Time to chop off the classification head and attach the regression head
     regression_head = _regression_head(
-        l2_reg=0.0,
-        dropout_p=0.5,
+        reg=reg,
+        reg_strength=reg_strength,
+        dropout_p=dropout_p,
         input_shape=(2048,),
     )
     return Model(inputs=model.input, outputs=regression_head(model.output))
 
 
-def _regression_head(l2_reg, dropout_p, input_shape):
+def _regression_head(input_shape, reg='l2', reg_strength=0.0, dropout_p=0.5):
     model = Sequential()
     model.add(Dropout(rate=dropout_p, input_shape=input_shape))
+    # Figure out regularization
+    if reg == 'l2':
+        regularization = l2
+    elif reg == 'l1':
+        regularization = l1
+    # Create dense layer
     dense = Dense(
         units=4,
-        kernel_regularizer=l2(l=l2_reg),
+        kernel_regularizer=regularization(l=reg_strength),
     )
     model.add(dense)
     return model
 
 
 def train(model_file, reduce_lr_factor=1e-1, num_freeze_layers=0, epochs=10,
-          name=''):
+          name='', reg='l2', reg_strength=0.0, dropout=0.5):
     data_info = load_organized_data_info(imgs_dim=HEIGHT, name=name)
     _, X_tr, Y_tr = _get_tagged_images(data_info['dir_tr'])
     _, X_val, Y_val = _get_tagged_images(data_info['dir_val'])
@@ -204,8 +211,12 @@ def train(model_file, reduce_lr_factor=1e-1, num_freeze_layers=0, epochs=10,
             shuffle=True,
         )
 
-    model = _cnn(model_file)
-    # TODO See if an L1 loss does any better
+    model = _cnn(
+        model_file=model_file,
+        reg=reg,
+        reg_strength=reg_strength,
+        dropout_p=dropout
+    )
     model.compile(loss='mean_squared_error', optimizer='adam')
 
     # model has 134 layers
