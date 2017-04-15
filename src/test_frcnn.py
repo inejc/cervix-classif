@@ -12,6 +12,7 @@ from keras.layers import Input
 from keras.models import Model
 from keras_frcnn import config
 from keras_frcnn import roi_helpers
+from parse_roi import resize_bounding_box
 from tqdm import tqdm
 
 sys.setrecursionlimit(40000)
@@ -41,15 +42,6 @@ def format_img(img):
     img[:, 1, :, :] -= C.mean_pixel[1]  # used to be 116.779
     img[:, 2, :, :] -= C.mean_pixel[2]  # used to be 123.68
     return img, new_width, new_height
-
-
-def resize_bounding_box(width_ratio, height_ratio, coordinates):
-    """coordinates: (x1, x2, y1, y2) """
-    x1 = max(0, coordinates[0] * width_ratio)
-    x2 = max(0, coordinates[1] * width_ratio)
-    y1 = max(0, coordinates[2] * height_ratio)
-    y2 = max(0, coordinates[3] * height_ratio)
-    return int(x1), int(x2), int(y1), int(y2)
 
 
 def get_class_mappings():
@@ -198,14 +190,13 @@ def crop(dir_with_images="./../data/train/*/", overlap_thresh=0.9, visualise=Fal
 
                     cv2.rectangle(img, (textOrg[0] - 5, textOrg[1] + baseLine - 5),
                                   (textOrg[0] + retval[0] + 5, textOrg[1] - retval[1] - 5),
-                                  (0, 0, 0),
-                                  2)
+                                  (0, 0, 0), 2)
                     cv2.rectangle(img, (textOrg[0] - 5, textOrg[1] + baseLine - 5),
                                   (textOrg[0] + retval[0] + 5, textOrg[1] - retval[1] - 5),
                                   (255, 255, 255), -1)
-                    cv2.putText(img, textLabel, textOrg, cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 0),
-                                1)
+                    cv2.putText(img, textLabel, textOrg, cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 0), 1)
 
+        #FIXME TIM:
         if "/train_cleaned" in img_name:
             new_image_path = img_name.replace("/train_cleaned", "/train_cleaned_frcnn_cropped")
         elif "/test" in img_name:

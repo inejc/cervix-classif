@@ -11,6 +11,7 @@ from keras_frcnn.simple_parser import get_data
 roi_file_path = "./../data/roi/roi_bbox.txt"
 mean_pixel_file_path = './../data/roi/mean_pixel_color.txt'
 roi_files_dir = './../data/roi/train/*/*.roi'
+roi_files_dir = "./../data/bounding_boxes_299/*.roi"
 
 
 def process_roi():
@@ -42,16 +43,27 @@ def generate_mean_pixel_file():
     np.savetxt(mean_pixel_file_path, avg, delimiter=',')
 
 
-def generate_roi_file():
+def generate_roi_file(roi_files_dir='./../data/roi/train/*/*.roi'):
     roi_files = glob.glob(roi_files_dir)
     with open(roi_file_path, 'w') as out:
         for roi_file in roi_files:
             with open(roi_file, "rb") as f:
                 roi = ijroi.read_roi(f)
-                out.write(roi_file.replace("roi/", "").replace(".roi", ".jpg") + ", ")
+                image_name = roi_file.split("/")[-1].replace(".roi", ".jpg")
+                out.write(glob.glob("./../data/train/**/" + image_name)[0] + ", ")
+                # TODO TIM: RESIZE IF NECESSARY
                 out.write(", ".join(map(str, roi[0][::-1])) + ", ")
                 out.write(", ".join(map(str, roi[2][::-1])) + ", ")
                 out.write("cervix\n")
+
+
+def resize_bounding_box(width_ratio, height_ratio, coordinates):
+    """coordinates: (x1, x2, y1, y2) """
+    x1 = max(0, coordinates[0] * width_ratio)
+    x2 = max(0, coordinates[1] * width_ratio)
+    y1 = max(0, coordinates[2] * height_ratio)
+    y2 = max(0, coordinates[3] * height_ratio)
+    return int(x1), int(x2), int(y1), int(y2)
 
 
 def get_average_roi_size():
@@ -74,4 +86,6 @@ def get_average_roi_size():
 
 
 if __name__ == '__main__':
-    process_roi()
+    import fire
+
+    fire.Fire()
