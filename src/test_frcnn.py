@@ -61,7 +61,7 @@ def get_model_rpn(input_shape_img):
     rpn = nn.rpn(shared_layers, num_anchors)
     model_rpn = Model(img_input, rpn + [shared_layers])
     model_rpn.load_weights(C.model_path, by_name=True)
-    model_rpn.compile(optimizer='sgd', loss='mse')
+    model_rpn.compile(optimizer='adam', loss='mse')
     return model_rpn
 
 
@@ -72,11 +72,11 @@ def get_model_classifier(class_mapping, input_shape_features):
                                nb_classes=len(class_mapping))
     model_classifier = Model([feature_map_input, roi_input], classifier)
     model_classifier.load_weights(C.model_path, by_name=True)
-    model_classifier.compile(optimizer='sgd', loss='mse')
+    model_classifier.compile(optimizer='adam', loss='mse')
     return model_classifier
 
 
-def crop(dir_with_images="./../data/train/*/", overlap_thresh=0.9, visualise=False):
+def crop(img_dir="./../data/train/*/", overlap_thresh=0.95, visualise=False):
     class_mapping = get_class_mappings()
 
     if K.image_dim_ordering() == 'th':
@@ -89,7 +89,7 @@ def crop(dir_with_images="./../data/train/*/", overlap_thresh=0.9, visualise=Fal
     model_rpn = get_model_rpn(input_shape_img)
     model_classifier = get_model_classifier(class_mapping, input_shape_features)
 
-    images = sorted(glob.glob(os.path.join(dir_with_images, '*.jpg')))
+    images = sorted(glob.glob(os.path.join(img_dir, '*.jpg')))
     print("Found " + str(len(images)) + " images...")
     for idx, img_name in tqdm(enumerate(images), total=len(images)):
 
@@ -174,7 +174,7 @@ def crop(dir_with_images="./../data/train/*/", overlap_thresh=0.9, visualise=Fal
                 (x1, y1, x2, y2) = best_match
                 cv2.rectangle(img, (x1, y1), (x2, y2), (0, 255, 0), 2)
                 for jk in range(new_boxes.shape[0]):
-                    x1, x2, y1, y2 = resize_bounding_box(width_ratio, height_ratio,
+                    x1, y1, x2, y2 = resize_bounding_box(width_ratio, height_ratio,
                                                          new_boxes[jk, :])
 
                     cv2.rectangle(img, (x1, y1), (x2, y2), (255, 0, 0), 2)
@@ -196,13 +196,14 @@ def crop(dir_with_images="./../data/train/*/", overlap_thresh=0.9, visualise=Fal
                                   (255, 255, 255), -1)
                     cv2.putText(img, textLabel, textOrg, cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 0), 1)
 
-        #FIXME TIM:
+        # FIXME TIM:
         if "/train_cleaned" in img_name:
             new_image_path = img_name.replace("/train_cleaned", "/train_cleaned_frcnn_cropped")
         elif "/test" in img_name:
             new_image_path = img_name.replace("/test", "/test_frcnn_cropped")
         elif "/additional_cleaned" in img_name:
-            new_image_path = img_name.replace("/additional_cleaned", "/additional_cleaned_frcnn_cropped")
+            new_image_path = img_name.replace("/additional_cleaned",
+                                              "/additional_cleaned_frcnn_cropped")
         else:
             raise RuntimeError("Wrong dir name!")
         if best_match is not None:
