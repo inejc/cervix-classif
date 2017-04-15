@@ -25,6 +25,7 @@ def generate_mean_pixel_file():
 
     avg = [0, 0, 0]
     for img_data in all_imgs:
+        print(img_data['filepath'])
         img_data_aug, x_img = augment(img_data, C, augment=False)
 
         (width, height) = (img_data_aug['width'], img_data_aug['height'])
