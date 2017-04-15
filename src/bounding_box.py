@@ -7,7 +7,7 @@ import re
 import ijroi
 import numpy as np
 from keras.applications import Xception
-from keras.callbacks import ReduceLROnPlateau, ModelCheckpoint
+from keras.callbacks import ReduceLROnPlateau, ModelCheckpoint, TensorBoard
 from keras.layers import Dense, Dropout
 from keras.models import Sequential, Model
 from keras.preprocessing.image import ImageDataGenerator, load_img, \
@@ -216,6 +216,7 @@ def train(model_file, reduce_lr_factor=1e-1, num_freeze_layers=0, epochs=10,
     callbacks = [
         ReduceLROnPlateau(factor=reduce_lr_factor),
         ModelCheckpoint(MODEL_FILE, save_best_only=True),
+        TensorBoard(log_dir='./logs', histogram_freq=0, write_graph=True),
     ]
     model.fit_generator(
         generator=_image_generator(X_tr, Y_tr),
