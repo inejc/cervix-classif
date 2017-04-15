@@ -1,5 +1,6 @@
 import glob
 
+import os
 import cv2
 import ijroi
 import numpy as np
@@ -8,6 +9,7 @@ from keras_frcnn.data_augment import augment
 from keras_frcnn.data_generators import get_new_img_size
 from keras_frcnn.simple_parser import get_data
 
+train_dir = "./../data/train_cleaned/"
 roi_file_path = "./../data/roi/roi_bbox.txt"
 mean_pixel_file_path = './../data/roi/mean_pixel_color.txt'
 
@@ -70,7 +72,11 @@ def resized_roi_to_original(roi_file, resized_dim=299):
         x1, y1 = tuple(roi[0][::-1])
         x2, y2 = tuple(roi[2][::-1])
 
-        image_name = img_name(roi_file)
+        try:
+            image_name = img_name(roi_file)
+        except IndexError:
+            print("Could not find image " + roi_file.split("/")[-1].replace(".roi", ".jpg"))
+            return
         img = cv2.imread(image_name)
         height, width, _ = img.shape
 
@@ -87,8 +93,7 @@ def resized_roi_to_original(roi_file, resized_dim=299):
 
 def img_name(roi_file_path):
     image_name = roi_file_path.split("/")[-1].replace(".roi", ".jpg")
-    image_name = glob.glob("./../data/train/**/" + image_name)[0]
-    return image_name
+    return glob.glob(os.path.join(train_dir, "**/", image_name))[0]
 
 
 def resize_bounding_box(width_ratio, height_ratio, coordinates):
