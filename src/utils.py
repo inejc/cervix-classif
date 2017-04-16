@@ -1,6 +1,8 @@
 from functools import partial
+from warnings import warn
 
 import numpy as np
+from keras.callbacks import Callback
 from sklearn.model_selection import cross_val_score
 
 
@@ -52,3 +54,20 @@ def read_lines(file_name, line_func=None):
             return list(f)
         else:
             return [line_func(l) for l in list(f)]
+
+
+class EarlyStoppingByLoss(Callback):
+
+    def __init__(self, monitor='val_loss', value=0.00001):
+        super(Callback, self).__init__()
+        self.monitor = monitor
+        self.value = value
+
+    def on_epoch_end(self, epoch, logs={}):
+        current_val = logs.get(self.monitor)
+
+        if current_val is None:
+            warn("EarlyStoppingByLoss requires {:s}".format(self.monitor))
+
+        if current_val < self.value:
+            self.model.stop_training = True
