@@ -91,3 +91,18 @@ Epoch 20 - loss: 0.4901 - val_loss: 0.7353 (0.70487 public score)
 
 fine_tune --name 'cleaned' --name_ext 'frozen_86_dropout_0_2' --lr 1e-5 --reduce_lr_factor 0.1 --reduce_lr_patience 50 --epochs 50 --batch_size 256 --l2_reg 0 --dropout_p 0.2 --num_freeze_layers 86
 Epoch 21 - loss: 0.4392 - val_loss: 0.7216 (0.73083 public score)
+
+0.15 VAL DATA
+-------------
+a
+fine_tune --name 'stable' --name_ext 'frozen_86_dropout_0_6' --lr 1e-5 --reduce_lr_factor 0.1 --reduce_lr_patience 50 --epochs 50 --batch_size 256 --l2_reg 0 --dropout_p 0.6 --num_freeze_layers 86
+Epoch 27 - loss: 0.4265 - val_loss: 0.7309 (0.74365 public score)
+
+b
+fine_tune --name 'stable' --name_ext 'frozen_86_dropout_0_5' --lr 1e-5 --reduce_lr_factor 0.1 --reduce_lr_patience 50 --epochs 50 --batch_size 256 --l2_reg 0 --dropout_p 0.5 --num_freeze_layers 86
+
+c
+fine_tune --name 'stable' --name_ext 'frozen_86_dropout_0_4' --lr 1e-5 --reduce_lr_factor 0.1 --reduce_lr_patience 50 --epochs 50 --batch_size 256 --l2_reg 0 --dropout_p 0.4 --num_freeze_layers 86
+
+d
+fine_tune --name 'stable' --name_ext 'frozen_86_dropout_0_3' --lr 1e-5 --reduce_lr_factor 0.1 --reduce_lr_patience 50 --epochs 50 --batch_size 256 --l2_reg 0 --dropout_p 0.3 --num_freeze_layers 86
