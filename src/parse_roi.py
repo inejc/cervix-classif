@@ -15,7 +15,7 @@ mean_pixel_file_path = './../data/roi/mean_pixel_color.txt'
 
 
 def process_roi():
-    generate_roi_file_from_cropped_images()
+    generate_roi_file()
     generate_mean_pixel_file()
 
 
@@ -44,13 +44,14 @@ def generate_mean_pixel_file():
     np.savetxt(mean_pixel_file_path, avg, delimiter=',')
 
 
-def generate_roi_file(roi_files_dir='./../data/roi/train/*/*.roi'):
-    roi_files = glob.glob(roi_files_dir)
+def generate_roi_file():
+    roi_files = glob.glob('./../data/roi/train/*/*.roi')
+    roi_files += glob.glob('./../data/roi/additional_cleaned/*/*.roi')
     with open(roi_file_path, 'w') as out:
         for roi_file in roi_files:
             with open(roi_file, "rb") as f:
                 roi = ijroi.read_roi(f)
-                out.write(img_name(roi_file) + ", ")
+                out.write(roi_file.replace("roi/", "").replace(".roi", ".jpg") + ", ")
                 out.write(", ".join(map(str, roi[0][::-1])) + ", ")
                 out.write(", ".join(map(str, roi[2][::-1])) + ", ")
                 out.write("cervix\n")

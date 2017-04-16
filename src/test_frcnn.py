@@ -76,7 +76,7 @@ def get_model_classifier(class_mapping, input_shape_features):
     return model_classifier
 
 
-def crop(img_dir="./../data/train/*/", overlap_thresh=0.95, visualise=False):
+def crop(img_dir="./../data/train/*/", overlap_threshold=0.95, visualise=False):
     class_mapping = get_class_mappings()
 
     if K.image_dim_ordering() == 'th':
@@ -164,7 +164,7 @@ def crop(img_dir="./../data/train/*/", overlap_thresh=0.95, visualise=False):
         for key in bboxes:
             bbox = np.array(bboxes[key])
             new_boxes, new_probs = roi_helpers.non_max_suppression_fast(bbox, np.array(probs[key]),
-                                                                        overlapThresh=overlap_thresh)
+                                                                        overlapThresh=overlap_threshold)
 
             # TODO TIM: check if box makes sense
             best_match = new_boxes[np.argmax(new_probs), :]
