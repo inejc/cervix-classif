@@ -7,35 +7,35 @@ Regularization
 L1 loss after 10 epochs of training
 -----------------------------------
 - strength = 0.1:
-CUDA_VISIBLE_DEVICES=0 python3 src/bounding_box.py train --name cleaned --model_file models/xception_fine_tuned_cleaned_frozen_96_dropout_0_6_val_loss_0_7404.h5 --reg l1 --reg_strength 0.1 --dropout 0.5
+CUDA_VISIBLE_DEVICES=0 python3 src/bounding_box.py train --name cleaned --model_file models/xception_fine_tuned_cleaned_frozen_96_dropout_0_6_val_loss_0_7404.h5 --reg l1 --reg_strength 0.1 --dropout 0.5 --num_freeze_layers 134 --epochs 30 --early_stopping 5
 MSE: 874.41
 
 - strength = 1:
-CUDA_VISIBLE_DEVICES=1 python3 src/bounding_box.py train --name cleaned --model_file models/xception_fine_tuned_cleaned_frozen_96_dropout_0_6_val_loss_0_7404.h5 --reg l1 --reg_strength 1 --dropout 0.5
+CUDA_VISIBLE_DEVICES=1 python3 src/bounding_box.py train --name cleaned --model_file models/xception_fine_tuned_cleaned_frozen_96_dropout_0_6_val_loss_0_7404.h5 --reg l1 --reg_strength 1 --dropout 0.5 --num_freeze_layers 134 --epochs 30 --early_stopping 5
 MSE: 849.43
 
 - strength = 10:
-CUDA_VISIBLE_DEVICES=2 python3 src/bounding_box.py train --name cleaned --model_file models/xception_fine_tuned_cleaned_frozen_96_dropout_0_6_val_loss_0_7404.h5 --reg l1 --reg_strength 10 --dropout 0.5
+CUDA_VISIBLE_DEVICES=2 python3 src/bounding_box.py train --name cleaned --model_file models/xception_fine_tuned_cleaned_frozen_96_dropout_0_6_val_loss_0_7404.h5 --reg l1 --reg_strength 10 --dropout 0.5 --num_freeze_layers 134 --epochs 30 --early_stopping 5
 MSE: 1585.98
 
 - strength = 100:
-CUDA_VISIBLE_DEVICES=3 python3 src/bounding_box.py train --name cleaned --model_file models/xception_fine_tuned_cleaned_frozen_96_dropout_0_6_val_loss_0_7404.h5 --reg l1 --reg_strength 100 --dropout 0.5
+CUDA_VISIBLE_DEVICES=3 python3 src/bounding_box.py train --name cleaned --model_file models/xception_fine_tuned_cleaned_frozen_96_dropout_0_6_val_loss_0_7404.h5 --reg l1 --reg_strength 100 --dropout 0.5 --num_freeze_layers 134 --epochs 30 --early_stopping 5
 MSE: 4738.88
 
 L2 loss after 10 epochs of training
 -----------------------------------
 - strength = 0.1:
-CUDA_VISIBLE_DEVICES=4 python3 src/bounding_box.py train --name cleaned --model_file models/xception_fine_tuned_cleaned_frozen_96_dropout_0_6_val_loss_0_7404.h5 --reg l2 --reg_strength 0.1 --dropout 0.5
+CUDA_VISIBLE_DEVICES=4 python3 src/bounding_box.py train --name cleaned --model_file models/xception_fine_tuned_cleaned_frozen_96_dropout_0_6_val_loss_0_7404.h5 --reg l2 --reg_strength 0.1 --dropout 0.5 --num_freeze_layers 134 --epochs 30 --early_stopping 5
 MSE: 855.51
 
 - strength = 1:
-CUDA_VISIBLE_DEVICES=5 python3 src/bounding_box.py train --name cleaned --model_file models/xception_fine_tuned_cleaned_frozen_96_dropout_0_6_val_loss_0_7404.h5 --reg l2 --reg_strength 1 --dropout 0.5
+CUDA_VISIBLE_DEVICES=5 python3 src/bounding_box.py train --name cleaned --model_file models/xception_fine_tuned_cleaned_frozen_96_dropout_0_6_val_loss_0_7404.h5 --reg l2 --reg_strength 1 --dropout 0.5 --num_freeze_layers 134 --epochs 30 --early_stopping 5
 MSE: 662.40
 
 - strength = 10:
-CUDA_VISIBLE_DEVICES=6 python3 src/bounding_box.py train --name cleaned --model_file models/xception_fine_tuned_cleaned_frozen_96_dropout_0_6_val_loss_0_7404.h5 --reg l2 --reg_strength 10 --dropout 0.5
+CUDA_VISIBLE_DEVICES=6 python3 src/bounding_box.py train --name cleaned --model_file models/xception_fine_tuned_cleaned_frozen_96_dropout_0_6_val_loss_0_7404.h5 --reg l2 --reg_strength 10 --dropout 0.5 --num_freeze_layers 134 --epochs 30 --early_stopping 5
 MSE: 856.62
 
 - strength = 100:
-CUDA_VISIBLE_DEVICES=7 python3 src/bounding_box.py train --name cleaned --model_file models/xception_fine_tuned_cleaned_frozen_96_dropout_0_6_val_loss_0_7404.h5 --reg l2 --reg_strength 100 --dropout 0.5
+CUDA_VISIBLE_DEVICES=7 python3 src/bounding_box.py train --name cleaned --model_file models/xception_fine_tuned_cleaned_frozen_96_dropout_0_6_val_loss_0_7404.h5 --reg l2 --reg_strength 100 --dropout 0.5 --num_freeze_layers 134 --epochs 30 --early_stopping 5
 MSE: 944.26

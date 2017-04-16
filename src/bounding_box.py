@@ -17,7 +17,8 @@ import re
 import ijroi
 import numpy as np
 from keras.applications import Xception
-from keras.callbacks import ReduceLROnPlateau, ModelCheckpoint, TensorBoard
+from keras.callbacks import ReduceLROnPlateau, ModelCheckpoint, TensorBoard, \
+    EarlyStopping
 from keras.layers import Dense, Dropout
 from keras.models import Sequential, Model
 from keras.preprocessing.image import ImageDataGenerator, load_img, \
@@ -216,12 +217,13 @@ def _regression_head(input_shape, reg='l2', reg_strength=0.0, dropout_p=0.5):
 
 
 def train(model_file, reduce_lr_factor=1e-1, num_freeze_layers=0, epochs=10,
-          name='', reg='l2', reg_strength=0.0, dropout=0.5):
+          name='', reg='l2', reg_strength=0.0, dropout=0.5,
+          early_stopping=False):
     data_info = load_organized_data_info(imgs_dim=HEIGHT, name=name)
     _, X_tr, Y_tr = _get_tagged_images(data_info['dir_tr'])
     _, X_val, Y_val = _get_tagged_images(data_info['dir_val'])
 
-    def _image_generator(data, labels):
+    def _image_generator(generator, data, labels):
         return generator.flow(
             data, labels,
             batch_size=32,
@@ -240,7 +242,6 @@ def train(model_file, reduce_lr_factor=1e-1, num_freeze_layers=0, epochs=10,
     for layer in model.layers[:num_freeze_layers]:
         layer.trainable = False
 
-    generator = ImageDataGenerator()
     callbacks = [
         ReduceLROnPlateau(factor=reduce_lr_factor),
         ModelCheckpoint(_model_file_name(
@@ -248,12 +249,52 @@ def train(model_file, reduce_lr_factor=1e-1, num_freeze_layers=0, epochs=10,
         ), save_best_only=True),
         TensorBoard(log_dir='./logs', histogram_freq=0, write_graph=True),
     ]
+    if early_stopping:
+        callbacks.append(EarlyStopping(
+            monitor='val_loss', min_delta=1, patience=early_stopping
+        ))
+
+    generator = ImageDataGenerator()
     model.fit_generator(
-        generator=_image_generator(X_tr, Y_tr),
+        generator=_image_generator(generator, X_tr, Y_tr),
         steps_per_epoch=len(X_tr),
         epochs=epochs,
         callbacks=callbacks,
-        validation_data=_image_generator(X_val, Y_val),
+        validation_data=_image_generator(generator, X_val, Y_val),
+        validation_steps=len(X_val),
+    )
+
+
+def resume_training(model_file, name='', num_freeze_layers=0, epochs=10):
+    data_info = load_organized_data_info(imgs_dim=HEIGHT, name=name)
+    _, X_tr, Y_tr = _get_tagged_images(data_info['dir_tr'])
+    _, X_val, Y_val = _get_tagged_images(data_info['dir_val'])
+
+    def _image_generator(generator, data, labels):
+        return generator.flow(
+            data, labels,
+            batch_size=32,
+            shuffle=True,
+        )
+    model = load_model(model_file)
+
+    for layer in model.layers[:num_freeze_layers]:
+        layer.trainable = False
+
+    callbacks = [
+        ReduceLROnPlateau(factor=reduce_lr_factor),
+        ModelCheckpoint(_model_file_name(
+            name, reg, reg_strength, dropout
+        ), save_best_only=True),
+        TensorBoard(log_dir='./logs', histogram_freq=0, write_graph=True),
+    ]
+    generator = ImageDataGenerator()
+    model.fit_generator(
+        generator=_image_generator(generator, X_tr, Y_tr),
+        steps_per_epoch=len(X_tr),
+        epochs=epochs,
+        callbacks=callbacks,
+        validation_data=_image_generator(generator, X_val, Y_val),
         validation_steps=len(X_val),
     )
 
