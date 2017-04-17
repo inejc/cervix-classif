@@ -15,7 +15,7 @@ Example usage
                                  --reduce_lr_factor 0.1 --reduce_lr_patience 3
                                  --epochs 2 --batch_size 32 --l2_reg 0
                                  --dropout_p 0.5 --num_freeze_layers 133,
-                                 --loss_stop_val 0.49
+                                 --save_best_only False --loss_stop_val 0.49
 
     python xception_fine_tune.py make_submission_xception --name 'cleaned'
                                  --name_ext 'frozen_96_dropout_0_6'

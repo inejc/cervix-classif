@@ -100,6 +100,12 @@ Epoch 21 - loss: 0.5423 - val_loss: 0.7421
 fine_tune --name 'stable' --name_ext 'frozen_86_dropout_0_5' --lr 1e-5 --reduce_lr_factor 0.1 --reduce_lr_patience 50 --epochs 50 --batch_size 256 --l2_reg 0 --dropout_p 0.5 --num_freeze_layers 86
 Epoch 21 - loss: 0.5079 - val_loss: 0.7489
 
+fine_tune --name 'stable' --name_ext 'frozen_86_dropout_0_5' --lr 1e-5 --reduce_lr_factor 0.1 --reduce_lr_patience 50 --epochs 50 --batch_size 256 --l2_reg 0 --dropout_p 0.5 --num_freeze_layers 86 --save_best_only False --loss_stop_val 0.46
+Epoch 23 - loss: 0.4509 - val_loss: 0.7581 (0.72726 public score)
+
+fine_tune --name 'stable' --name_ext 'frozen_86_dropout_0_5' --lr 1e-5 --reduce_lr_factor 0.1 --reduce_lr_patience 50 --epochs 50 --batch_size 256 --l2_reg 0 --dropout_p 0.5 --num_freeze_layers 86 --save_best_only False --loss_stop_val 0.48
+todo
+
 fine_tune --name 'stable' --name_ext 'frozen_86_dropout_0_4' --lr 1e-5 --reduce_lr_factor 0.1 --reduce_lr_patience 50 --epochs 50 --batch_size 256 --l2_reg 0 --dropout_p 0.4 --num_freeze_layers 86
 Epoch 20 - loss: 0.4929 - val_loss: 0.7371
 
