@@ -14,7 +14,8 @@ Example usage
                                  --name_ext 'frozen_96_dropout_0_6' --lr 1e-4
                                  --reduce_lr_factor 0.1 --reduce_lr_patience 3
                                  --epochs 2 --batch_size 32 --l2_reg 0
-                                 --dropout_p 0.5 --num_freeze_layers 133
+                                 --dropout_p 0.5 --num_freeze_layers 133,
+                                 --save_best_only False --loss_stop_val 0.49
 
     python xception_fine_tune.py make_submission_xception --name 'cleaned'
                                  --name_ext 'frozen_96_dropout_0_6'
@@ -39,7 +40,7 @@ from keras.utils.np_utils import to_categorical
 from data_provider import DATA_DIR, num_examples_per_class_in_dir
 from data_provider import EXPERIMENTS_DIR, SUBMISSIONS_DIR
 from data_provider import MODELS_DIR, load_organized_data_info
-from utils import create_submission_file
+from utils import create_submission_file, EarlyStoppingByLoss
 
 HEIGHT, WIDTH = 299, 299
 EMBEDDINGS_FILE = 'xception_embeddings_{:s}.npz'
@@ -177,7 +178,8 @@ def make_submission_top_classifier(name, dropout_p):
 
 def fine_tune(name, name_ext, lr=1e-4, reduce_lr_factor=0.1,
               reduce_lr_patience=3, epochs=10, batch_size=32, l2_reg=0,
-              dropout_p=0.5, num_freeze_layers=0, save_best_only=True):
+              dropout_p=0.5, num_freeze_layers=0, save_best_only=True,
+              loss_stop_val=0.00001):
 
     data_info = load_organized_data_info(imgs_dim=HEIGHT, name=name)
     tr_datagen = ImageDataGenerator(
@@ -225,6 +227,7 @@ def fine_tune(name, name_ext, lr=1e-4, reduce_lr_factor=0.1,
 
     log_dir = join(EXPERIMENTS_DIR, 'xception_fine_tuned_{:s}'.format(name))
     callbacks = [
+        EarlyStoppingByLoss(monitor='loss', value=loss_stop_val),
         ReduceLROnPlateau(factor=reduce_lr_factor, patience=reduce_lr_patience),
         ModelCheckpoint(model_file, save_best_only=save_best_only),
         TensorBoard(
