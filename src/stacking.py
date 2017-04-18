@@ -18,14 +18,14 @@ BATCH_SIZE = 32
 MODELS = {
     'xception_fine_tuned_stable_frozen_86_dropout_0_2_val_loss_0_7288.h5':
         xception_preprocess,
-    # 'xception_fine_tuned_stable_frozen_86_dropout_0_3_val_loss_0_7494.h5':
-    #     xception_preprocess,
+    'xception_fine_tuned_stable_frozen_86_dropout_0_3_val_loss_0_7494.h5':
+        xception_preprocess,
     'xception_fine_tuned_stable_frozen_86_dropout_0_4_val_loss_0_7155.h5':
         xception_preprocess,
-    # 'xception_fine_tuned_stable_frozen_86_dropout_0_5_val_loss_0_7520.h5':
-    #     xception_preprocess,
-    # 'xception_fine_tuned_stable_frozen_86_dropout_0_6_val_loss_0_7386.h5':
-    #     xception_preprocess,
+    'xception_fine_tuned_stable_frozen_86_dropout_0_5_val_loss_0_7520.h5':
+        xception_preprocess,
+    'xception_fine_tuned_stable_frozen_86_dropout_0_6_val_loss_0_7386.h5':
+        xception_preprocess,
 }
 
 
