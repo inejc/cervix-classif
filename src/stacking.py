@@ -29,7 +29,7 @@ MODELS = {
 }
 
 
-def train(name='stable', cross_validate=True):
+def train(name='stable', cross_validate=True, k=10):
     data_info = load_organized_data_info(imgs_dim=HEIGHT, name=name)
 
     preds_val = np.empty((data_info['num_val'], 0))
@@ -67,7 +67,7 @@ def train(name='stable', cross_validate=True):
             classifiers=[('lr', lr)],
             X=preds_val,
             y=y_val,
-            k=10
+            k=k
         )
         print(score)
     else:
