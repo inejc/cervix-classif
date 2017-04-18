@@ -3,9 +3,9 @@ from os.path import join
 
 import fire
 import numpy as np
+from keras.applications.xception import preprocess_input as xception_preprocess
 from keras.models import load_model
 from keras.preprocessing.image import ImageDataGenerator
-from keras.applications.xception import preprocess_input as xception_preprocess
 
 from data_provider import load_organized_data_info, MODELS_DIR
 
@@ -13,11 +13,20 @@ WIDTH, HEIGHT = 299, 299
 BATCH_SIZE = 256
 
 MODELS = {
-    '': xception_preprocess
+    'xception_fine_tuned_stable_frozen_86_dropout_0_2_val_loss_0_7288.h5':
+        xception_preprocess,
+    'xception_fine_tuned_stable_frozen_86_dropout_0_3_val_loss_0_7494.h5':
+        xception_preprocess,
+    'xception_fine_tuned_stable_frozen_86_dropout_0_4_val_loss_0_7155.h5':
+        xception_preprocess,
+    'xception_fine_tuned_stable_frozen_86_dropout_0_5_val_loss_0_7520.h5':
+        xception_preprocess,
+    'xception_fine_tuned_stable_frozen_86_dropout_0_6_val_loss_0_7386.h5':
+        xception_preprocess,
 }
 
 
-def train(name=''):
+def train(name='stable'):
     data_info = load_organized_data_info(imgs_dim=HEIGHT, name=name)
 
     preds_val, preds_te = np.array([]), np.array([])
@@ -41,6 +50,8 @@ def train(name=''):
 
         preds_val = np.hstack((preds_val, model_preds_val))
         preds_te = np.hstack((preds_te, model_preds_te))
+        print(preds_val.shape)
+        print(preds_te.shape)
 
 
 def _make_predictions(model_path, preprocess_func, data_info, dir_id):
