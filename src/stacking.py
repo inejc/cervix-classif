@@ -16,10 +16,10 @@ WIDTH, HEIGHT = 299, 299
 BATCH_SIZE = 32
 
 MODELS = {
-    'xception_fine_tuned_stable_frozen_86_dropout_0_2_val_loss_0_7288.h5':
-        xception_preprocess,
-    'xception_fine_tuned_stable_frozen_86_dropout_0_3_val_loss_0_7494.h5':
-        xception_preprocess,
+    # 'xception_fine_tuned_stable_frozen_86_dropout_0_2_val_loss_0_7288.h5':
+    #     xception_preprocess,
+    # 'xception_fine_tuned_stable_frozen_86_dropout_0_3_val_loss_0_7494.h5':
+    #     xception_preprocess,
     'xception_fine_tuned_stable_frozen_86_dropout_0_4_val_loss_0_7155.h5':
         xception_preprocess,
     'xception_fine_tuned_stable_frozen_86_dropout_0_5_val_loss_0_7520.h5':
@@ -29,7 +29,7 @@ MODELS = {
 }
 
 
-def make_submission(name='stable'):
+def train(name='stable', cross_validate=True):
     data_info = load_organized_data_info(imgs_dim=HEIGHT, name=name)
 
     preds_val = np.empty((data_info['num_val'], 0))
@@ -59,21 +59,23 @@ def make_submission(name='stable'):
 
     lr = LogisticRegression(C=1e10)
 
-    # score = cross_val_scores(
-    #     classifiers=[('lr', lr)],
-    #     X=preds_val,
-    #     y=y_val,
-    #     k=10
-    # )
-    # print(score)
+    if cross_validate:
+        score = cross_val_scores(
+            classifiers=[('lr', lr)],
+            X=preds_val,
+            y=y_val,
+            k=10
+        )
+        print(score)
+    else:
+        lr.fit(preds_val, y_val)
+        y_pred = lr.predict_proba(preds_te)
 
-    lr.fit(preds_val, y_val)
-    y_pred = lr.predict_proba(preds_te)
-    create_submission_file(
-        te_names,
-        y_pred,
-        join(SUBMISSIONS_DIR, 'stacked.csv')
-    )
+        create_submission_file(
+            te_names,
+            y_pred,
+            join(SUBMISSIONS_DIR, 'stacked.csv')
+        )
 
 
 def _make_predictions(model_path, preprocess_func, data_info, dir_id):
