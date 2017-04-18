@@ -8,7 +8,7 @@ from keras.optimizers import Adam
 from keras.regularizers import l2
 
 from data_provider import MODELS_DIR
-
+import fire
 
 def fit(epochs=1000, lr=0.001, dropout=0.5, l2_reg=0.05):
     WEIGHTS_PATH = join(MODELS_DIR, 'resnet50_weights_tf_dim_ordering_tf_kernels_notop.h5')
@@ -38,3 +38,7 @@ def fit(epochs=1000, lr=0.001, dropout=0.5, l2_reg=0.05):
     model.fit(X_train, y_train, callbacks=cb, validation_data=(X_valid, y_valid), epochs=epochs)
 
     print("Finished fitting the model!")
+
+
+if __name__ == '__main__':
+    fire.Fire()
