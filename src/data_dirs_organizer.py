@@ -93,17 +93,32 @@ def _organize_train_dirs(dirs, val_size_fraction, imgs_dim, name, new_dir_tr,
         other_paths = np.hstack((other_paths, dir_paths))
         other_labels = np.hstack((other_labels, dir_labels))
 
+    # use only data from train dir for validation
+    # ind_tr, ind_val = _train_val_split_indices(
+    #     val_size_fraction,
+    #     train_paths,
+    #     train_labels
+    # )
+    # all_train_paths = np.hstack((train_paths[ind_tr], other_paths))
+    # all_train_labels = np.hstack((train_labels[ind_tr], other_labels))
+    # val_paths = train_paths[ind_val]
+    # val_labels = train_labels[ind_val]
+
+    # use all data for validation
     ind_tr, ind_val = _train_val_split_indices(
         val_size_fraction,
         train_paths,
         train_labels
     )
-
-    # use only data from train dir for validation
-    all_train_paths = np.hstack((train_paths[ind_tr], other_paths))
-    all_train_labels = np.hstack((train_labels[ind_tr], other_labels))
-    val_paths = train_paths[ind_val]
-    val_labels = train_labels[ind_val]
+    ind_tr_oth, ind_val_oth = _train_val_split_indices(
+        val_size_fraction,
+        other_paths,
+        other_labels
+    )
+    all_train_paths = np.hstack((train_paths[ind_tr], other_paths[ind_tr_oth]))
+    all_train_labels = np.hstack((train_labels[ind_tr], other_labels[ind_tr_oth]))
+    val_paths = np.hstack((train_paths[ind_val], other_paths[ind_val_oth]))
+    val_labels = np.hstack((train_labels[ind_val], other_labels[ind_val_oth]))
 
     weighted_paths, weighted_labels = _create_duplicated_examples(
         train_paths[ind_tr],
