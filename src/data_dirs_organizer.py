@@ -93,17 +93,29 @@ def _organize_train_dirs(dirs, val_size_fraction, imgs_dim, name, new_dir_tr,
         other_paths = np.hstack((other_paths, dir_paths))
         other_labels = np.hstack((other_labels, dir_labels))
 
+    # use only data from train dir for validation
+    # ind_tr, ind_val = _train_val_split_indices(
+    #     val_size_fraction,
+    #     train_paths,
+    #     train_labels
+    # )
+    # all_train_paths = np.hstack((train_paths[ind_tr], other_paths))
+    # all_train_labels = np.hstack((train_labels[ind_tr], other_labels))
+    # val_paths = train_paths[ind_val]
+    # val_labels = train_labels[ind_val]
+
+    # use all data for validation
+    all_paths = np.hstack((train_paths, other_paths))
+    all_labels = np.hstack((train_labels, other_labels))
     ind_tr, ind_val = _train_val_split_indices(
         val_size_fraction,
-        train_paths,
-        train_labels
+        all_paths,
+        all_labels
     )
-
-    # use only data from train dir for validation
-    all_train_paths = np.hstack((train_paths[ind_tr], other_paths))
-    all_train_labels = np.hstack((train_labels[ind_tr], other_labels))
-    val_paths = train_paths[ind_val]
-    val_labels = train_labels[ind_val]
+    all_train_paths = all_paths[ind_tr]
+    all_train_labels = all_labels[ind_tr]
+    val_paths = all_paths[ind_val]
+    val_labels = all_labels[ind_val]
 
     weighted_paths, weighted_labels = _create_duplicated_examples(
         train_paths[ind_tr],
