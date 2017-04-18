@@ -70,6 +70,7 @@ def train(name='stable', cross_validate=True, k=10):
             k=k
         )
         print(score)
+        print(lr.coef_)
     else:
         lr.fit(preds_val, y_val)
         y_pred = lr.predict_proba(preds_te)
