@@ -8,8 +8,8 @@ from keras.models import load_model
 from keras.preprocessing.image import ImageDataGenerator
 from sklearn.linear_model import LogisticRegression
 
-from data_provider import load_organized_data_info, MODELS_DIR
-from utils import cross_val_scores
+from data_provider import load_organized_data_info, MODELS_DIR, SUBMISSIONS_DIR
+from utils import cross_val_scores, create_submission_file
 from xception_fine_tune import create_embeddings
 
 WIDTH, HEIGHT = 299, 299
@@ -29,11 +29,11 @@ MODELS = {
 }
 
 
-def cross_validate(name='stable'):
+def make_submission(name='stable'):
     data_info = load_organized_data_info(imgs_dim=HEIGHT, name=name)
 
     preds_val = np.empty((data_info['num_val'], 0))
-    # preds_te = np.empty((data_info['num_te'], 0))
+    preds_te = np.empty((data_info['num_te'], 0))
 
     for model_name, preprocess_func in MODELS.items():
         model_path = join(MODELS_DIR, model_name)
@@ -45,26 +45,35 @@ def cross_validate(name='stable'):
             dir_id='val'
         )
 
-        # model_preds_te = _make_predictions(
-        #     model_path=model_path,
-        #     preprocess_func=preprocess_func,
-        #     data_info=data_info,
-        #     dir_id='te'
-        # )
+        model_preds_te = _make_predictions(
+            model_path=model_path,
+            preprocess_func=preprocess_func,
+            data_info=data_info,
+            dir_id='te'
+        )
 
         preds_val = np.hstack((preds_val, model_preds_val))
-        # preds_te = np.hstack((preds_te, model_preds_te))
+        preds_te = np.hstack((preds_te, model_preds_te))
 
     _, _, _, y_val, _, te_names = create_embeddings(name=name)
 
     lr = LogisticRegression(C=1e10)
-    score = cross_val_scores(
-        classifiers=[('lr', lr)],
-        X=preds_val,
-        y=y_val,
-        k=10
+
+    # score = cross_val_scores(
+    #     classifiers=[('lr', lr)],
+    #     X=preds_val,
+    #     y=y_val,
+    #     k=10
+    # )
+    # print(score)
+
+    lr.fit(preds_val, y_val)
+    y_pred = lr.predict_proba(preds_te)
+    create_submission_file(
+        te_names,
+        y_pred,
+        join(SUBMISSIONS_DIR, 'stacked.csv')
     )
-    print(score)
 
 
 def _make_predictions(model_path, preprocess_func, data_info, dir_id):
