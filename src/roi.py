@@ -1,6 +1,6 @@
 import struct
 import numpy as np
-
+from os.path import join
 
 ROI_TYPE_RECT = 1
 
@@ -19,7 +19,7 @@ def write32(f, int32):
 def writefloat(f, b):
     f.write(struct.pack('f', b))
 
-def write_bb(fileobj, bb):
+def write_bb(f, bb):
     """ Save bounding box bb passed in the same format as it is returned from
     ijroi.read_roi into fileobj.
     
@@ -58,6 +58,31 @@ def write_bb(fileobj, bb):
     # we also need fill the file up with 64 zeros
     for i in range(16):
         write32(f, 0)
+
+
+def save_prediction(array, fname):
+    """Write an array of standard bounding box format to a roi file.
+    
+    Parameters
+    ----------
+    array : [x, y, w, h]
+    fname : string
+    
+    """
+    x, y, w, h = array
+    with open(fname, 'wb+') as fhandle:
+        write_bb(fhandle, [[x, y], [x + w, y], [x + w, y + h], [x, y + h]])
+
+
+def save_predictions(img_ids, predictions, output_dir):
+    """Dump predictions to an output dir in roi format.
+    
+    The id positions must correspond with the prediction indices.
+    
+    """
+    for img_id, pred in zip(img_ids, predictions):
+        save_prediction(pred, join(output_dir, '%s.roi' % img_id))
+
 
 def downsize_bb(bb, original_dims, new_dims):
     """ Take bounding box bb as returned from ijroi.read_roi that was created

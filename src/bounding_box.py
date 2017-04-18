@@ -8,26 +8,26 @@ CUDA_VISIBLE_DEVICES=0 python3 src/bounding_box.py train
     --dropout 0.5
     --epochs=10
 """
+import re
 from collections import OrderedDict
 from os import listdir
 from os.path import join, splitext
 
 import fire
-import re
 import ijroi
 import numpy as np
+from data_provider import MODELS_DIR, load_organized_data_info
 from keras.applications import Xception
 from keras.callbacks import ReduceLROnPlateau, ModelCheckpoint, TensorBoard, \
     EarlyStopping
 from keras.layers import Dense, Dropout
-from keras.models import Sequential, Model
+from keras.models import Sequential, Model, load_model
 from keras.preprocessing.image import ImageDataGenerator, load_img, \
     img_to_array
 from keras.regularizers import l2, l1
-
 from xception_fine_tune import HEIGHT, WIDTH
-from data_provider import MODELS_DIR, load_organized_data_info
 from xception_fine_tune import _top_classifier
+import roi
 
 IJ_ROI_DIR = join('data', 'bounding_boxes_299')
 MODEL_FILE = 'localizer_.h5'
@@ -52,7 +52,7 @@ def _get_dict_roi(directory=None):
     return d
 
 
-def _get_dict_all_images(directory=None):
+def _get_dict_all_images(directory=None, truncate_to_id=False):
     """Get all available images witch have an ROI bounding box label.
     
     Returns
@@ -68,7 +68,8 @@ def _get_dict_all_images(directory=None):
             # Because the clened images sometimes contain other information
             # e.g. additional or train, we want to extract only the id, so we
             # match on that.
-            img_id = id_pattern.search(img_id).group(0)
+            if truncate_to_id:
+                img_id = id_pattern.search(img_id).group(0)
             d[img_id] = join(directory or TRAINING_DIR, class_, f)
     return d
 
@@ -159,8 +160,8 @@ def _get_untagged_images():
     return list(img_dict.keys()), X
 
 
-def _get_all_images():
-    img_dict = _get_dict_all_images()
+def _get_all_images(directory=None):
+    img_dict = _get_dict_all_images(directory)
     X = np.zeros((len(img_dict), HEIGHT, WIDTH, 3))
     for idx, img_id in enumerate(img_dict):
         X[idx] = load_img(img_dict[img_id])
@@ -214,10 +215,6 @@ def _regression_head(input_shape, reg='l2', reg_strength=0.0, dropout_p=0.5):
     )
     model.add(dense)
     return model
-
-
-def _prepare_generators():
-    pass
 
 
 def train(model_file, reduce_lr_factor=1e-1, num_freeze_layers=0, epochs=10,
@@ -303,18 +300,20 @@ def resume_training(model_file, name='', num_freeze_layers=0, epochs=10):
     )
 
 
-def predict():
-    model = _cnn()
-    model.load_weights(MODEL_FILE)
-    labels, X = _get_all_images()
+def predict(model_file, image_folder, out_dir=None):
+    labels, X = _get_all_images(image_folder)
+    model = load_model(model_file)
 
-    print(labels[:20])
     predictions = model.predict(X)
 
-    print(predictions[:5])
-    print(predictions.shape)
+    mask = predictions < 0
+    predictions[mask] = 0
+    mask = predictions > WIDTH
+    predictions[mask] = WIDTH
 
-    np.save('predictions.npy', predictions)
+    if out_dir:
+        np.savez(join(out_dir, 'predictions.npz'))
+        roi.save_predictions(labels, predictions, output_dir=out_dir)
 
 
 if __name__ == '__main__':
