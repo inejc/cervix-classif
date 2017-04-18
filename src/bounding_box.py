@@ -177,7 +177,7 @@ def number_tagged():
 def _model_file_name(name, reg, reg_strength, dropout):
     split = MODEL_FILE.split('.')
     split[0] += '%s_%s-%s_dropout-%s_'% (name, reg, reg_strength, dropout)
-    split[0] += 'val_loss-epoch-{epoch:02d}_{val_loss:.2f}'
+    split[0] += 'val_loss-{val_loss:.2f}'
     return join(MODELS_DIR, '.'.join(split))
 
 
