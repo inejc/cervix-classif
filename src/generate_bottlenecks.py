@@ -10,13 +10,11 @@ from keras.utils.np_utils import to_categorical
 from data_provider import load_organized_data_info, MODELS_DIR
 from resnet50 import ResNet50
 
-IMGS_DIR = "299_cleaned_frcnn_cropped"
-
 WEIGHTS_PATH = join(MODELS_DIR, 'resnet50_weights_tf_dim_ordering_tf_kernels_notop.h5')
 BOTTLENECKS_FILE = join(MODELS_DIR, "resnet50_bottlenecks.h5")
 LABELS_FILE = join(MODELS_DIR, "resnet50_labels.h5")
 
-data_info = load_organized_data_info(imgs_dim=IMGS_DIR)
+data_info = load_organized_data_info(imgs_dim=299, name="cropped")
 
 dir_tr, num_tr = data_info['dir_tr'], data_info['num_tr']
 dir_val, num_val = data_info['dir_val'], data_info['num_val']
@@ -67,6 +65,8 @@ test_batches = gen.flow_from_directory(dir_te, model.input_shape[1:3], shuffle=F
 
 start_time = time.time()
 with h5py.File(LABELS_FILE) as hf:
-    hf.create_dataset("train", data=to_categorical(train_batches.classes, train_batches.samples // train_batches.batch_size))
-    hf.create_dataset("valid", data=to_categorical(valid_batches.classes, valid_batches.samples // valid_batches.batch_size))
+    hf.create_dataset("train", data=to_categorical(train_batches.classes,
+                                                   train_batches.samples // train_batches.batch_size))
+    hf.create_dataset("valid", data=to_categorical(valid_batches.classes,
+                                                   valid_batches.samples // valid_batches.batch_size))
 print("--- label dataset %s seconds ---" % (time.time() - start_time))
