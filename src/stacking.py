@@ -10,7 +10,7 @@ from keras.preprocessing.image import ImageDataGenerator
 from data_provider import load_organized_data_info, MODELS_DIR
 
 WIDTH, HEIGHT = 299, 299
-BATCH_SIZE = 256
+BATCH_SIZE = 32
 
 MODELS = {
     'xception_fine_tuned_stable_frozen_86_dropout_0_2_val_loss_0_7288.h5':
