@@ -29,8 +29,8 @@ MODELS = {
 def train(name='stable'):
     data_info = load_organized_data_info(imgs_dim=HEIGHT, name=name)
 
-    preds_val = np.empty((-1, 3 * len(MODELS)))
-    preds_te = np.empty((-1, 3 * len(MODELS)))
+    preds_val = np.empty((0, 3 * len(MODELS)))
+    preds_te = np.empty((0, 3 * len(MODELS)))
 
     for model_name, preprocess_func in MODELS.items():
         model_path = join(MODELS_DIR, model_name)
