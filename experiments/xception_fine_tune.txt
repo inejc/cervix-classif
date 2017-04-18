@@ -119,3 +119,6 @@ Epoch 24 - loss: 0.5539 - val_loss: 0.7662
 
 fine_tune --name 'cropped' --name_ext 'frozen_86_dropout_0_5' --lr 1e-5 --reduce_lr_factor 0.1 --reduce_lr_patience 30 --epochs 30 --batch_size 256 --l2_reg 0 --dropout_p 0.5 --num_freeze_layers 86
 Epoch 26 - loss: 0.4670 - val_loss: 0.7397 (0.68807 public score)
+
+fine_tune --name 'cropped' --name_ext 'frozen_86_dropout_0_5_l2_0_0001' --lr 1e-5 --reduce_lr_factor 0.1 --reduce_lr_patience 50 --epochs 50 --batch_size 256 --l2_reg 0.0001 --dropout_p 0.5 --num_freeze_layers 86 --save_best_only False --loss_stop_val 0.49
+Epoch 27 - loss: 0.4879 - val_loss: 0.8397 (0.69871 public score)
