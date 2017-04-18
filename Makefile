@@ -25,4 +25,4 @@ r:
 	nvidia-docker-compose run $(USER) $(cmd)
 
 cli:
-	@$(MAKE) r cmd="/usr/bin/su -m user -l; cd $UHOME"
+	@$(MAKE) r cmd="su -m user -l; cd $UHOME"
