@@ -1,0 +1,65 @@
+from math import ceil
+from os.path import join
+
+import fire
+import numpy as np
+from keras.models import load_model
+from keras.preprocessing.image import ImageDataGenerator
+from keras.applications.xception import preprocess_input as xception_preprocess
+
+from data_provider import load_organized_data_info, MODELS_DIR
+
+WIDTH, HEIGHT = 299, 299
+BATCH_SIZE = 256
+
+MODELS = {
+    '': xception_preprocess
+}
+
+
+def train(name=''):
+    data_info = load_organized_data_info(imgs_dim=HEIGHT, name=name)
+
+    preds_val, preds_te = np.array([]), np.array([])
+
+    for model_name, preprocess_func in MODELS.items():
+        model_path = join(MODELS_DIR, model_name)
+
+        model_preds_val = _make_predictions(
+            model_path=model_path,
+            preprocess_func=preprocess_func,
+            data_info=data_info,
+            dir_id='val'
+        )
+
+        model_preds_te = _make_predictions(
+            model_path=model_path,
+            preprocess_func=preprocess_func,
+            data_info=data_info,
+            dir_id='te'
+        )
+
+        preds_val = np.hstack((preds_val, model_preds_val))
+        preds_te = np.hstack((preds_te, model_preds_te))
+
+
+def _make_predictions(model_path, preprocess_func, data_info, dir_id):
+    model = load_model(model_path)
+
+    datagen = ImageDataGenerator(preprocessing_function=preprocess_func)
+    datagen = datagen.flow_from_directory(
+        directory=data_info['dir_' + dir_id],
+        target_size=(HEIGHT, WIDTH),
+        class_mode=None,
+        batch_size=BATCH_SIZE,
+        shuffle=False
+    )
+
+    return model.predict_generator(
+        generator=datagen,
+        steps=ceil(data_info['num_' + dir_id] / BATCH_SIZE)
+    )
+
+
+if __name__ == '__main__':
+    fire.Fire()
