@@ -6,5 +6,5 @@ services:
         ports: 
             - "22"
         volumes:
-            - ~:/home/user
+            - ~:/home/user/remote
             - /mnt/nfs/kaggle/cervix/data:/home/user/cervix-classif/data
