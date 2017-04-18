@@ -70,7 +70,6 @@ def train(name='stable', cross_validate=True, k=10):
             k=k
         )
         print(score)
-        print(lr.coef_)
     else:
         lr.fit(preds_val, y_val)
         y_pred = lr.predict_proba(preds_te)
@@ -80,6 +79,7 @@ def train(name='stable', cross_validate=True, k=10):
             y_pred,
             join(SUBMISSIONS_DIR, 'stacked.csv')
         )
+        print(lr.coef_)
 
 
 def _make_predictions(model_path, preprocess_func, data_info, dir_id):
