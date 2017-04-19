@@ -6,6 +6,8 @@ import numpy as np
 from keras.applications.xception import preprocess_input as xception_preprocess
 from keras.models import load_model
 from keras.preprocessing.image import ImageDataGenerator
+from sklearn.dummy import DummyClassifier
+from sklearn.ensemble import RandomForestClassifier, GradientBoostingClassifier
 from sklearn.linear_model import LogisticRegression
 
 from data_provider import load_organized_data_info, MODELS_DIR, SUBMISSIONS_DIR
@@ -60,17 +62,23 @@ def train(name='stable', cross_validate=True, k=10):
 
     _, _, _, y_val, _, te_names = create_embeddings(name=name)
 
-    lr = LogisticRegression(C=1e10)
-
     if cross_validate:
-        score = cross_val_scores(
-            classifiers=[('lr', lr)],
+        clfs = [
+            ('stratified', DummyClassifier()),
+            ('lr', LogisticRegression(C=1e10)),
+            ('rf', RandomForestClassifier(n_estimators=100, n_jobs=-1)),
+            ('gb', GradientBoostingClassifier())
+        ]
+
+        scores = cross_val_scores(
+            classifiers=clfs,
             X=preds_val,
             y=y_val,
             k=k
         )
-        print(score)
+        print(scores)
     else:
+        lr = LogisticRegression(C=1e10)
         lr.fit(preds_val, y_val)
         y_pred = lr.predict_proba(preds_te)
 

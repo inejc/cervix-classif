@@ -140,14 +140,14 @@ Epoch 24 - loss: 0.4990 - val_loss: 0.7520 (0.69868 public score)
 fine_tune --name 'stable' --name_ext 'frozen_86_dropout_0_6' --lr 1e-5 --reduce_lr_factor 0.1 --reduce_lr_patience 50 --epochs 50 --batch_size 256 --l2_reg 0 --dropout_p 0.6 --num_freeze_layers 86
 Epoch 27- loss: 0.4783 - val_loss: 0.7386
 
-a
-fine_tune --name 'stable' --name_ext 'frozen_96_dropout_0_3' --lr 1e-5 --reduce_lr_factor 0.1 --reduce_lr_patience 50 --epochs 50 --batch_size 256 --l2_reg 0 --dropout_p 0.3 --num_freeze_layers 96
+fine_tune --name 'stable' --name_ext 'frozen_96_dropout_0_3' --lr 1e-5 --reduce_lr_factor 0.1 --reduce_lr_patience 30 --epochs 30 --batch_size 256 --l2_reg 0 --dropout_p 0.3 --num_freeze_layers 96
+Epoch 27 - loss: 0.3967 - val_loss: 0.7326
 
-b
-fine_tune --name 'stable' --name_ext 'frozen_96_dropout_0_4' --lr 1e-5 --reduce_lr_factor 0.1 --reduce_lr_patience 50 --epochs 50 --batch_size 256 --l2_reg 0 --dropout_p 0.4 --num_freeze_layers 96
+fine_tune --name 'stable' --name_ext 'frozen_96_dropout_0_4' --lr 1e-5 --reduce_lr_factor 0.1 --reduce_lr_patience 30 --epochs 30 --batch_size 256 --l2_reg 0 --dropout_p 0.4 --num_freeze_layers 96
+Epoch 29- loss: 0.3769 - val_loss: 0.7216
 
-c
-fine_tune --name 'stable' --name_ext 'frozen_96_dropout_0_5' --lr 1e-5 --reduce_lr_factor 0.1 --reduce_lr_patience 50 --epochs 50 --batch_size 256 --l2_reg 0 --dropout_p 0.5 --num_freeze_layers 96
+fine_tune --name 'stable' --name_ext 'frozen_96_dropout_0_5' --lr 1e-5 --reduce_lr_factor 0.1 --reduce_lr_patience 30 --epochs 30 --batch_size 256 --l2_reg 0 --dropout_p 0.5 --num_freeze_layers 96
+Epoch 15 - loss: 0.6435 - val_loss: 0.7669
 
-d
-fine_tune --name 'stable' --name_ext 'frozen_96_dropout_0_6' --lr 1e-5 --reduce_lr_factor 0.1 --reduce_lr_patience 50 --epochs 50 --batch_size 256 --l2_reg 0 --dropout_p 0.6 --num_freeze_layers 96
+fine_tune --name 'stable' --name_ext 'frozen_96_dropout_0_6' --lr 1e-5 --reduce_lr_factor 0.1 --reduce_lr_patience 30 --epochs 30 --batch_size 256 --l2_reg 0 --dropout_p 0.6 --num_freeze_layers 96
+Epoch 26 - loss: 0.4987 - val_loss: 0.7383
