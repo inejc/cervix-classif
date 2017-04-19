@@ -4,6 +4,7 @@ from os.path import join
 import fire
 import numpy as np
 from keras.applications.xception import preprocess_input as xception_preprocess
+from keras.applications.inception_v3 import preprocess_input as inception_preprocess
 from keras.models import load_model
 from keras.preprocessing.image import ImageDataGenerator
 from sklearn.dummy import DummyClassifier
@@ -21,22 +22,18 @@ BATCH_SIZE = 32
 MODELS = {
     'xception_fine_tuned_stable_frozen_86_dropout_0_2_val_loss_0_7288.h5':
         xception_preprocess,
-    # 'xception_fine_tuned_stable_frozen_86_dropout_0_3_val_loss_0_7494.h5':
-    #     xception_preprocess,
-    'xception_fine_tuned_stable_frozen_86_dropout_0_4_val_loss_0_7155.h5':
-        xception_preprocess,
     'xception_fine_tuned_stable_frozen_86_dropout_0_5_val_loss_0_7520.h5':
         xception_preprocess,
     'xception_fine_tuned_stable_frozen_86_dropout_0_6_val_loss_0_7386.h5':
         xception_preprocess,
-    # 'xception_fine_tuned_stable_frozen_96_dropout_0_3_val_loss_0_7326.h5':
-    #     xception_preprocess,
-    # 'xception_fine_tuned_stable_frozen_96_dropout_0_4_val_loss_0_7216.h5':
-    #     xception_preprocess,
-    # 'xception_fine_tuned_stable_frozen_96_dropout_0_5_val_loss_0_7669.h5':
-    #     xception_preprocess,
     'xception_fine_tuned_stable_frozen_96_dropout_0_6_val_loss_0_7383.h5':
         xception_preprocess,
+    'inception_fine_tuned_stable_frozen_280_dropout_0_5_val_loss_0_7203.h5':
+        inception_preprocess,
+    'inception_fine_tuned_stable_frozen_260_dropout_0_5_val_loss_0_7440.h5':
+        inception_preprocess,
+    'inception_fine_tuned_stable_frozen_250_dropout_0_5_val_loss_0_7473.h5':
+        inception_preprocess,
 }
 
 
