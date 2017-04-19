@@ -29,6 +29,14 @@ MODELS = {
         xception_preprocess,
     'xception_fine_tuned_stable_frozen_86_dropout_0_6_val_loss_0_7386.h5':
         xception_preprocess,
+    'xception_fine_tuned_stable_frozen_96_dropout_0_3_val_loss_0_7326.h5':
+        xception_preprocess,
+    'xception_fine_tuned_stable_frozen_96_dropout_0_4_val_loss_0_7216.h5':
+        xception_preprocess,
+    'xception_fine_tuned_stable_frozen_96_dropout_0_5_val_loss_0_7669.h5':
+        xception_preprocess,
+    'xception_fine_tuned_stable_frozen_96_dropout_0_6_val_loss_0_7383.h5':
+        xception_preprocess,
 }
 
 
