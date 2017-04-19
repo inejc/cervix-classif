@@ -5,10 +5,10 @@ import h5py
 from data_provider import MODELS_DIR
 
 MODELS = [
-    'xception_fine_tuned_stable_frozen_96_dropout_0_3_val_loss_0_7326.h5',
-    'xception_fine_tuned_stable_frozen_96_dropout_0_4_val_loss_0_7216.h5',
-    'xception_fine_tuned_stable_frozen_96_dropout_0_5_val_loss_0_7669.h5',
-    'xception_fine_tuned_stable_frozen_96_dropout_0_6_val_loss_0_7383.h5',
+    'inception_fine_tuned_stable_frozen_250_dropout_0_5_val_loss_0_7473.h5',
+    'inception_fine_tuned_stable_frozen_260_dropout_0_5_val_loss_0_7440.h5',
+    'inception_fine_tuned_stable_frozen_270_dropout_0_5_val_loss_0_7166.h5',
+    'inception_fine_tuned_stable_frozen_280_dropout_0_5_val_loss_0_7203.h5',
 ]
 
 for model in MODELS:
