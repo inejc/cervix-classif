@@ -1,16 +1,17 @@
 import cv2
 import numpy as np
 
+from keras_frcnn import config
+
+C = config.Config()
+
 
 def get_data(input_path):
     found_bg = False
     all_imgs = {}
 
     classes_count = {}
-
     class_mapping = {}
-
-    visualise = True
 
     with open(input_path, 'r') as f:
 
@@ -41,7 +42,7 @@ def get_data(input_path):
                 all_imgs[filename]['width'] = cols
                 all_imgs[filename]['height'] = rows
                 all_imgs[filename]['bboxes'] = []
-                if np.random.randint(0, 6) > 0:
+                if np.random.randint(0, 100) > C.validation_percent * 100:
                     all_imgs[filename]['imageset'] = 'trainval'
                 else:
                     all_imgs[filename]['imageset'] = 'test'
@@ -56,7 +57,8 @@ def get_data(input_path):
         # make sure the bg class is last in the list
         if found_bg:
             if class_mapping['bg'] != len(class_mapping) - 1:
-                key_to_switch = [key for key in class_mapping.keys() if class_mapping[key] == len(class_mapping) - 1][0]
+                key_to_switch = [key for key in class_mapping.keys() if
+                                 class_mapping[key] == len(class_mapping) - 1][0]
                 val_to_switch = class_mapping['bg']
                 class_mapping['bg'] = len(class_mapping) - 1
                 class_mapping[key_to_switch] = val_to_switch

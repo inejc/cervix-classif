@@ -14,6 +14,8 @@ class Config:
         self.random_rotate = True
         self.random_rotate_scale = 60.
 
+        self.validation_percent = 0.15
+
         # anchor box scales
         # self.anchor_box_scales = [128, 256, 512]
         self.anchor_box_scales = [50, 100, 150, 200, 299]
@@ -54,4 +56,5 @@ class Config:
             self.base_net_weights = './../models/resnet50_weights_th_dim_ordering_th_kernels_notop.h5'
         else:
             self.base_net_weights = './../models/resnet50_weights_tf_dim_ordering_tf_kernels_notop.h5'
-        self.model_path = './../models/model_frcnn.hdf5'
+        self.model_name = ""
+        self.model_path = './../models/model_frcnn_' + self.model_name + '.hdf5'
