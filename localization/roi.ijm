@@ -1,31 +1,42 @@
-function load_roi() {
+// Bounding box directory where all the bounding boxes will be placed. Make
+// sure to remove trailing slash.
+var BOUNDING_BOX_DIR = "bounding_boxes";
+
+function get_roi_path_keep_dir() {
+  // Keep the directory structure when saving ROI files, but place them into
+  // the specified bounding box directory.
   name =  getInfo("image.filename");
   name = replace(name, ".jpg", ".roi");
   path = getInfo("image.directory");
-  // path_arr = split(path, "/");
-  // roi_path = path + name;
-  roi_path = "/home/pavlin/kaggle/bounding_boxes/" + name;
+  path = replace(path, "data", "data/" + BOUNDING_BOX_DIR);
+  return path + name;
+}
+
+function get_roi_path() {
+  // Place all the ROI files into a single directory.
+  name =  getInfo("image.filename");
+  name = replace(name, ".jpg", ".roi");
+  path = getInfo("image.directory");
+  path = replace(path, "data/.*", "data/" + BOUNDING_BOX_DIR + "/");
+  return path + name;
+}
+
+function load_roi() {
+  roi_path = get_roi_path();
 
   // see if it can be opened
   if (File.exists(roi_path)) {
     open(roi_path);
   } else {
-    // print("There is no roi");
     run("Select None");
   }
 }
 
 function save_roi_if_exists() {
-  name = getInfo("image.filename");
-  name = replace(name, ".jpg", ".roi");
-  path = getInfo("image.directory");
-  // roi_path = path + name;
-  roi_path = "/home/pavlin/kaggle/bounding_boxes/" + name;
+  roi_path = get_roi_path();
+
   if (selectionType() >= 0) {
-    // print("Saving to  " + roi_path);
     saveAs("Selection", roi_path);
-  } else {
-    // print("No roi to save");
   }
 }
 
