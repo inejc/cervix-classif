@@ -24,6 +24,7 @@ sys.setrecursionlimit(40000)
 
 C = config.Config()
 roi_file_path = "./../data/roi/roi_bbox.txt"
+classes_json = './../data/roi/classes.json'
 
 
 def train(name, epochs=500, batch_size=32, lr=0.0001, decay=0.001):
@@ -35,8 +36,9 @@ def train(name, epochs=500, batch_size=32, lr=0.0001, decay=0.001):
         classes_count['bg'] = 0
         class_mapping['bg'] = len(class_mapping)
 
-    with open('./../data/roi/classes.json', 'w') as class_data_json:
-        json.dump(class_mapping, class_data_json)
+    if not os.path.isfile(classes_json):
+        with open(classes_json, 'w') as class_data_json:
+            json.dump(class_mapping, class_data_json)
 
     print('Num classes (including bg) = {}'.format(len(classes_count)))
     random.shuffle(all_imgs)
