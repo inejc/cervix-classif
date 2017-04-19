@@ -172,3 +172,12 @@ def rpn_to_roi(rpn_layer, regr_layer, C, dim_ordering, use_regr=True):
     all_boxes = np.array(all_boxes)
     all_probs = np.array(all_probs)
     return non_max_suppression_fast(all_boxes, all_probs, 0.7)[0]
+
+
+def resize_bounding_box(width_ratio, height_ratio, coordinates):
+    """coordinates: (x1, y1, x2, y2) """
+    x1 = max(0, coordinates[0] * width_ratio)
+    y1 = max(0, coordinates[1] * height_ratio)
+    x2 = max(0, coordinates[2] * width_ratio)
+    y2 = max(0, coordinates[3] * height_ratio)
+    return int(x1), int(y1), int(x2), int(y2)

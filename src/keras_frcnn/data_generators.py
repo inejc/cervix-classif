@@ -61,6 +61,7 @@ def iou(a, b):
     return float(area_i) / float(area_u)
 
 
+# TODO TIM: try square
 def get_new_img_size(width, height, img_min_side=600):
     if width <= height:
         f = float(img_min_side) / width
@@ -82,22 +83,12 @@ class SampleSelector:
         self.curr_class = next(self.class_cycle)
 
     def skip_sample_for_balanced_class(self, img_data):
-
-        class_in_img = False
-
         for bbox in img_data['bboxes']:
-
             cls_name = bbox['class']
-
             if cls_name == self.curr_class:
-                class_in_img = True
                 self.curr_class = next(self.class_cycle)
-                break
-
-        if class_in_img:
-            return False
-        else:
-            return True
+                return True
+        return False
 
 
 def calcY(C, class_mapping, img_data, width, height, resized_width, resized_height):
@@ -380,14 +371,8 @@ def threadsafe_generator(f):
 
 # @threadsafe_generator
 def get_anchor_gt(all_img_data, class_mapping, class_count, C, backend, mode='train'):
-    downscale = float(C.rpn_stride)
 
     all_img_data = sorted(all_img_data, key=lambda x: x["filepath"])
-
-    anchor_sizes = C.anchor_box_scales
-    anchor_ratios = C.anchor_box_ratios
-
-    num_anchors = len(anchor_sizes) * len(anchor_ratios)
 
     sample_selector = SampleSelector(class_count)
 
@@ -417,17 +402,16 @@ def get_anchor_gt(all_img_data, class_mapping, class_count, C, backend, mode='tr
                 # get image dimensions for resizing
                 (resized_width, resized_height) = get_new_img_size(width, height, C.im_size)
 
-                # resize the image so that smalles side is length = 600px
+                # resize the image so that smalles side is length = C.im_size
                 x_img = cv2.resize(x_img, (resized_width, resized_height), interpolation=cv2.INTER_CUBIC)
 
-                # calculate the output map size based on the network architecture
-                (output_width, output_height) = get_img_output_length(resized_width, resized_height)
                 try:
                     x_rois, y_rpn_cls, y_rpn_regr, y_class_num, y_class_regr = calcY(C, class_mapping, img_data_aug,
                                                                                      width, height, resized_width,
                                                                                      resized_height)
                 except:
                     continue
+
                 # Zero-center by mean pixel
                 x_img = x_img.astype(np.float32)
                 x_img[:, :, 0] -= C.mean_pixel[0]  # used to be 103.939

@@ -7,6 +7,7 @@ import numpy as np
 from keras_frcnn.config import Config
 from keras_frcnn.data_augment import augment
 from keras_frcnn.data_generators import get_new_img_size
+from keras_frcnn.roi_helpers import resize_bounding_box
 from keras_frcnn.simple_parser import get_data
 
 train_dir = "./../data/train_cleaned/"
@@ -97,14 +98,6 @@ def img_name(roi_file_path):
     image_name = roi_file_path.split("/")[-1].replace(".roi", ".jpg")
     return glob.glob(os.path.join(train_dir, "**/", image_name))[0]
 
-
-def resize_bounding_box(width_ratio, height_ratio, coordinates):
-    """coordinates: (x1, y1, x2, y2) """
-    x1 = max(0, coordinates[0] * width_ratio)
-    y1 = max(0, coordinates[1] * height_ratio)
-    x2 = max(0, coordinates[2] * width_ratio)
-    y2 = max(0, coordinates[3] * height_ratio)
-    return int(x1), int(y1), int(x2), int(y2)
 
 
 def get_average_roi_size():

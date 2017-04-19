@@ -8,9 +8,9 @@ class Config:
     def __init__(self):
         # setting for roi augmentation
         self.use_horizontal_flips = True
-        self.use_vertical_flips = False
+        self.use_vertical_flips = True
         self.scale_augment = True
-        self.scale_bounds = [0.]
+        self.scale_percent = 1.15  # max zoom in for 10%
         self.random_rotate = True
         self.random_rotate_scale = 60.
 
@@ -25,7 +25,7 @@ class Config:
         self.im_size = 299
 
         # number of ROIs at once
-        self.num_rois = 2
+        self.num_rois = 1
 
         # stride at the RPN (this depends on the network configuration)
         self.rpn_stride = 16

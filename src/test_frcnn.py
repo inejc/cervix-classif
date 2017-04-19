@@ -12,8 +12,9 @@ from keras.layers import Input
 from keras.models import Model
 from keras_frcnn import config
 from keras_frcnn import roi_helpers
-from parse_roi import resize_bounding_box
 from tqdm import tqdm
+
+from keras_frcnn.roi_helpers import resize_bounding_box
 
 sys.setrecursionlimit(40000)
 C = config.Config()
