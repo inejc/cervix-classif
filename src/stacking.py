@@ -9,6 +9,7 @@ from keras.preprocessing.image import ImageDataGenerator
 from sklearn.dummy import DummyClassifier
 from sklearn.ensemble import RandomForestClassifier, GradientBoostingClassifier
 from sklearn.linear_model import LogisticRegression
+from sklearn.svm import SVC
 
 from data_provider import load_organized_data_info, MODELS_DIR, SUBMISSIONS_DIR
 from utils import cross_val_scores, create_submission_file
@@ -66,8 +67,10 @@ def train(name='stable', cross_validate=True, k=10):
         clfs = [
             ('stratified', DummyClassifier()),
             ('lr', LogisticRegression(C=1e10)),
-            ('rf', RandomForestClassifier(n_estimators=100, n_jobs=-1)),
-            ('gb', GradientBoostingClassifier())
+            ('lr_l2', LogisticRegression(C=1)),
+            ('svm', SVC(probability=True)),
+            ('rf', RandomForestClassifier(n_estimators=500, n_jobs=-1)),
+            ('gb', GradientBoostingClassifier(n_estimators=500))
         ]
 
         scores = cross_val_scores(
@@ -76,6 +79,7 @@ def train(name='stable', cross_validate=True, k=10):
             y=y_val,
             k=k
         )
+
         print(scores)
     else:
         lr = LogisticRegression(C=1e10)
@@ -87,6 +91,7 @@ def train(name='stable', cross_validate=True, k=10):
             y_pred,
             join(SUBMISSIONS_DIR, 'stacked.csv')
         )
+
         print(lr.coef_)
 
 
