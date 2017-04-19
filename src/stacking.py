@@ -75,7 +75,7 @@ def train(name='stable', cross_validate=True, k=10):
         clfs = [
             ('stratified', DummyClassifier()),
             ('lr', LogisticRegression(C=1e10)),
-            ('lr_l2', LogisticRegression(C=1)),
+            ('lr_l2', LogisticRegression(C=2)),
             ('svm', SVC(probability=True)),
             ('rf', RandomForestClassifier(n_estimators=500, n_jobs=-1)),
             ('gb', GradientBoostingClassifier(n_estimators=500))
