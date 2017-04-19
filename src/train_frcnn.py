@@ -10,11 +10,15 @@ from keras.callbacks import ReduceLROnPlateau
 from keras.layers import Input
 from keras.models import Model
 from keras.optimizers import Adam
+
 from keras_frcnn import config
 from keras_frcnn import data_generators
 from keras_frcnn import losses
 from keras_frcnn import resnet as nn
 from keras_frcnn.simple_parser import get_data
+
+import fire
+
 
 sys.setrecursionlimit(40000)
 
@@ -98,6 +102,4 @@ def train(name, epochs=500, batch_size=32, lr=0.0001, decay=0.001):
 
 
 if __name__ == '__main__':
-    import fire
-
     fire.Fire()
