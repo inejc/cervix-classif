@@ -82,7 +82,6 @@ def create_embeddings(name):
         )
 
     model = InceptionV3(weights='imagenet', include_top=False, pooling='avg')
-    print(len(model.layers))
 
     def embed(dir_, num, data_is_labeled):
         X = model.predict_generator(
@@ -222,7 +221,7 @@ def fine_tune(name, name_ext, lr=1e-4, reduce_lr_factor=0.1,
     model = Model(inputs=model.input, outputs=top_classifier(model.output))
     model.compile(Adam(lr=lr), loss='categorical_crossentropy')
 
-    # model has 134 layers
+    # model has 313 layers
     for layer in model.layers[:num_freeze_layers]:
         layer.trainable = False
 
