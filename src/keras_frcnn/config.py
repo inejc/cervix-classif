@@ -8,8 +8,8 @@ class Config:
     def __init__(self):
         # setting for roi augmentation
         self.use_horizontal_flips = True
-        self.use_vertical_flips = True
-        self.scale_augment = True
+        self.use_vertical_flips = False
+        self.scale_augment = False
         self.scale_percent = 1.15  # max zoom in for 10%
         self.random_rotate = True
         self.random_rotate_scale = 60.
@@ -18,10 +18,10 @@ class Config:
 
         # anchor box scales
         # self.anchor_box_scales = [128, 256, 512]
-        self.anchor_box_scales = [50, 100, 150, 200, 299]
+        self.anchor_box_scales = [50, 75, 100, 125, 150, 175, 200, 225, 250 299]
 
         # anchor box ratios
-        self.anchor_box_ratios = [[1, 1], [1, 2], [2, 1]]
+        self.anchor_box_ratios = [[1, 1], [1, 2], [2, 1], [2, 3], [3, 2], [3, 4], [4, 3]]
 
         # size to resize the smallest side of the image
         self.im_size = 299
