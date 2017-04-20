@@ -7,7 +7,7 @@ from data_provider import SUBMISSIONS_DIR
 from utils import read_lines, create_submission_file
 
 W_SUBMISSIONS = {
-    'stacked_0_64577.csv': 1,
+    'stacked_0_60967.csv': 1,
     'old/xception_fine_tuned_cropped_0_68807.csv': 1,
     'old/xception_fine_tuned_cropped_0_69871.csv': 1,
     'old/xception_fine_tuned_cleaned_0_70487.csv': 1,
