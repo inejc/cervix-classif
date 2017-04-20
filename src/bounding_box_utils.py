@@ -1,6 +1,7 @@
-from collections import OrderedDict
+from collections import OrderedDict, Counter
 from os import listdir
-from os.path import join, splitext
+from os.path import join, splitext, isdir
+from pprint import pprint
 
 import fire
 import ijroi
@@ -10,7 +11,9 @@ from keras.preprocessing.image import load_img, img_to_array
 
 CLASSES = ['Type_1', 'Type_2', 'Type_3']
 
-HEIGHT, WIDTH = 299, 299
+# Since the large majority of the images have aspect ratio 4:3, we will resize
+# them accordingly
+HEIGHT, WIDTH = 400, 300
 
 
 def _get_dict_roi(directory):
@@ -115,6 +118,35 @@ def resize_roi_to_original(image_dir, roi_dir, output_dir, initial_size):
 
         new_file = join(output_dir, img_dict[img_id].split('/')[-2], '%s.roi' % img_id)
         roi.save_prediction(bounding_box, new_file)
+
+
+def image_info(image_dir):
+    sizes, aspect_ratios = [], []
+    for f in listdir(image_dir):
+        try:
+            img = load_img(join(image_dir, f))
+            sizes.append(img.size)
+            aspect_ratios.append(img.width / img.height)
+        except:
+            print('Could not open `%s`' % join(image_dir, f))
+    for class_ in CLASSES:
+        if not isdir(join(image_dir, class_)):
+            continue
+        for f in listdir(join(image_dir, class_)):
+            try:
+                img = load_img(join(image_dir, class_, f))
+                sizes.append(img.size)
+                aspect_ratios.append(img.width / img.height)
+            except:
+                print('Could not open `%s`' % join(image_dir, class_, f))
+
+    sizes = Counter(sizes)
+    aspect_ratios = Counter(aspect_ratios)
+
+    print('Resolutions:')
+    pprint(sizes)
+    print('Aspect ratios:')
+    pprint(aspect_ratios)
 
 
 if __name__ == '__main__':
