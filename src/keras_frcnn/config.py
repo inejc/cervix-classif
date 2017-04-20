@@ -59,6 +59,6 @@ class Config:
             self.model_name = ""
         self.model_path = './../models/model_frcnn.hdf5'
 
-    def model_name(self, name):
+    def set_model_name(self, name):
         self.model_name = name
         self.model_path = './../models/model_frcnn_' + self.model_name + '.hdf5'
