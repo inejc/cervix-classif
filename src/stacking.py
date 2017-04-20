@@ -8,11 +8,12 @@ from keras.applications.inception_v3 import \
 from keras.applications.xception import preprocess_input as xception_preprocess
 from keras.models import load_model
 from keras.preprocessing.image import ImageDataGenerator
-from sklearn.dummy import DummyClassifier
+from numpy.random import uniform
 from sklearn.linear_model import LogisticRegression
+from sklearn.model_selection import RandomizedSearchCV
 
 from data_provider import load_organized_data_info, MODELS_DIR, SUBMISSIONS_DIR
-from utils import cross_val_scores, create_submission_file
+from utils import create_submission_file
 from xception_fine_tune import create_embeddings
 
 WIDTH, HEIGHT = 299, 299
@@ -27,10 +28,6 @@ MODELS = {
         xception_preprocess,
     'xception_fine_tuned_stable_frozen_96_dropout_0_6_val_loss_0_7383.h5':
         xception_preprocess,
-    'xception_fine_tuned_stable_frozen_66_dropout_0_5_val_loss_0_7719.h5':
-        xception_preprocess,
-    'xception_fine_tuned_stable_frozen_106_dropout_0_5_val_loss_0_7550.h5':
-        xception_preprocess,
     'inception_fine_tuned_stable_frozen_280_dropout_0_5_val_loss_0_7203.h5':
         inception_preprocess,
     'inception_fine_tuned_stable_frozen_260_dropout_0_5_val_loss_0_7440.h5':
@@ -40,7 +37,7 @@ MODELS = {
 }
 
 
-def train(name='stable', cross_validate=True, k=10):
+def train(name='stable', cross_validate=True, num_search_iter=100):
     data_info = load_organized_data_info(imgs_dim=HEIGHT, name=name)
 
     preds_val = np.empty((data_info['num_val'], 0))
@@ -72,20 +69,17 @@ def train(name='stable', cross_validate=True, k=10):
     _, _, _, y_val, _, te_names = create_embeddings(name=name)
 
     if cross_validate:
-        clfs = [
-            ('stratified', DummyClassifier()),
-            ('lr', LogisticRegression(C=1e10)),
-            ('lr_l2', LogisticRegression(C=2)),
-        ]
-
-        scores = cross_val_scores(
-            classifiers=clfs,
-            X=preds_val,
-            y=y_val,
-            k=k
+        l2_distribution = {'C': uniform(1e-3, 1e4)}
+        random_search = RandomizedSearchCV(
+            estimator=LogisticRegression(),
+            param_distributions=l2_distribution,
+            n_iter=num_search_iter,
+            n_jobs=-1,
+            cv=10,
         )
-
-        print(scores)
+        print("Best random search score and params:")
+        print(random_search.best_score_)
+        print(random_search.best_params_)
     else:
         lr = LogisticRegression(C=1e10)
         lr.fit(preds_val, y_val)
