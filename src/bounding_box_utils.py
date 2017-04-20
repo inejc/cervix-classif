@@ -6,7 +6,8 @@ import numpy as np
 import ijroi
 import fire
 import roi
-from keras.preprocessing.image import load_img
+from PIL.ImageOps import fit
+from keras.preprocessing.image import load_img, img_to_array
 
 CLASSES = ['Type_1', 'Type_2', 'Type_3']
 
@@ -53,11 +54,23 @@ def resize_roi_to_original(image_dir, roi_dir, output_dir, initial_size):
 
     for img_id in roi_dict:
         img = load_img(img_dict[img_id])
+
         bounding_box = _convert_from_roi(roi_dict[img_id]).astype(np.float64)
         bounding_box /= initial_size
-        bounding_box[[0, 2]] *= img.height
-        bounding_box[[1, 3]] *= img.width
+
+        img_size = np.array(img.size)
+        sq_img_size = np.array([img_size.min(), img_size.min()])
+
+        # Calculate the amount of padding needed on each size of the new
+        # bounding box
+        img_padding = (img_size - sq_img_size) / 2
+        img_padding = np.hstack((img_padding[::-1], [0, 0]))
+
+        bounding_box *= sq_img_size[0]
         bounding_box = bounding_box.astype(np.int32)
+
+        # Add the padding to the bounding box
+        bounding_box = bounding_box + img_padding
 
         new_file = join(output_dir, img_dict[img_id].split('/')[-2], '%s.roi' % img_id)
         roi.save_prediction(bounding_box, new_file)
