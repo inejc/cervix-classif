@@ -3,14 +3,13 @@ from os.path import join
 
 import fire
 import numpy as np
+from keras.applications.inception_v3 import \
+    preprocess_input as inception_preprocess
 from keras.applications.xception import preprocess_input as xception_preprocess
-from keras.applications.inception_v3 import preprocess_input as inception_preprocess
 from keras.models import load_model
 from keras.preprocessing.image import ImageDataGenerator
 from sklearn.dummy import DummyClassifier
-from sklearn.ensemble import RandomForestClassifier, GradientBoostingClassifier
 from sklearn.linear_model import LogisticRegression
-from sklearn.svm import SVC
 
 from data_provider import load_organized_data_info, MODELS_DIR, SUBMISSIONS_DIR
 from utils import cross_val_scores, create_submission_file
