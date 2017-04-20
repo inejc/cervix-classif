@@ -28,6 +28,10 @@ MODELS = {
         xception_preprocess,
     'xception_fine_tuned_stable_frozen_96_dropout_0_6_val_loss_0_7383.h5':
         xception_preprocess,
+    'xception_fine_tuned_stable_frozen_66_dropout_0_5_val_loss_0_7719.h5':
+        xception_preprocess,
+    'xception_fine_tuned_stable_frozen_106_dropout_0_5_val_loss_0_7550.h5':
+        xception_preprocess,
     'inception_fine_tuned_stable_frozen_280_dropout_0_5_val_loss_0_7203.h5':
         inception_preprocess,
     'inception_fine_tuned_stable_frozen_260_dropout_0_5_val_loss_0_7440.h5':
@@ -73,9 +77,6 @@ def train(name='stable', cross_validate=True, k=10):
             ('stratified', DummyClassifier()),
             ('lr', LogisticRegression(C=1e10)),
             ('lr_l2', LogisticRegression(C=2)),
-            ('svm', SVC(probability=True)),
-            ('rf', RandomForestClassifier(n_estimators=500, n_jobs=-1)),
-            ('gb', GradientBoostingClassifier(n_estimators=500))
         ]
 
         scores = cross_val_scores(
