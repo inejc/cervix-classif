@@ -30,7 +30,7 @@ import fire
 import numpy as np
 from keras.applications.resnet50 import ResNet50, preprocess_input
 from keras.callbacks import ModelCheckpoint, ReduceLROnPlateau, TensorBoard
-from keras.layers import Dense, Dropout, Input
+from keras.layers import Dense, Dropout
 from keras.models import Model, Sequential
 from keras.optimizers import Adam
 from keras.preprocessing.image import ImageDataGenerator
@@ -69,7 +69,7 @@ def create_embeddings(name):
             d['te_names']
 
     data_info = load_organized_data_info(imgs_dim=HEIGHT, name=name)
-    datagen = ImageDataGenerator(preprocessing_function=preprocess_input)
+    datagen = ImageDataGenerator(preprocessing_function=preprocess_single_input)
     batch_size = 32
 
     def dir_datagen(dir_):
@@ -85,7 +85,7 @@ def create_embeddings(name):
         weights='imagenet',
         include_top=False,
         pooling='avg',
-        input_tensor=Input(shape=(HEIGHT, WIDTH, 3))
+        input_shape=(HEIGHT, WIDTH, 3)
     )
 
     def embed(dir_, num, data_is_labeled):
@@ -188,7 +188,7 @@ def fine_tune(name, name_ext, lr=1e-4, reduce_lr_factor=0.1,
 
     data_info = load_organized_data_info(imgs_dim=HEIGHT, name=name)
     tr_datagen = ImageDataGenerator(
-        preprocessing_function=preprocess_input,
+        preprocessing_function=preprocess_single_input,
         rotation_range=180,
         vertical_flip=True,
         horizontal_flip=True,
@@ -198,7 +198,9 @@ def fine_tune(name, name_ext, lr=1e-4, reduce_lr_factor=0.1,
         # shear_range=0.3,
         # fill_mode='reflect'
     )
-    val_datagen = ImageDataGenerator(preprocessing_function=preprocess_input)
+    val_datagen = ImageDataGenerator(
+        preprocessing_function=preprocess_single_input
+    )
     batch_size = 32
 
     def dir_datagen(dir_, gen):
@@ -220,7 +222,7 @@ def fine_tune(name, name_ext, lr=1e-4, reduce_lr_factor=0.1,
         weights='imagenet',
         include_top=False,
         pooling='avg',
-        input_tensor=Input(shape=(HEIGHT, WIDTH, 3))
+        input_shape=(HEIGHT, WIDTH, 3)
     )
     top_classifier = _top_classifier(
         l2_reg=l2_reg,
@@ -261,7 +263,7 @@ def make_submission_resnet50(name, name_ext, dropout_p):
     _, _, _, _, _, te_names = create_embeddings(name)
     batch_size = 32
 
-    datagen = ImageDataGenerator(preprocessing_function=preprocess_input)
+    datagen = ImageDataGenerator(preprocessing_function=preprocess_single_input)
     datagen = datagen.flow_from_directory(
         directory=data_info['dir_te'],
         target_size=(HEIGHT, WIDTH),
@@ -275,7 +277,7 @@ def make_submission_resnet50(name, name_ext, dropout_p):
         weights='imagenet',
         include_top=False,
         pooling='avg',
-        input_tensor=Input(shape=(HEIGHT, WIDTH, 3))
+        input_shape=(HEIGHT, WIDTH, 3)
     )
     top_classifier = _top_classifier(
         l2_reg=0,
@@ -308,6 +310,11 @@ def _top_classifier(l2_reg, dropout_p, input_shape):
     )
     model.add(dense)
     return model
+
+
+def preprocess_single_input(x):
+    x = np.expand_dims(x, axis=0)
+    return preprocess_input(x)
 
 
 if __name__ == '__main__':
