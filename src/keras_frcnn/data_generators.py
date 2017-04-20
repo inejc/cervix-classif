@@ -87,8 +87,8 @@ class SampleSelector:
             cls_name = bbox['class']
             if cls_name == self.curr_class:
                 self.curr_class = next(self.class_cycle)
-                return True
-        return False
+                return False
+        return True
 
 
 def calcY(C, class_mapping, img_data, width, height, resized_width, resized_height):
