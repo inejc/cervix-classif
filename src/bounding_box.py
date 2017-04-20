@@ -16,6 +16,7 @@ from os.path import join, splitext
 import fire
 import ijroi
 import numpy as np
+import roi
 from data_provider import MODELS_DIR, load_organized_data_info
 from keras.applications import Xception
 from keras.callbacks import ReduceLROnPlateau, ModelCheckpoint, TensorBoard, \
@@ -27,15 +28,12 @@ from keras.preprocessing.image import ImageDataGenerator, load_img, \
 from keras.regularizers import l2, l1
 from xception_fine_tune import HEIGHT, WIDTH
 from xception_fine_tune import _top_classifier
-import roi
 
 IJ_ROI_DIR = join('data', 'bounding_boxes_299')
 MODEL_FILE = 'localizer_.h5'
 
 CLASSES = ['Type_1', 'Type_2', 'Type_3']
 TRAINING_DIR = join('data', 'train_299')
-
-__all__ = ['number_tagged', 'train', 'predict']
 
 
 def _get_dict_roi(directory=None):
@@ -74,7 +72,8 @@ def _get_dict_all_images(directory=None, truncate_to_id=False):
     return d
 
 
-def _get_dict_tagged_images(directory=None, roi_directory=None):
+def _get_dict_tagged_images(
+        directory=None, roi_directory=None, truncate_to_id=False):
     """Get all available images in the training directory.
     
     Returns
@@ -82,7 +81,7 @@ def _get_dict_tagged_images(directory=None, roi_directory=None):
     dict : {<image_id>: <image file path>}
     
     """
-    all_images = _get_dict_all_images(directory)
+    all_images = _get_dict_all_images(directory, truncate_to_id)
     tagged_roi = _get_dict_roi(roi_directory)
     d = OrderedDict()
     for img_id in all_images:
@@ -119,7 +118,7 @@ def _convert_from_roi(fname):
         return np.array([top, left, height, width])
 
 
-def _get_tagged_images(training_dir, roi_dir=None):
+def _get_tagged_images(training_dir, roi_dir=None, truncate_to_id=False):
     """Read images, tags and labels for any images that have been tagged.
 
     Return
@@ -132,7 +131,7 @@ def _get_tagged_images(training_dir, roi_dir=None):
 
     """
     roi_dict = _get_dict_roi(roi_dir or IJ_ROI_DIR)
-    img_dict = _get_dict_tagged_images(training_dir, roi_dir)
+    img_dict = _get_dict_tagged_images(training_dir, roi_dir, truncate_to_id)
     # Initialize X and Y (contains 4 values x, y, w, h)
     X = np.zeros((len(img_dict), HEIGHT, WIDTH, 3))
     Y = np.zeros((len(img_dict), 4))
@@ -176,7 +175,7 @@ def number_tagged():
 def _model_file_name(name, reg, reg_strength, dropout):
     split = MODEL_FILE.split('.')
     split[0] += '%s_%s-%s_dropout-%s_'% (name, reg, reg_strength, dropout)
-    split[0] += 'val_loss-epoch-{epoch:02d}_{val_loss:.2f}'
+    split[0] += 'val_loss-{val_loss:.2f}'
     return join(MODELS_DIR, '.'.join(split))
 
 
@@ -221,8 +220,10 @@ def train(model_file, reduce_lr_factor=1e-1, num_freeze_layers=0, epochs=10,
           name='', reg='l2', reg_strength=0.0, dropout=0.5,
           early_stopping=False):
     data_info = load_organized_data_info(imgs_dim=HEIGHT, name=name)
-    _, X_tr, Y_tr = _get_tagged_images(data_info['dir_tr'])
-    _, X_val, Y_val = _get_tagged_images(data_info['dir_val'])
+    _, X_tr, Y_tr = _get_tagged_images(
+        data_info['dir_tr'], truncate_to_id=True)
+    _, X_val, Y_val = _get_tagged_images(
+        data_info['dir_val'], truncate_to_id=True)
 
     def _image_generator(generator, data, labels):
         return generator.flow(
@@ -266,10 +267,21 @@ def train(model_file, reduce_lr_factor=1e-1, num_freeze_layers=0, epochs=10,
     )
 
 
-def resume_training(model_file, name='', num_freeze_layers=0, epochs=10):
+def fix_model(model_file):
+    import h5py
+    f = h5py.File(model_file, 'r+')
+    del f['optimizer_weights']
+    f.close()
+
+
+def resume_training(model_file, name='', reduce_lr_factor=1e-1,
+                    num_freeze_layers=0, epochs=10, reg='l2', reg_strength=0.0,
+                    dropout=0.5):
     data_info = load_organized_data_info(imgs_dim=HEIGHT, name=name)
-    _, X_tr, Y_tr = _get_tagged_images(data_info['dir_tr'])
-    _, X_val, Y_val = _get_tagged_images(data_info['dir_val'])
+    _, X_tr, Y_tr = _get_tagged_images(
+        data_info['dir_tr'], truncate_to_id=True)
+    _, X_val, Y_val = _get_tagged_images(
+        data_info['dir_val'], truncate_to_id=True)
 
     def _image_generator(generator, data, labels):
         return generator.flow(

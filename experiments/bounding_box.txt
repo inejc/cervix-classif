@@ -8,25 +8,25 @@ L1 loss after 10 epochs of training
 -----------------------------------
 - strength = 0.1:
 CUDA_VISIBLE_DEVICES=0 python3 src/bounding_box.py train --name cleaned --model_file models/xception_fine_tuned_cleaned_frozen_96_dropout_0_6_val_loss_0_7404.h5 --reg l1 --reg_strength 0.1 --dropout 0.5 --num_freeze_layers 134 --epochs 30 --early_stopping 5
-MSE: 874.41
+MSE: 576.22
 
 - strength = 1:
 CUDA_VISIBLE_DEVICES=1 python3 src/bounding_box.py train --name cleaned --model_file models/xception_fine_tuned_cleaned_frozen_96_dropout_0_6_val_loss_0_7404.h5 --reg l1 --reg_strength 1 --dropout 0.5 --num_freeze_layers 134 --epochs 30 --early_stopping 5
-MSE: 849.43
+MSE: 618.41
 
 - strength = 10:
 CUDA_VISIBLE_DEVICES=2 python3 src/bounding_box.py train --name cleaned --model_file models/xception_fine_tuned_cleaned_frozen_96_dropout_0_6_val_loss_0_7404.h5 --reg l1 --reg_strength 10 --dropout 0.5 --num_freeze_layers 134 --epochs 30 --early_stopping 5
-MSE: 1585.98
+MSE: very bad
 
 - strength = 100:
 CUDA_VISIBLE_DEVICES=3 python3 src/bounding_box.py train --name cleaned --model_file models/xception_fine_tuned_cleaned_frozen_96_dropout_0_6_val_loss_0_7404.h5 --reg l1 --reg_strength 100 --dropout 0.5 --num_freeze_layers 134 --epochs 30 --early_stopping 5
-MSE: 4738.88
+MSE: very bad
 
 L2 loss after 10 epochs of training
 -----------------------------------
 - strength = 0.1:
 CUDA_VISIBLE_DEVICES=4 python3 src/bounding_box.py train --name cleaned --model_file models/xception_fine_tuned_cleaned_frozen_96_dropout_0_6_val_loss_0_7404.h5 --reg l2 --reg_strength 0.1 --dropout 0.5 --num_freeze_layers 134 --epochs 30 --early_stopping 5
-MSE: 855.51
+MSE: 464.88
 
 - strength = 1:
 CUDA_VISIBLE_DEVICES=5 python3 src/bounding_box.py train --name cleaned --model_file models/xception_fine_tuned_cleaned_frozen_96_dropout_0_6_val_loss_0_7404.h5 --reg l2 --reg_strength 1 --dropout 0.5 --num_freeze_layers 134 --epochs 30 --early_stopping 5
@@ -34,8 +34,17 @@ MSE: 662.40
 
 - strength = 10:
 CUDA_VISIBLE_DEVICES=6 python3 src/bounding_box.py train --name cleaned --model_file models/xception_fine_tuned_cleaned_frozen_96_dropout_0_6_val_loss_0_7404.h5 --reg l2 --reg_strength 10 --dropout 0.5 --num_freeze_layers 134 --epochs 30 --early_stopping 5
-MSE: 856.62
+MSE: 765.23
 
 - strength = 100:
 CUDA_VISIBLE_DEVICES=7 python3 src/bounding_box.py train --name cleaned --model_file models/xception_fine_tuned_cleaned_frozen_96_dropout_0_6_val_loss_0_7404.h5 --reg l2 --reg_strength 100 --dropout 0.5 --num_freeze_layers 134 --epochs 30 --early_stopping 5
-MSE: 944.26
+MSE: 651.16
+
+RESUME TRAINING FOR BEST LOCALIZERS (unfreeze 2 more layers - 132 frozen)
+-------------------------------------------------------------------------
+
+L2 0.1 (this was the best localizer):
+CUDA_VISIBLE_DEVICES=0 python3 src/bounding_box.py resume_training --name cleaned --model_file models/localizer_cleaned_l2-0.1_dropout-0.5_val_loss-464.88.h5 --reg l2 --reg_strength 0.1 --dropout 0.5 --num_freeze_layers 132 --epochs 30
+
+L1 0.1 (even though was worse by 100 score):
+CUDA_VISIBLE_DEVICES=1 python3 src/bounding_box.py resume_training --name cleaned --model_file models/localizer_cleaned_l1-0.1_dropout-0.5_val_loss-576.22.h5 --reg l1 --reg_strength 0.1 --dropout 0.5 --num_freeze_layers 132 --epochs 30
