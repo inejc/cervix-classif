@@ -30,7 +30,7 @@ import fire
 import numpy as np
 from keras.applications.resnet50 import ResNet50, preprocess_input
 from keras.callbacks import ModelCheckpoint, ReduceLROnPlateau, TensorBoard
-from keras.layers import Dense, Dropout
+from keras.layers import Dense, Dropout, Input
 from keras.models import Model, Sequential
 from keras.optimizers import Adam
 from keras.preprocessing.image import ImageDataGenerator
@@ -85,7 +85,7 @@ def create_embeddings(name):
         weights='imagenet',
         include_top=False,
         pooling='avg',
-        input_shape=(HEIGHT, WIDTH, 3)
+        input_tensor=Input(shape=(HEIGHT, WIDTH, 3))
     )
 
     def embed(dir_, num, data_is_labeled):
@@ -220,7 +220,7 @@ def fine_tune(name, name_ext, lr=1e-4, reduce_lr_factor=0.1,
         weights='imagenet',
         include_top=False,
         pooling='avg',
-        input_shape=(HEIGHT, WIDTH, 3)
+        input_tensor=Input(shape=(HEIGHT, WIDTH, 3))
     )
     top_classifier = _top_classifier(
         l2_reg=l2_reg,
@@ -275,7 +275,7 @@ def make_submission_resnet50(name, name_ext, dropout_p):
         weights='imagenet',
         include_top=False,
         pooling='avg',
-        input_shape=(HEIGHT, WIDTH, 3)
+        input_tensor=Input(shape=(HEIGHT, WIDTH, 3))
     )
     top_classifier = _top_classifier(
         l2_reg=0,
