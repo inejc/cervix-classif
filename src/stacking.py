@@ -8,7 +8,7 @@ from keras.applications.inception_v3 import \
 from keras.applications.xception import preprocess_input as xception_preprocess
 from keras.models import load_model
 from keras.preprocessing.image import ImageDataGenerator
-from numpy.random import uniform
+from scipy.stats import uniform
 from sklearn.linear_model import LogisticRegression
 from sklearn.model_selection import RandomizedSearchCV
 
