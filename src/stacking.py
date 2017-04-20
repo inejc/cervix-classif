@@ -77,6 +77,8 @@ def train(name='stable', cross_validate=True, num_search_iter=100):
             n_jobs=-1,
             cv=10,
         )
+        random_search.fit(preds_val, y_val)
+
         print("Best random search score and params:")
         print(random_search.best_score_)
         print(random_search.best_params_)
