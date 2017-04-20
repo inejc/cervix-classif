@@ -61,7 +61,6 @@ def iou(a, b):
     return float(area_i) / float(area_u)
 
 
-# TODO TIM: try square
 def get_new_img_size(width, height, img_min_side=600):
     if width <= height:
         f = float(img_min_side) / width
