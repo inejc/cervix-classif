@@ -2,21 +2,22 @@ from collections import OrderedDict
 from os import listdir
 from os.path import join, splitext
 
-import numpy as np
-import ijroi
 import fire
+import ijroi
+import numpy as np
 import roi
-from PIL.ImageOps import fit
 from keras.preprocessing.image import load_img, img_to_array
 
 CLASSES = ['Type_1', 'Type_2', 'Type_3']
+
+HEIGHT, WIDTH = 299, 299
 
 
 def _get_dict_roi(directory):
     d = OrderedDict()
     for class_ in CLASSES:
         for f in listdir(join(directory, class_)):
-            img_id = splitext(f)[0].split('_')[2]
+            img_id = splitext(f)[0]
             d[img_id] = join(directory, class_, f)
     return d
 
@@ -27,6 +28,23 @@ def _get_dict_all_images(directory):
         for f in listdir(join(directory, class_)):
             img_id = splitext(f)[0]
             d[img_id] = join(directory, class_, f)
+    return d
+
+
+def _get_dict_tagged_images(directory, roi_directory):
+    """Get all available images in the training directory.
+
+    Returns
+    -------
+    dict : {<image_id>: <image file path>}
+
+    """
+    all_images = _get_dict_all_images(directory)
+    tagged_roi = _get_dict_roi(roi_directory)
+    d = OrderedDict()
+    for img_id in all_images:
+        if img_id in tagged_roi:
+            d[img_id] = all_images[img_id]
     return d
 
 
@@ -46,6 +64,29 @@ def _convert_from_roi(fname):
         height, width = bottom - top, right - left
 
         return np.array([top, left, height, width])
+
+
+def get_all_images(directory):
+    img_dict = _get_dict_all_images(directory)
+    X = np.zeros((len(img_dict), HEIGHT, WIDTH, 3))
+    for idx, img_id in enumerate(img_dict):
+        X[idx] = load_img(img_dict[img_id])
+    return list(img_dict.keys()), X
+
+
+def get_tagged_images(image_dir, roi_dir):
+    roi_dict = _get_dict_roi(roi_dir)
+    img_dict = _get_dict_tagged_images(image_dir, roi_dir)
+    # Initialize X and Y (contains 4 values x, y, w, h)
+    X = np.zeros((len(img_dict), HEIGHT, WIDTH, 3))
+    Y = np.zeros((len(img_dict), 4))
+    # Load the image files into a nice data array
+    for idx, key in enumerate(img_dict):
+        img = load_img(img_dict[key], target_size=(HEIGHT, WIDTH))
+        X[idx] = img_to_array(img)
+        Y[idx] = _convert_from_roi(roi_dict[key])
+
+    return list(img_dict.keys()), X, Y
 
 
 def resize_roi_to_original(image_dir, roi_dir, output_dir, initial_size):

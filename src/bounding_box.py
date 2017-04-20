@@ -16,6 +16,7 @@ from os.path import join, splitext
 import fire
 import ijroi
 import numpy as np
+import roi
 from data_provider import MODELS_DIR, load_organized_data_info
 from keras.applications import Xception
 from keras.callbacks import ReduceLROnPlateau, ModelCheckpoint, TensorBoard, \
@@ -27,15 +28,12 @@ from keras.preprocessing.image import ImageDataGenerator, load_img, \
 from keras.regularizers import l2, l1
 from xception_fine_tune import HEIGHT, WIDTH
 from xception_fine_tune import _top_classifier
-import roi
 
 IJ_ROI_DIR = join('data', 'bounding_boxes_299')
 MODEL_FILE = 'localizer_.h5'
 
 CLASSES = ['Type_1', 'Type_2', 'Type_3']
 TRAINING_DIR = join('data', 'train_299')
-
-__all__ = ['number_tagged', 'train', 'predict']
 
 
 def _get_dict_roi(directory=None):
