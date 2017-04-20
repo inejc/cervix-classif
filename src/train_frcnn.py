@@ -100,7 +100,7 @@ def train(name, epochs=500, batch_size=32, lr=0.0001, decay=0.001):
     print('Starting training')
     model.fit_generator(data_gen_train, steps_per_epoch=ceil(len(train_imgs) / batch_size),
                         epochs=epochs, validation_data=data_gen_val, validation_steps=len(val_imgs),
-                        callbacks=callbacks)
+                        callbacks=callbacks, max_q_size=1, workers=1)
 
 
 if __name__ == '__main__':
