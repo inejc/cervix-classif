@@ -1,7 +1,5 @@
 0.1 VAL DATA CROPPED WITH ADDITIONAL
 ------------------------------------
-('lr', 0.74779077904078928), 0.64577 public leaderboard
-('lr_l2', x), x public leaderboard:
 'xception_fine_tuned_stable_frozen_86_dropout_0_2_val_loss_0_7288.h5'
 'xception_fine_tuned_stable_frozen_86_dropout_0_5_val_loss_0_7520.h5'
 'xception_fine_tuned_stable_frozen_86_dropout_0_6_val_loss_0_7386.h5'
@@ -9,3 +7,6 @@
 'inception_fine_tuned_stable_frozen_280_dropout_0_5_val_loss_0_7203.h5'
 'inception_fine_tuned_stable_frozen_260_dropout_0_5_val_loss_0_7440.h5'
 'inception_fine_tuned_stable_frozen_250_dropout_0_5_val_loss_0_7473.h5'
+
+('lr_l2_1e6', 0.74779077904078928), 0.64577 public leaderboard
+('lr_l2_30_643572623046371', 0.692144373673), 0.64310 public leaderboard
