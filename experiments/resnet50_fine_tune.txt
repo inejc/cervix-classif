@@ -1,3 +1,13 @@
 0.1 VAL DATA CROPPED WITH ADDITIONAL
 ------------------------------------
-todo
+fine_tune --name 'stable' --name_ext 'frozen_150_dropout_0_5' --lr 1e-5 --reduce_lr_factor 0.1 --reduce_lr_patience 100 --epochs 100 --batch_size 256 --l2_reg 0 --dropout_p 0.5 --num_freeze_layers 150
+Epoch 19 - loss: 0.4763 - val_loss: 0.7410
+
+fine_tune --name 'stable' --name_ext 'frozen_140_dropout_0_5' --lr 1e-5 --reduce_lr_factor 0.1 --reduce_lr_patience 100 --epochs 100 --batch_size 256 --l2_reg 0 --dropout_p 0.5 --num_freeze_layers 140
+Epoch 15 - loss: 0.5763 - val_loss: 0.7365 (0.68719 public score)
+
+fine_tune --name 'stable' --name_ext 'frozen_130_dropout_0_5' --lr 1e-5 --reduce_lr_factor 0.1 --reduce_lr_patience 100 --epochs 100 --batch_size 256 --l2_reg 0 --dropout_p 0.5 --num_freeze_layers 130
+Epoch 17 - loss: 0.5324 - val_loss: 0.6868
+
+fine_tune --name 'stable' --name_ext 'frozen_120_dropout_0_5' --lr 1e-5 --reduce_lr_factor 0.1 --reduce_lr_patience 100 --epochs 100 --batch_size 256 --l2_reg 0 --dropout_p 0.5 --num_freeze_layers 120
+Epoch 17 - loss: 0.5179 - val_loss: 0.7174

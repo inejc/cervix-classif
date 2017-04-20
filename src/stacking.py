@@ -13,6 +13,7 @@ from sklearn.linear_model import LogisticRegression
 from sklearn.model_selection import RandomizedSearchCV
 
 from data_provider import load_organized_data_info, MODELS_DIR, SUBMISSIONS_DIR
+from resnet50_fine_tune import preprocess_single_input as resnet50_preprocess
 from utils import create_submission_file
 from xception_fine_tune import create_embeddings
 
@@ -34,6 +35,14 @@ MODELS = {
         inception_preprocess,
     'inception_fine_tuned_stable_frozen_250_dropout_0_5_val_loss_0_7473.h5':
         inception_preprocess,
+    'resnet50_fine_tuned_stable_frozen_150_dropout_0_5_val_loss_0_7410.h5':
+        resnet50_preprocess,
+    'resnet50_fine_tuned_stable_frozen_140_dropout_0_5_val_loss_0_7365.h5':
+        resnet50_preprocess,
+    'resnet50_fine_tuned_stable_frozen_130_dropout_0_5_val_loss_0_6868.h5':
+        resnet50_preprocess,
+    'resnet50_fine_tuned_stable_frozen_120_dropout_0_5_val_loss_0_7174.h5':
+        resnet50_preprocess,
 }
 
 
