@@ -5,6 +5,8 @@ from keras_frcnn import config
 
 C = config.Config()
 
+np.random.seed(42)
+
 
 def get_data(input_path):
     found_bg = False

@@ -27,7 +27,7 @@ class Config:
         self.im_size = 299
 
         # number of ROIs at once
-        self.num_rois = 1
+        self.num_rois = 2
 
         # stride at the RPN (this depends on the network configuration)
         self.rpn_stride = 16
