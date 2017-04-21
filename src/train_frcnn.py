@@ -18,19 +18,20 @@ from keras_frcnn import resnet as nn
 from keras_frcnn.simple_parser import get_data
 
 import fire
-import numpy as np
 
 sys.setrecursionlimit(40000)
+random.seed(0)
 
 C = config.Config()
 roi_file_path = "./../data/roi/roi_bbox.txt"
 classes_json = './../data/roi/classes.json'
 
 
-def train(name, epochs=500, batch_size=32, lr=0.0001, decay=0.001):
+def train(name, epochs=500, batch_size=32, lr=0.0001, decay=0.001, num_rois=6):
     all_imgs, classes_count, class_mapping = get_data(roi_file_path)
 
     C.set_model_name(name)
+    C.num_rois = num_rois
 
     if 'bg' not in classes_count:
         classes_count['bg'] = 0
