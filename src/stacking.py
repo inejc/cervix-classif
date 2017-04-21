@@ -46,8 +46,6 @@ MODELS = {
         resnet50_preprocess,
     'vgg19_fine_tuned_stable_frozen_17_penultimate_256_dropout_0_5_val_loss_0_6631.h5':
         vgg19_preprocess,
-    'vgg19_fine_tuned_stable_frozen_12_penultimate_256_dropout_0_5_val_loss_0_7082.h5':
-        vgg19_preprocess,
     'vgg19_fine_tuned_stable_frozen_7_penultimate_256_dropout_0_5_val_loss_0_7142.h5':
         vgg19_preprocess,
 }

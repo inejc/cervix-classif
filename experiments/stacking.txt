@@ -39,7 +39,6 @@
 'resnet50_fine_tuned_stable_frozen_130_dropout_0_5_val_loss_0_6868.h5'
 'resnet50_fine_tuned_stable_frozen_120_dropout_0_5_val_loss_0_7174.h5'
 'vgg19_fine_tuned_stable_frozen_17_penultimate_256_dropout_0_5_val_loss_0_6631'
-'vgg19_fine_tuned_stable_frozen_12_penultimate_256_dropout_0_5_val_loss_0_7082'
 'vgg19_fine_tuned_stable_frozen_7_penultimate_256_dropout_0_5_val_loss_0_7142'
-('lr_l2_', x), x public leaderboard
+('lr_l2_98_07135670339359', 0.72186836518), x public leaderboard
 ------------------------------------------------------------------------
