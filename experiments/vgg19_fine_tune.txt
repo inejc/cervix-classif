@@ -1,16 +1,16 @@
-train_top_classifier --name 'stable' --lr 0.0001 --epochs 1000 --batch_size 1024 --l2_reg 0 --dropout_p 0.5 --penultimate_size 256 --save_model True
-
+train_top_classifier --name 'stable' --lr 0.00005 --epochs 60 --batch_size 1024 --l2_reg 0 --dropout_p 0.5 --penultimate_size 256 --save_model True
+train_top_classifier --name 'stable' --lr 0.00005 --epochs 40 --batch_size 1024 --l2_reg 0 --dropout_p 0.5 --penultimate_size 512 --save_model True
 
 0.1 VAL DATA CROPPED WITH ADDITIONAL
 ------------------------------------
-a
 fine_tune --name 'stable' --name_ext 'frozen_17_penultimate_256_dropout_0_5' --lr 1e-5 --reduce_lr_factor 0.1 --reduce_lr_patience 100 --epochs 100 --batch_size 256 --l2_reg 0 --dropout_p 0.5 --num_freeze_layers 17 --penultimate_size 256
+Epoch 27 - loss: 0.5403 - val_loss: 0.6631 (0.66886)
 
-b
 fine_tune --name 'stable' --name_ext 'frozen_12_penultimate_256_dropout_0_5' --lr 1e-5 --reduce_lr_factor 0.1 --reduce_lr_patience 100 --epochs 100 --batch_size 256 --l2_reg 0 --dropout_p 0.5 --num_freeze_layers 12 --penultimate_size 256
+Epoch 21 - loss: 0.6359 - val_loss: 0.7082
 
-c
 fine_tune --name 'stable' --name_ext 'frozen_7_penultimate_256_dropout_0_5' --lr 1e-5 --reduce_lr_factor 0.1 --reduce_lr_patience 100 --epochs 100 --batch_size 256 --l2_reg 0 --dropout_p 0.5 --num_freeze_layers 7 --penultimate_size 256
+Epoch 32 - loss: 0.4891 - val_loss: 0.7142
 
 fine_tune --name 'stable' --name_ext 'frozen_17_penultimate_512_dropout_0_5' --lr 1e-5 --reduce_lr_factor 0.1 --reduce_lr_patience 100 --epochs 100 --batch_size 256 --l2_reg 0 --dropout_p 0.5 --num_freeze_layers 17 --penultimate_size 512
 fine_tune --name 'stable' --name_ext 'frozen_12_penultimate_512_dropout_0_5' --lr 1e-5 --reduce_lr_factor 0.1 --reduce_lr_patience 100 --epochs 100 --batch_size 256 --l2_reg 0 --dropout_p 0.5 --num_freeze_layers 12 --penultimate_size 512

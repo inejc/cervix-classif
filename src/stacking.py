@@ -14,6 +14,7 @@ from sklearn.model_selection import RandomizedSearchCV
 
 from data_provider import load_organized_data_info, MODELS_DIR, SUBMISSIONS_DIR
 from resnet50_fine_tune import preprocess_single_input as resnet50_preprocess
+from vgg19_fine_tune import preprocess_single_input as vgg19_preprocess
 from utils import create_submission_file
 from xception_fine_tune import create_embeddings
 
@@ -43,10 +44,16 @@ MODELS = {
         resnet50_preprocess,
     'resnet50_fine_tuned_stable_frozen_120_dropout_0_5_val_loss_0_7174.h5':
         resnet50_preprocess,
+    'vgg19_fine_tuned_stable_frozen_17_penultimate_256_dropout_0_5_val_loss_0_6631':
+        vgg19_preprocess,
+    'vgg19_fine_tuned_stable_frozen_12_penultimate_256_dropout_0_5_val_loss_0_7082':
+        vgg19_preprocess,
+    'vgg19_fine_tuned_stable_frozen_7_penultimate_256_dropout_0_5_val_loss_0_7142':
+        vgg19_preprocess,
 }
 
 
-def train(name='stable', cross_validate=True, num_search_iter=100):
+def train(name='stable', cross_validate=True, num_search_iter=500):
     data_info = load_organized_data_info(imgs_dim=HEIGHT, name=name)
 
     preds_val = np.empty((data_info['num_val'], 0))
