@@ -46,7 +46,7 @@ from utils import create_submission_file, EarlyStoppingByLoss
 
 HEIGHT, WIDTH = 299, 299
 EMBEDDINGS_FILE = 'vgg19_embeddings_{:s}.npz'
-TOP_CLASSIFIER_FILE = 'vgg19_top_classifier_{:s}.h5'
+TOP_CLASSIFIER_FILE = 'vgg19_top_classifier_{:s}_penultimate_{:d}.h5'
 MODEL_FILE = 'vgg19_fine_tuned_{:s}_{:s}.h5'
 
 
@@ -143,7 +143,10 @@ def train_top_classifier(name, lr=0.01, epochs=10, batch_size=32,
     X_tr, y_tr, X_val, y_val, _, _ = create_embeddings(name)
     y_tr, y_val = to_categorical(y_tr), to_categorical(y_val)
 
-    model_file = join(MODELS_DIR, TOP_CLASSIFIER_FILE.format(name))
+    model_file = join(
+        MODELS_DIR,
+        TOP_CLASSIFIER_FILE.format(name, penultimate_size)
+    )
     model = _top_classifier(
         l2_reg=l2_reg,
         dropout_p=dropout_p,
@@ -166,7 +169,10 @@ def train_top_classifier(name, lr=0.01, epochs=10, batch_size=32,
 def make_submission_top_classifier(name, dropout_p, penultimate_size):
     _, _, _, _, X_te, te_names = create_embeddings(name)
 
-    model_file = join(MODELS_DIR, TOP_CLASSIFIER_FILE.format(name))
+    model_file = join(
+        MODELS_DIR,
+        TOP_CLASSIFIER_FILE.format(name, penultimate_size)
+    )
     model = _top_classifier(
         l2_reg=0,
         dropout_p=dropout_p,
@@ -219,7 +225,10 @@ def fine_tune(name, name_ext, lr=1e-4, reduce_lr_factor=0.1,
     dir_tr, num_tr = data_info['dir_tr'], data_info['num_tr']
     dir_val, num_val = data_info['dir_val'], data_info['num_val']
 
-    top_classifier_file = join(MODELS_DIR, TOP_CLASSIFIER_FILE.format(name))
+    top_classifier_file = join(
+        MODELS_DIR,
+        TOP_CLASSIFIER_FILE.format(name, penultimate_size)
+    )
     model_file = join(MODELS_DIR, MODEL_FILE.format(name, name_ext))
 
     model = VGG19(
