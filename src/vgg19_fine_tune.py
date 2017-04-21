@@ -316,13 +316,14 @@ def make_submission_vgg19(name, name_ext, dropout_p, penultimate_size):
 def _top_classifier(l2_reg, dropout_p, input_shape, penultimate_size=256):
     model = Sequential()
     model.add(Flatten(input_shape=input_shape))
+    model.add(Dropout(rate=dropout_p))
     dense = Dense(
         units=penultimate_size,
         kernel_regularizer=l2(l=l2_reg),
         activation='relu'
     )
     model.add(dense)
-    model.add(Dropout(rate=dropout_p, input_shape=input_shape))
+    model.add(Dropout(rate=dropout_p))
     dense = Dense(
         units=3,
         kernel_regularizer=l2(l=l2_reg),

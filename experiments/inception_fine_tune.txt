@@ -1,3 +1,5 @@
+train_top_classifier --name 'stable' --lr 0.0001 --epochs 1000 --batch_size 1024 --l2_reg 0 --dropout_p 0.5 --save_model True
+
 0.1 VAL DATA CROPPED WITH ADDITIONAL
 ------------------------------------
 fine_tune --name 'stable' --name_ext 'frozen_280_dropout_0_5' --lr 1e-5 --reduce_lr_factor 0.1 --reduce_lr_patience 100 --epochs 100 --batch_size 256 --l2_reg 0 --dropout_p 0.5 --num_freeze_layers 280
