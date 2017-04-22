@@ -18,16 +18,18 @@ class Config:
 
         # anchor box scales
         # self.anchor_box_scales = [128, 256, 512]
-        self.anchor_box_scales = [50, 75, 100, 125, 150, 175, 200, 225, 250, 299]
+        # self.anchor_box_scales = [50, 75, 100, 125, 150, 175, 200, 225, 250, 299]
+        self.anchor_box_scales = [25, 50, 75, 100, 125, 150, 175, 199]
 
         # anchor box ratios
         self.anchor_box_ratios = [[1, 1], [1, 2], [2, 1], [3, 4], [4, 3]]
 
         # size to resize the smallest side of the image
-        self.im_size = 299
+        # self.im_size = 299
+        self.im_size = 199
 
         # number of ROIs at once
-        self.num_rois = 6
+        self.num_rois = 2
 
         # stride at the RPN (this depends on the network configuration)
         self.rpn_stride = 16
@@ -56,9 +58,8 @@ class Config:
             self.base_net_weights = './../models/resnet50_weights_th_dim_ordering_th_kernels_notop.h5'
         else:
             self.base_net_weights = './../models/resnet50_weights_tf_dim_ordering_tf_kernels_notop.h5'
-            self.model_name = ""
         self.model_path = './../models/model_frcnn.hdf5'
 
     def set_model_name(self, name):
-        self.model_name = name
-        self.model_path = './../models/model_frcnn_' + self.model_name + '.hdf5'
+        if name is not None and name != "":
+            self.model_path = './../models/model_frcnn_' + name + '.hdf5'

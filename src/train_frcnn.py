@@ -27,11 +27,10 @@ roi_file_path = "./../data/roi/roi_bbox.txt"
 classes_json = './../data/roi/classes.json'
 
 
-def train(name, epochs=500, batch_size=32, lr=0.0001, decay=0.001, num_rois=6):
+def train(name, epochs=500, batch_size=1, lr=0.0001, decay=0.001):
     all_imgs, classes_count, class_mapping = get_data(roi_file_path)
 
     C.set_model_name(name)
-    C.num_rois = num_rois
 
     if 'bg' not in classes_count:
         classes_count['bg'] = 0
