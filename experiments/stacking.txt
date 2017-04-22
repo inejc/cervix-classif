@@ -7,9 +7,9 @@
 'inception_fine_tuned_stable_frozen_280_dropout_0_5_val_loss_0_7203.h5'
 'inception_fine_tuned_stable_frozen_260_dropout_0_5_val_loss_0_7440.h5'
 'inception_fine_tuned_stable_frozen_250_dropout_0_5_val_loss_0_7473.h5'
-
 ('lr_l2_1e6', 0.74779077904078928), 0.64577 public leaderboard
 ('lr_l2_30_643572623046371', 0.692144373673), 0.64310 public leaderboard
+------------------------------------------------------------------------
 
 
 'xception_fine_tuned_stable_frozen_86_dropout_0_2_val_loss_0_7288.h5'
@@ -24,3 +24,61 @@
 'resnet50_fine_tuned_stable_frozen_130_dropout_0_5_val_loss_0_6868.h5'
 'resnet50_fine_tuned_stable_frozen_120_dropout_0_5_val_loss_0_7174.h5'
 ('lr_l2_2_2297040205837271', 0.704883227176), 0.60967 public leaderboard
+------------------------------------------------------------------------
+
+
+'xception_fine_tuned_stable_frozen_86_dropout_0_2_val_loss_0_7288.h5'
+'xception_fine_tuned_stable_frozen_86_dropout_0_5_val_loss_0_7520.h5'
+'xception_fine_tuned_stable_frozen_86_dropout_0_6_val_loss_0_7386.h5'
+'xception_fine_tuned_stable_frozen_96_dropout_0_6_val_loss_0_7383.h5'
+'inception_fine_tuned_stable_frozen_280_dropout_0_5_val_loss_0_7203.h5'
+'inception_fine_tuned_stable_frozen_260_dropout_0_5_val_loss_0_7440.h5'
+'inception_fine_tuned_stable_frozen_250_dropout_0_5_val_loss_0_7473.h5'
+'resnet50_fine_tuned_stable_frozen_150_dropout_0_5_val_loss_0_7410.h5'
+'resnet50_fine_tuned_stable_frozen_140_dropout_0_5_val_loss_0_7365.h5'
+'resnet50_fine_tuned_stable_frozen_130_dropout_0_5_val_loss_0_6868.h5'
+'resnet50_fine_tuned_stable_frozen_120_dropout_0_5_val_loss_0_7174.h5'
+'vgg19_fine_tuned_stable_frozen_17_penultimate_256_dropout_0_5_val_loss_0_6631'
+'vgg19_fine_tuned_stable_frozen_7_penultimate_256_dropout_0_5_val_loss_0_7142'
+0.61835 public leaderboard
+------------------------------------------------------------------------
+
+
+'xception_fine_tuned_stable_frozen_86_dropout_0_2_val_loss_0_7288.h5'
+'inception_fine_tuned_stable_frozen_280_dropout_0_5_val_loss_0_7203.h5'
+'resnet50_fine_tuned_stable_frozen_120_dropout_0_5_val_loss_0_7174.h5'
+'vgg19_fine_tuned_stable_frozen_17_penultimate_256_dropout_0_5_val_loss_0_6631.h5'
+(0.707006369427 val_loss), 0.60049 public leaderboard
+------------------------------------------------------------------------
+
+
+'xception_fine_tuned_stable_frozen_86_dropout_0_2_val_loss_0_7288.h5'
+'xception_fine_tuned_stable_frozen_96_dropout_0_6_val_loss_0_7383.h5'
+'inception_fine_tuned_stable_frozen_280_dropout_0_5_val_loss_0_7203.h5'
+'inception_fine_tuned_stable_frozen_270_dropout_0_5_val_loss_0_7166.h5'
+'resnet50_fine_tuned_stable_frozen_120_dropout_0_5_val_loss_0_7174.h5'
+'resnet50_fine_tuned_stable_frozen_130_dropout_0_5_val_loss_0_6868.h5'
+'vgg19_fine_tuned_stable_frozen_17_penultimate_256_dropout_0_5_val_loss_0_6631.h5'
+0.704883227176 val_loss {'C': 40.912938517699253}, 0.60829 public score
+------------------------------------------------------------------------
+
+
+'xception_fine_tuned_stable_frozen_86_dropout_0_2_val_loss_0_7288.h5'
+'inception_fine_tuned_stable_frozen_270_dropout_0_5_val_loss_0_7166.h5'
+'resnet50_fine_tuned_stable_frozen_130_dropout_0_5_val_loss_0_6868.h5'
+'vgg19_fine_tuned_stable_frozen_17_penultimate_256_dropout_0_5_val_loss_0_6631.h5'
+'vgg19_fine_tuned_stable_frozen_7_penultimate_512_dropout_0_5_val_loss_0_6881.h5'
+0.711252653928 val_loss {'C': 7417.0857633789947}, 0.60564 public score
+
+[[ 0.39321516 -0.55176617 -0.05389189  1.72086198 -0.44753456 -1.48577128
+   1.32443536 -1.00902245 -0.52785554  1.20540667 -0.71824399 -0.69960829
+   0.71669717 -0.59660716 -0.33253188]
+
+ [-0.33506099  0.56723581 -0.74337396 -1.4808828   0.77789482  0.1917872
+  -1.40603577  0.88391122  0.01092732 -0.51808668  0.81403473 -0.80714913
+  -0.30267437  0.48044604 -0.68897122]
+
+ [-0.49425993 -0.71955155  0.75010178 -0.43951946 -0.45933095  0.43514564
+  -0.01811355 -0.66823957  0.22263967 -1.2071588  -0.3313705   1.0748271
+  -0.95307338 -0.13100486  0.62036817]]
+------------------------------------------------------------------------

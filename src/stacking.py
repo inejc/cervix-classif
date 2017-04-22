@@ -14,6 +14,7 @@ from sklearn.model_selection import RandomizedSearchCV
 
 from data_provider import load_organized_data_info, MODELS_DIR, SUBMISSIONS_DIR
 from resnet50_fine_tune import preprocess_single_input as resnet50_preprocess
+from vgg19_fine_tune import preprocess_single_input as vgg19_preprocess
 from utils import create_submission_file
 from xception_fine_tune import create_embeddings
 
@@ -23,30 +24,18 @@ BATCH_SIZE = 32
 MODELS = {
     'xception_fine_tuned_stable_frozen_86_dropout_0_2_val_loss_0_7288.h5':
         xception_preprocess,
-    'xception_fine_tuned_stable_frozen_86_dropout_0_5_val_loss_0_7520.h5':
-        xception_preprocess,
-    'xception_fine_tuned_stable_frozen_86_dropout_0_6_val_loss_0_7386.h5':
-        xception_preprocess,
-    'xception_fine_tuned_stable_frozen_96_dropout_0_6_val_loss_0_7383.h5':
-        xception_preprocess,
-    'inception_fine_tuned_stable_frozen_280_dropout_0_5_val_loss_0_7203.h5':
+    'inception_fine_tuned_stable_frozen_270_dropout_0_5_val_loss_0_7166.h5':
         inception_preprocess,
-    'inception_fine_tuned_stable_frozen_260_dropout_0_5_val_loss_0_7440.h5':
-        inception_preprocess,
-    'inception_fine_tuned_stable_frozen_250_dropout_0_5_val_loss_0_7473.h5':
-        inception_preprocess,
-    'resnet50_fine_tuned_stable_frozen_150_dropout_0_5_val_loss_0_7410.h5':
-        resnet50_preprocess,
-    'resnet50_fine_tuned_stable_frozen_140_dropout_0_5_val_loss_0_7365.h5':
-        resnet50_preprocess,
     'resnet50_fine_tuned_stable_frozen_130_dropout_0_5_val_loss_0_6868.h5':
         resnet50_preprocess,
-    'resnet50_fine_tuned_stable_frozen_120_dropout_0_5_val_loss_0_7174.h5':
-        resnet50_preprocess,
+    'vgg19_fine_tuned_stable_frozen_17_penultimate_256_dropout_0_5_val_loss_0_6631.h5':
+        vgg19_preprocess,
+    'vgg19_fine_tuned_stable_frozen_7_penultimate_512_dropout_0_5_val_loss_0_6881.h5':
+        vgg19_preprocess,
 }
 
 
-def train(name='stable', cross_validate=True, num_search_iter=100):
+def train(name='stable', cross_validate=True, num_search_iter=500):
     data_info = load_organized_data_info(imgs_dim=HEIGHT, name=name)
 
     preds_val = np.empty((data_info['num_val'], 0))
