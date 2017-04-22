@@ -13,5 +13,10 @@ fine_tune --name 'stable' --name_ext 'frozen_7_penultimate_256_dropout_0_5' --lr
 Epoch 32 - loss: 0.4891 - val_loss: 0.7142
 
 fine_tune --name 'stable' --name_ext 'frozen_17_penultimate_512_dropout_0_5' --lr 1e-5 --reduce_lr_factor 0.1 --reduce_lr_patience 100 --epochs 100 --batch_size 256 --l2_reg 0 --dropout_p 0.5 --num_freeze_layers 17 --penultimate_size 512
+Epoch 23 - loss: 0.6000 - val_loss: 0.7087
+
 fine_tune --name 'stable' --name_ext 'frozen_12_penultimate_512_dropout_0_5' --lr 1e-5 --reduce_lr_factor 0.1 --reduce_lr_patience 100 --epochs 100 --batch_size 256 --l2_reg 0 --dropout_p 0.5 --num_freeze_layers 12 --penultimate_size 512
+Epoch 27 - loss: 0.5365 - val_loss: 0.6995
+
 fine_tune --name 'stable' --name_ext 'frozen_7_penultimate_512_dropout_0_5' --lr 1e-5 --reduce_lr_factor 0.1 --reduce_lr_patience 100 --epochs 100 --batch_size 256 --l2_reg 0 --dropout_p 0.5 --num_freeze_layers 7 --penultimate_size 512
+Epoch 32 - loss: 0.4773 - val_loss: 0.6881
