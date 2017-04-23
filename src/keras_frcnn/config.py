@@ -18,8 +18,8 @@ class Config:
 
         # anchor box scales
         # self.anchor_box_scales = [128, 256, 512]
-        self.anchor_box_scales = [50, 75, 100, 125, 150, 175, 200, 225, 250, 299]
-        # self.anchor_box_scales = [25, 50, 75, 100, 125, 150, 175, 199]
+        self.anchor_box_scales = [50, 75, 100, 125, 150, 175, 200, 225, 250, 299] #za model num_rois_2_additional
+        # self.anchor_box_scales = [25, 50, 75, 100, 125, 150, 175, 199] #za kasnejse modele
 
         # anchor box ratios
         self.anchor_box_ratios = [[1, 1], [1, 2], [2, 1], [3, 4], [4, 3]]
