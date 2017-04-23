@@ -12,7 +12,6 @@ from keras.layers import Dense, Activation, Flatten
 from keras.layers import Convolution2D, MaxPooling2D, ZeroPadding2D, AveragePooling2D, TimeDistributed
 from keras import backend as K
 from keras.layers.core import Reshape, Permute
-from keras.regularizers import l2
 
 from keras_frcnn.RoiPoolingConv import RoiPoolingConv
 from keras_frcnn.FixedBatchNormalization import FixedBatchNormalization
@@ -257,19 +256,10 @@ def classifier(base_layers, input_rois, num_rois, nb_classes=21, trainable=False
 
     out = TimeDistributed(Flatten(), name='td_flatten')(out)
 
-
-    out_class = TimeDistributed(
-        Dense(nb_classes, activation='softmax', kernel_initializer='zero', W_regularizer=l2(0.05)),
-        name='dense_class_{}'.format(nb_classes))(out)
+    out_class = TimeDistributed(Dense(nb_classes, activation='softmax', kernel_initializer='zero'),
+                                name='dense_class_{}'.format(nb_classes))(out)
     # note: no regression target for bg class
-    out_regr = TimeDistributed(
-        Dense(4 * (nb_classes - 1), activation='linear', kernel_initializer='zero',
-              W_regularizer=l2(0.05)),
-        name='dense_regress_{}'.format(nb_classes))(out)
-    # out_class = TimeDistributed(Dense(nb_classes, activation='softmax', kernel_initializer='zero'),
-    #                             name='dense_class_{}'.format(nb_classes))(out)
-    # # note: no regression target for bg class
-    # out_regr = TimeDistributed(Dense(4 * (nb_classes - 1), activation='linear', kernel_initializer='zero'),
-    #                            name='dense_regress_{}'.format(nb_classes))(out)
+    out_regr = TimeDistributed(Dense(4 * (nb_classes - 1), activation='linear', kernel_initializer='zero'),
+                               name='dense_regress_{}'.format(nb_classes))(out)
 
     return [out_class, out_regr]
