@@ -15,7 +15,7 @@ def dump_args(func):
         args = func_args[:len(arg_names)]
         defaults = func.__defaults__ or ()
         args = args + defaults[len(defaults) - (func.__code__.co_argcount - len(args)):]
-        params = zip(arg_names, args)
+        params = [zip(arg_names, args)]
         args = func_args[len(arg_names):]
         if args:
             params.append(('args', args))
