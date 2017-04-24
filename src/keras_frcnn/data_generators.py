@@ -331,9 +331,9 @@ def get_anchor_gt(all_img_data, class_count, C, backend, mode='train'):
 
                 x_img = x_img[:, :, (2, 1, 0)]  # BGR -> RGB
                 x_img = x_img.astype(np.float32)
-                x_img[:, :, 0] -= C.img_channel_mean[0]
-                x_img[:, :, 1] -= C.img_channel_mean[1]
-                x_img[:, :, 2] -= C.img_channel_mean[2]
+                x_img[:, :, 0] -= C.mean_pixel[0]
+                x_img[:, :, 1] -= C.mean_pixel[1]
+                x_img[:, :, 2] -= C.mean_pixel[2]
                 x_img /= C.img_scaling_factor
 
                 x_img = np.transpose(x_img, (2, 0, 1))

@@ -69,11 +69,11 @@ def build_model(classes_count, num_anchors):
 
 
 # @dump_args
-def train(name, epochs=60, lr=0.0001, decay=0.001):
+def train(model_name, epochs=60, lr=0.0001, decay=0.001):
     all_imgs, classes_count, class_mapping = get_data(ROI_BBOX_FILE)
     num_anchors = len(C.anchor_box_scales) * len(C.anchor_box_ratios)
 
-    C.model_name = name
+    C.model_name = model_name
 
     if 'bg' not in classes_count:
         classes_count['bg'] = 0
@@ -127,7 +127,7 @@ def train(name, epochs=60, lr=0.0001, decay=0.001):
     print('Starting training')
     while True:
         try:
-            X, Y, img_data = data_gen_train.next()
+            X, Y, img_data = next(data_gen_train)
             loss_rpn = model_rpn.train_on_batch(X, Y)
             P_rpn = model_rpn.predict_on_batch(X)
             R = roi_helpers.rpn_to_roi(P_rpn[0], P_rpn[1], C, K.image_dim_ordering(), use_regr=True, overlap_thresh=0.7,

@@ -57,6 +57,7 @@ class Config:
         self.classifier_min_overlap = 0.1
         self.classifier_max_overlap = 0.5
 
+        self.img_scaling_factor = 1.0
         if isfile(MEAN_PIXEL_FILE):
             self.mean_pixel = list(np.loadtxt(MEAN_PIXEL_FILE, delimiter=','))
 

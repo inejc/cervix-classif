@@ -23,7 +23,11 @@ def dump_args(func):
             params.append(('kwargs', func_kwargs))
 
         # TODO TIM: SAVE TO FILE
-        model_dir = os.path.join(FRCNN_MODELS_DIR, func_args[0])
+        if len(func_args) > 0:
+            model_name = func_args[0]
+        else:
+            model_name = func_kwargs.get("model_name")
+        model_dir = os.path.join(FRCNN_MODELS_DIR, model_name)
         if not os.path.exists(model_dir):
             os.makedirs(model_dir)
         with open(os.path.join(model_dir, 'log.txt'), 'w') as log:
