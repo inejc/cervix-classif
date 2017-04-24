@@ -68,7 +68,7 @@ def build_model(classes_count, num_anchors):
 # TODO: SAVE FIT HISTORY/SUMMARY
 
 
-@dump_args
+# @dump_args
 def train(name, epochs=60, lr=0.0001, decay=0.001):
     all_imgs, classes_count, class_mapping = get_data(ROI_BBOX_FILE)
     num_anchors = len(C.anchor_box_scales) * len(C.anchor_box_ratios)
