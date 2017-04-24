@@ -4,7 +4,7 @@ import cv2
 import numpy as np
 from scipy.ndimage import zoom
 
-from keras_frcnn.roi_helpers import resize_bounding_box
+from keras_frcnn import roi_helpers
 
 
 def augment(img_data, config, augment=True):
@@ -78,7 +78,7 @@ def augment(img_data, config, augment=True):
             img = clipped_zoom(img, scale)
             for bbox in img_data_aug['bboxes']:
                 coordinates = bbox['x1'], bbox['y1'], bbox['x2'], bbox['y2']
-                coordinates = resize_bounding_box(scale, scale, coordinates)
+                coordinates = roi_helpers.resize_bounding_box(scale, scale, coordinates)
                 bbox['x1'] = coordinates[0]
                 bbox['y1'] = coordinates[1]
                 bbox['x2'] = coordinates[2]
