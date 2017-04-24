@@ -29,7 +29,7 @@ def apply_regr(x, y, w, h, tx, ty, tw, th):
         return x, y, w, h
 
 
-def non_max_suppression_fast(boxes, probs, overlapThresh=0.95):
+def non_max_suppression_fast(boxes, probs, overlap_thresh=0.95, max_boxes=300):
     # if there are no boxes, return an empty list
     if len(boxes) == 0:
         return []
@@ -90,9 +90,9 @@ def non_max_suppression_fast(boxes, probs, overlapThresh=0.95):
         overlap = (ww_int * hh_int) / (ww_un * hh_un + 1e-9)
 
         # delete all indexes from the index list that have
-        idxs = np.delete(idxs, np.concatenate(([last], np.where(overlap > overlapThresh)[0])))
+        idxs = np.delete(idxs, np.concatenate(([last], np.where(overlap > overlap_thresh)[0])))
 
-        if len(pick) >= 300:
+        if len(pick) >= max_boxes:
             break
 
             # return only the bounding boxes that were picked using the
@@ -102,7 +102,7 @@ def non_max_suppression_fast(boxes, probs, overlapThresh=0.95):
     return boxes, probs
 
 
-def rpn_to_roi(rpn_layer, regr_layer, C, dim_ordering, use_regr=True):
+def rpn_to_roi(rpn_layer, regr_layer, C, dim_ordering, use_regr=True, max_boxes=300, overlap_thresh=0.9):
     regr_layer = regr_layer / C.std_scaling
 
     anchor_sizes = C.anchor_box_scales
@@ -170,7 +170,7 @@ def rpn_to_roi(rpn_layer, regr_layer, C, dim_ordering, use_regr=True):
 
     all_boxes = np.array(all_boxes)
     all_probs = np.array(all_probs)
-    return non_max_suppression_fast(all_boxes, all_probs, 0.7)[0]
+    return non_max_suppression_fast(all_boxes, all_probs, overlap_thresh=overlap_thresh, max_boxes=max_boxes)[0]
 
 
 def resize_bounding_box(width_ratio, height_ratio, coordinates):

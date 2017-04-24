@@ -4,15 +4,12 @@ import os
 import cv2
 import ijroi
 import numpy as np
+
+from data_provider import ROI_DIR, MEAN_PIXEL_FILE, ROI_BBOX_FILE
 from keras_frcnn.config import Config
 from keras_frcnn.data_augment import augment
 from keras_frcnn.data_generators import get_new_img_size
-from keras_frcnn.roi_helpers import resize_bounding_box
 from keras_frcnn.simple_parser import get_data
-
-train_dir = "./../data/train_cleaned/"
-roi_file_path = "./../data/roi/roi_bbox.txt"
-mean_pixel_file_path = './../data/roi/mean_pixel_color.txt'
 
 
 def process_roi():
@@ -22,7 +19,7 @@ def process_roi():
 
 def generate_mean_pixel_file():
     C = Config()
-    all_imgs, _, _ = get_data(roi_file_path)
+    all_imgs, _, _ = get_data(ROI_BBOX_FILE)
 
     avg = [0, 0, 0]
     for img_data in all_imgs:
@@ -42,13 +39,12 @@ def generate_mean_pixel_file():
         avg[1] += np.sum(x_img[:, :, 1]) / pixels
         avg[2] += np.sum(x_img[:, :, 2]) / pixels
     avg = [a / len(all_imgs) for a in list(avg)]
-    np.savetxt(mean_pixel_file_path, avg, delimiter=',')
+    np.savetxt(MEAN_PIXEL_FILE, avg, delimiter=',')
 
 
 def generate_roi_file():
-    roi_files = glob.glob('./../data/roi/train/*/*.roi')
-    roi_files += glob.glob('./../data/roi/additional_cleaned/*/*.roi')
-    with open(roi_file_path, 'w') as out:
+    roi_files = glob.glob(os.path.join(ROI_DIR, '**/*.roi', recursive=True))
+    with open(ROI_BBOX_FILE, 'w') as out:
         for roi_file in roi_files:
             with open(roi_file, "rb") as f:
                 roi = ijroi.read_roi(f)
@@ -58,51 +54,9 @@ def generate_roi_file():
                 out.write("cervix\n")
 
 
-def generate_roi_file_from_cropped_images(roi_files_dir="./../data/bounding_boxes_299/*.roi",
-                                          new_dim=299):
-    roi_files = glob.glob(roi_files_dir)
-    with open(roi_file_path, 'w') as out:
-        for roi_file in roi_files:
-            box = resized_roi_to_original(roi_file, new_dim)
-            out.write(img_name(roi_file) + ", ")
-            out.write(", ".join(map(str, box)) + ", ")
-            out.write("cervix\n")
-
-
-def resized_roi_to_original(roi_file, resized_dim=299):
-    with open(roi_file, "rb") as f:
-        roi = ijroi.read_roi(f)
-        x1, y1 = tuple(roi[0][::-1])
-        x2, y2 = tuple(roi[2][::-1])
-
-        try:
-            image_name = img_name(roi_file)
-        except IndexError:
-            print("Could not find image " + roi_file.split("/")[-1].replace(".roi", ".jpg"))
-            return
-        img = cv2.imread(image_name)
-        height, width, _ = img.shape
-
-        resized = int(max(height, width) * resized_dim / min(height, width))
-        offset = int(max(height, width) * (resized - resized_dim) // (2 * resized))
-
-        if height > width:
-            box = resize_bounding_box(width / resized_dim, height / resized, (x1, y1, x2, y2))
-            return box[0], offset + box[1], box[2], offset + box[3]
-        else:
-            box = resize_bounding_box(width / resized, height / resized_dim, (x1, y1, x2, y2))
-            return offset + box[0], box[1], offset + box[2], box[3]
-
-
-def img_name(roi_file_path):
-    image_name = roi_file_path.split("/")[-1].replace(".roi", ".jpg")
-    return glob.glob(os.path.join(train_dir, "**/", image_name))[0]
-
-
-
 def get_average_roi_size():
     # TODO TIM
-    with open(roi_file_path, 'r') as f:
+    with open(ROI_BBOX_FILE, 'r') as f:
         width = []
         height = []
         ratios = []
