@@ -48,13 +48,11 @@ def rpn_loss_cls(num_anchors):
                                                                                                   num_anchors:, :,
                                                                                                   :])) / K.sum(
                 epsilon + y_true[:, :num_anchors, :, :])
-            # return lambda_rpn_class * K.sum(y_pred[:, :, :, :])
-            # return lambda_rpn_class * K.sum(y_true[:, :, :, :num_anchors] * K.abs(y_pred[:, :, :, :] - y_true[:, :, :, num_anchors:]))
 
     return rpn_loss_cls_fixed_num
 
 
-def class_loss_regr(num_rois, num_classes):
+def class_loss_regr(num_classes):
     def class_loss_regr_fixed_num(y_true, y_pred):
         x = y_true[:, :, 4 * num_classes:] - y_pred
         x_abs = K.abs(x)
@@ -67,4 +65,4 @@ def class_loss_regr(num_rois, num_classes):
 
 
 def class_loss_cls(y_true, y_pred):
-    return lambda_cls_class * categorical_crossentropy(y_true[0, :, :], y_pred[0, :, :])
+    return lambda_cls_class * K.mean(categorical_crossentropy(y_true[0, :, :], y_pred[0, :, :]))

@@ -10,8 +10,9 @@ from data_provider import FRCNN_MODELS_DIR, MEAN_PIXEL_FILE
 class Config:
     def __init__(self, **entries):
 
-        self.model_name = "default"
+        self.verbose = True
 
+        self.model_name = "default"
         # setting for roi augmentation
         self.use_horizontal_flips = True
         self.use_vertical_flips = False
