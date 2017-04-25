@@ -209,9 +209,12 @@ def visualize(model_name, in_dir, only_best=True, overlap_th=0.95, img_min_side=
 
     print("Found " + str(len(images)) + " images...")
     for idx, img_name in tqdm(enumerate(images), total=len(images)):
-        img_name = img_name.replace("user", "tim/PycharmProjects")
 
         img = cv2.imread(img_name)
+        height, width, _ = img.shape
+        img, new_height, new_width = resize_image(img, img_min_side)
+        for key in boxes[idx]:
+            boxes[idx][key] = [resize_bounding_box(new_width / width, new_height / height, b) for b in boxes[idx][key]]
 
         for key in boxes[idx]:
             bbox = np.array(boxes[idx][key])
@@ -219,12 +222,12 @@ def visualize(model_name, in_dir, only_best=True, overlap_th=0.95, img_min_side=
 
             if only_best:
                 x1, y1, x2, y2 = new_boxes[np.argmax(new_probs), :]
-                cv2.rectangle(img, (x1, y1), (x2, y2), (255, 0, 0), 5)
+                cv2.rectangle(img, (x1, y1), (x2, y2), (255, 0, 0), 1)
                 continue
 
             for jk in range(new_boxes.shape[0]):
                 x1, y1, x2, y2 = new_boxes[jk, :]
-                cv2.rectangle(img, (x1, y1), (x2, y2), (255, 0, 0), 5)
+                cv2.rectangle(img, (x1, y1), (x2, y2), (255, 0, 0), 1)
 
                 text_label = '{}:{}'.format(key, int(100 * new_probs[jk]))
                 (retval, baseLine) = cv2.getTextSize(text_label, cv2.FONT_HERSHEY_COMPLEX, 1, 1)
@@ -234,7 +237,6 @@ def visualize(model_name, in_dir, only_best=True, overlap_th=0.95, img_min_side=
                               5)
                 cv2.putText(img, text_label, text_org, cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 0), 1)
 
-        img, _, _ = resize_image(img, img_min_side)
         cv2.imshow('img', img)
         cv2.waitKey(0)
 
@@ -249,4 +251,3 @@ def load_predictions(model_name, in_dir):
 
 if __name__ == '__main__':
     fire.Fire()
-    visualize("box_ratios", "test", True, 0.1)

@@ -187,8 +187,7 @@ def non_max_suppression_fast(boxes, probs, overlap_thresh=0.9, max_boxes=300):
         overlap = (ww_int * hh_int) / (ww_un * hh_un + 1e-9)
 
         # delete all indexes from the index list that have
-        idxs = np.delete(idxs, np.concatenate(([last],
-                                               np.where(overlap > overlap_thresh)[0])))
+        idxs = np.delete(idxs, np.concatenate(([last], np.where(overlap > overlap_thresh)[0])))
 
         if len(pick) >= max_boxes:
             break
