@@ -129,8 +129,14 @@ def train(model_name, epochs=60, lr=0.0001, decay=0.001):
     print('Starting training')
     while True:
         X, Y, img_data = next(data_gen_train)
+
+        t = time.time()
         loss_rpn = model_rpn.train_on_batch(X, Y)
+        print('Train on batch took %0.3f ms' % ((time.time() - t) * 1000.0))
+        t = time.time()
         P_rpn = model_rpn.predict_on_batch(X)
+        print('Predict on batch took %0.3f ms' % ((time.time() - t) * 1000.0))
+
         R = roi_helpers.rpn_to_roi(P_rpn[0], P_rpn[1], C, K.image_dim_ordering(), use_regr=True,
                                    overlap_thresh=0.7,
                                    max_boxes=300)
