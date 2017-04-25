@@ -5,10 +5,10 @@ from keras_frcnn import config
 
 C = config.Config()
 
-np.random.seed(42)
-
 
 def get_data(input_path):
+    np.random.seed(42)
+
     found_bg = False
     all_imgs = {}
 

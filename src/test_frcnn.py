@@ -3,29 +3,41 @@ import json
 import os
 import sys
 
-import fire
 import cv2
-import keras_frcnn.resnet as nn
+import fire
 import numpy as np
 from keras import backend as K
 from keras.layers import Input
 from keras.models import Model
-from keras_frcnn import config
-from keras_frcnn import roi_helpers
 from tqdm import tqdm
 
-from keras_frcnn.roi_helpers import resize_bounding_box
+import keras_frcnn.resnet as nn
+from data_provider import DATA_DIR, ROI_CLASSES_FILE, FRCNN_MODELS_DIR
+from keras_frcnn.config import Config
+from keras_frcnn.roi_helpers import non_max_suppression_fast, apply_regr, rpn_to_roi, resize_bounding_box
 
 sys.setrecursionlimit(40000)
-C = config.Config()
-C.use_horizontal_flips = False
-C.use_vertical_flips = False
 
 
-def format_img(img):
+def format_img(img, C):
     img_min_side = C.im_size
-    (height, width, _) = img.shape
+    img, new_height, new_width = resize_image(img, img_min_side)
 
+    img = img[:, :, (2, 1, 0)]
+    img = img.astype(np.float32)
+    img[:, :, 0] -= C.mean_pixel[0]
+    img[:, :, 1] -= C.mean_pixel[1]
+    img[:, :, 2] -= C.mean_pixel[2]
+    img /= C.img_scaling_factor
+
+    img = np.transpose(img, (2, 0, 1))
+    img = np.expand_dims(img, axis=0)
+
+    return img, new_width, new_height
+
+
+def resize_image(img, img_min_side):
+    (height, width, _) = img.shape
     if width <= height:
         f = img_min_side / width
         new_height = int(f * height)
@@ -35,50 +47,52 @@ def format_img(img):
         new_width = int(f * width)
         new_height = int(img_min_side)
     img = cv2.resize(img, (new_width, new_height), interpolation=cv2.INTER_CUBIC)
-    img = img[:, :, (2, 1, 0)]
-    img = np.transpose(img, (2, 0, 1)).astype(np.float32)
-    img = np.expand_dims(img, axis=0)
-
-    img[:, 0, :, :] -= C.mean_pixel[0]  # used to be 103.939
-    img[:, 1, :, :] -= C.mean_pixel[1]  # used to be 116.779
-    img[:, 2, :, :] -= C.mean_pixel[2]  # used to be 123.68
-    return img, new_width, new_height
+    return img, new_height, new_width
 
 
 def get_class_mappings():
-    with open('./../data/roi/classes.json', 'r') as class_data_json:
+    with open(ROI_CLASSES_FILE, 'r') as class_data_json:
         class_mapping = json.load(class_data_json)
     if 'bg' not in class_mapping:
         class_mapping['bg'] = len(class_mapping)
     return {v: k for k, v in class_mapping.items()}
 
 
-def get_model_rpn(input_shape_img):
+def get_model_rpn(input_shape_img, C):
     img_input = Input(shape=input_shape_img)
     # define the base network (resnet here, can be VGG, Inception, etc)
-    shared_layers = nn.nn_base(img_input)
+    shared_layers = nn.nn_base(img_input, trainable=True)
     # define the RPN, built on the base layers
     num_anchors = len(C.anchor_box_scales) * len(C.anchor_box_ratios)
-    rpn = nn.rpn(shared_layers, num_anchors)
-    model_rpn = Model(img_input, rpn + [shared_layers])
-    model_rpn.load_weights(C.model_path, by_name=True)
+    rpn_layers = nn.rpn(shared_layers, num_anchors)
+    model_rpn = Model(img_input, rpn_layers)
+    model_rpn.load_weights(C.get_model_path(), by_name=True)
     model_rpn.compile(optimizer='adam', loss='mse')
     return model_rpn
 
 
-def get_model_classifier(class_mapping, input_shape_features):
+def get_model_classifier(class_mapping, input_shape_features, C):
     feature_map_input = Input(shape=input_shape_features)
     roi_input = Input(shape=(C.num_rois, 4))
-    classifier = nn.classifier(feature_map_input, roi_input, C.num_rois,
-                               nb_classes=len(class_mapping))
+    classifier = nn.classifier(feature_map_input, roi_input, C.num_rois, nb_classes=len(class_mapping))
+    model_classifier_only = Model([feature_map_input, roi_input], classifier)
     model_classifier = Model([feature_map_input, roi_input], classifier)
-    model_classifier.load_weights(C.model_path, by_name=True)
+    model_classifier.load_weights(C.get_model_path(), by_name=True)
     model_classifier.compile(optimizer='adam', loss='mse')
-    return model_classifier
+    return model_classifier, model_classifier_only
 
 
-def crop(name, img_dir="./../data/train_cleaned/*/", overlap_threshold=0.95, visualise=False):
-    C.set_model_name(name)
+def load_config(model_name):
+    model_dir = os.path.join(FRCNN_MODELS_DIR, model_name)
+    with open(os.path.join(model_dir, 'config.json'), 'r') as file:
+        # json.dump(config, file, default=lambda o: o.__dict__, indent=4, separators=(',', ': '))
+        return json.load(file)
+
+
+def predict(model_name, in_dir="train_cleaned", bbox_threshold=0.5):
+    C = Config(**load_config(model_name))
+    C.use_horizontal_flips = False
+    C.use_vertical_flips = False
 
     class_mapping = get_class_mappings()
 
@@ -89,42 +103,35 @@ def crop(name, img_dir="./../data/train_cleaned/*/", overlap_threshold=0.95, vis
         input_shape_img = (None, None, 3)
         input_shape_features = (None, None, 1024)
 
-    model_rpn = get_model_rpn(input_shape_img)
-    model_classifier = get_model_classifier(class_mapping, input_shape_features)
+    model_rpn = get_model_rpn(input_shape_img, C)
+    model_classifier, model_classifier_only = get_model_classifier(class_mapping, input_shape_features, C)
 
-    images = sorted(glob.glob(os.path.join(img_dir, '*.jpg')))
+    images = sorted(glob.glob(os.path.join(DATA_DIR, in_dir, "**/*.jpg"), recursive=True))
     print("Found " + str(len(images)) + " images...")
-    for idx, img_name in tqdm(enumerate(images), total=len(images)):
 
+    probs = []
+    boxes = []
+    for idx, img_name in tqdm(enumerate(images), total=len(images)):
         img = cv2.imread(img_name)
         height, width, _ = img.shape
-
-        X, new_width, new_height = format_img(img)
-
-        width_ratio = width / new_width
-        height_ratio = height / new_height
-
-        img_scaled = np.transpose(X[0, (2, 1, 0), :, :], (1, 2, 0)).copy()
-        img_scaled[:, :, 0] += C.mean_pixel[2]
-        img_scaled[:, :, 1] += C.mean_pixel[1]
-        img_scaled[:, :, 2] += C.mean_pixel[0]
-
-        img_scaled = img_scaled.astype(np.uint8)
+        X, new_width, new_height = format_img(img, C)
 
         if K.image_dim_ordering() == 'tf':
             X = np.transpose(X, (0, 2, 3, 1))
         # get the feature maps and output from the RPN
         [Y1, Y2, F] = model_rpn.predict(X)
 
-        R = roi_helpers.rpn_to_roi(Y1, Y2, C, K.image_dim_ordering())
+        # TODO TIM: EXPERIMENT WITH THRESH
+        R = rpn_to_roi(Y1, Y2, C, K.image_dim_ordering(), overlap_thresh=0.7)
 
         # convert from (x1,y1,x2,y2) to (x,y,w,h)
-        R[:, 2] = R[:, 2] - R[:, 0]
-        R[:, 3] = R[:, 3] - R[:, 1]
+        R[:, 2] -= R[:, 0]
+        R[:, 3] -= R[:, 1]
 
         # apply the spatial pyramid pooling to the proposed regions
         bboxes = {}
-        probs = {}
+        boxes.append({})
+        probs.append({})
         for jk in range(R.shape[0] // C.num_rois + 1):
             ROIs = np.expand_dims(R[C.num_rois * jk:C.num_rois * (jk + 1), :], axis=0)
             if ROIs.shape[1] == 0:
@@ -139,87 +146,107 @@ def crop(name, img_dir="./../data/train_cleaned/*/", overlap_threshold=0.95, vis
                 ROIs_padded[0, curr_shape[1]:, :] = ROIs[0, 0, :]
                 ROIs = ROIs_padded
 
-            [P_cls, P_regr] = model_classifier.predict([F, ROIs])
-            P_regr = P_regr / C.std_scaling
+            [P_cls, P_regr] = model_classifier_only.predict([F, ROIs])
 
             for ii in range(P_cls.shape[1]):
-                if np.max(P_cls[0, ii, :]) < 0.5 or np.argmax(P_cls[0, ii, :]) == (
-                            P_cls.shape[2] - 1):
+                if np.max(P_cls[0, ii, :]) < bbox_threshold or np.argmax(P_cls[0, ii, :]) == (P_cls.shape[2] - 1):
                     continue
 
                 cls_name = class_mapping[np.argmax(P_cls[0, ii, :])]
                 if cls_name not in bboxes:
                     bboxes[cls_name] = []
-                    probs[cls_name] = []
+                    boxes[idx][cls_name] = []
+                    probs[idx][cls_name] = []
 
                 (x, y, w, h) = ROIs[0, ii, :]
 
                 cls_num = np.argmax(P_cls[0, ii, :])
                 (tx, ty, tw, th) = P_regr[0, ii, 4 * cls_num:4 * (cls_num + 1)]
-                x, y, w, h = roi_helpers.apply_regr(x, y, w, h, tx, ty, tw, th)
+                tx /= C.classifier_regr_std[0]
+                ty /= C.classifier_regr_std[1]
+                tw /= C.classifier_regr_std[2]
+                th /= C.classifier_regr_std[3]
+                x, y, w, h = apply_regr(x, y, w, h, tx, ty, tw, th)
 
                 bboxes[cls_name].append([16 * x, 16 * y, 16 * (x + w), 16 * (y + h)])
-                probs[cls_name].append(np.max(P_cls[0, ii, :]))
-
-        best_match = None
-        all_dets = {}
+                probs[idx][cls_name].append(np.max(P_cls[0, ii, :]))
 
         for key in bboxes:
             bbox = np.array(bboxes[key])
-            new_boxes, new_probs = roi_helpers.non_max_suppression_fast(bbox, np.array(probs[key]),
-                                                                        overlapThresh=overlap_threshold)
+            boxes[idx][key] = [resize_bounding_box(width / new_width, height / new_height, b) for b in bbox]
 
-            # TODO TIM: check if box makes sense
-            best_match = new_boxes[np.argmax(new_probs), :]
-            best_match = resize_bounding_box(width_ratio, height_ratio, best_match)
+    np.savez_compressed(
+        file=os.path.join(FRCNN_MODELS_DIR, model_name, in_dir + "_predictions"),
+        images=images,
+        boxes=boxes,
+        probs=probs,
+    )
 
-            if visualise:
-                (x1, y1, x2, y2) = best_match
-                cv2.rectangle(img, (x1, y1), (x2, y2), (0, 255, 0), 2)
-                for jk in range(new_boxes.shape[0]):
-                    x1, y1, x2, y2 = resize_bounding_box(width_ratio, height_ratio,
-                                                         new_boxes[jk, :])
 
-                    cv2.rectangle(img, (x1, y1), (x2, y2), (255, 0, 0), 2)
+def crop(model_name, in_dir, overlap_th=0.95):
+    images, boxes, probs = load_predictions(model_name, in_dir)
 
-                    textLabel = '{}:{}'.format(key, int(100 * new_probs[jk]))
-                    if key not in all_dets:
-                        all_dets[key] = 100 * new_probs[jk]
-                    else:
-                        all_dets[key] = max(all_dets[key], 100 * new_probs[jk])
+    print("Found " + str(len(images)) + " images...")
+    for idx, img_name in tqdm(enumerate(images), total=len(images)):
 
-                    (retval, baseLine) = cv2.getTextSize(textLabel, cv2.FONT_HERSHEY_COMPLEX, 1, 1)
-                    textOrg = (x1, y1 + 20)
+        out_dir_name = img_name.split(DATA_DIR)[1].split("/")[1]
+        new_image_path = img_name.replace(out_dir_name, out_dir_name + "_frcnn_cropped")
 
-                    cv2.rectangle(img, (textOrg[0] - 5, textOrg[1] + baseLine - 5),
-                                  (textOrg[0] + retval[0] + 5, textOrg[1] - retval[1] - 5),
-                                  (0, 0, 0), 2)
-                    cv2.rectangle(img, (textOrg[0] - 5, textOrg[1] + baseLine - 5),
-                                  (textOrg[0] + retval[0] + 5, textOrg[1] - retval[1] - 5),
-                                  (255, 255, 255), -1)
-                    cv2.putText(img, textLabel, textOrg, cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 0), 1)
+        img = cv2.imread(img_name)
+        bbox = np.array(boxes[idx].get("cervix"))
 
-        # FIXME TIM:
-        if "/train_cleaned" in img_name:
-            new_image_path = img_name.replace("/train_cleaned", "/train_cleaned_frcnn_cropped")
-        elif "/test" in img_name:
-            new_image_path = img_name.replace("/test", "/test_frcnn_cropped")
-        elif "/additional_cleaned" in img_name:
-            new_image_path = img_name.replace("/additional_cleaned",
-                                              "/additional_cleaned_frcnn_cropped")
-        else:
-            raise RuntimeError("Wrong dir name!")
-        if best_match is not None:
-            (x1, y1, x2, y2) = best_match
-            cv2.imwrite(new_image_path, img[y1:y2, x1:x2])
-        else:
+        if bbox is None or len(bbox) == 0:
             print("Could not find ROI on image " + img_name)
             cv2.imwrite(new_image_path, img)
+            continue
 
-        if visualise and best_match is not None:
-            cv2.imshow('img', img_scaled)
-            cv2.waitKey(0)
+        new_boxes, new_probs = non_max_suppression_fast(bbox, np.array(probs[idx]["cervix"]), overlap_thresh=overlap_th)
+        (x1, y1, x2, y2) = new_boxes[np.argmax(new_probs), :]
+        cv2.imwrite(new_image_path, img[y1:y2, x1:x2])
+
+
+def visualize(model_name, in_dir, only_best=True, overlap_th=0.95, img_min_side=600):
+    images, boxes, probs = load_predictions(model_name, in_dir)
+
+    print("Found " + str(len(images)) + " images...")
+    for idx, img_name in tqdm(enumerate(images), total=len(images)):
+
+        img = cv2.imread(img_name)
+
+        for key in boxes[idx]:
+            bbox = np.array(boxes[idx][key])
+            new_boxes, new_probs = non_max_suppression_fast(bbox, np.array(probs[idx][key]), overlap_thresh=overlap_th)
+
+            if only_best:
+                x1, y1, x2, y2 = new_boxes[np.argmax(new_probs), :]
+                cv2.rectangle(img, (x1, y1), (x2, y2), (255, 0, 0), 5)
+                continue
+
+            for jk in range(new_boxes.shape[0]):
+                x1, y1, x2, y2 = new_boxes[jk, :]
+                cv2.rectangle(img, (x1, y1), (x2, y2), (255, 0, 0), 5)
+
+                text_label = '{}:{}'.format(key, int(100 * new_probs[jk]))
+                (retval, baseLine) = cv2.getTextSize(text_label, cv2.FONT_HERSHEY_COMPLEX, 1, 1)
+                text_org = (x1, y1 + 20)
+                cv2.rectangle(img, (text_org[0] - 5, text_org[1] + baseLine - 5),
+                              (text_org[0] + retval[0] + 5, text_org[1] - retval[1] - 5), (0, 0, 0), 5)
+                cv2.putText(img, text_label, text_org, cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 0), 1)
+
+        img, _, _ = resize_image(img, img_min_side)
+        cv2.imshow('img', img)
+        cv2.waitKey(0)
+
+
+def load_predictions(model_name, in_dir):
+    file = os.path.join(FRCNN_MODELS_DIR, model_name, in_dir + "_predictions.npz")
+    if not os.path.isfile(file):
+        raise RuntimeError("ROI_PREDICTIONS_FILE not found! You must run predict first!")
+    with np.load(file) as data:
+        return data["images"], data["boxes"], data["probs"]
 
 
 if __name__ == '__main__':
     fire.Fire()
+    # predict("neki", in_dir="test")
+    visualize("neki", in_dir="test", overlap_th=0.7, only_best=False)

@@ -22,6 +22,12 @@ IMAGES_WEIGHTS_FILE = join(
     'src', 'images_weighted_list.txt'
 )
 
+FRCNN_MODELS_DIR = join(MODELS_DIR, "frcnn")
+ROI_DIR = join(DATA_DIR, 'roi')
+ROI_CLASSES_FILE = join(ROI_DIR, "classes.json")
+ROI_BBOX_FILE = join(ROI_DIR, "roi_bbox.txt")
+MEAN_PIXEL_FILE = join(ROI_DIR, "mean_pixel_color.txt")
+
 
 def load_organized_data_info(imgs_dim, name=''):
     """Loads the train, val, test datasets info file.
