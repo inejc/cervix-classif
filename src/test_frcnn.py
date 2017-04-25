@@ -169,8 +169,7 @@ def predict(model_name, in_dir="train_cleaned", bbox_threshold=0.5):
             for key in bboxes:
                 bbox = np.array(bboxes[key])
                 boxes[idx][key] = [resize_bounding_box(width / new_width, height / new_height, b)
-                                   for b
-                                   in bbox]
+                                   for b in bbox]
     except KeyboardInterrupt:
         pass
     print("Saving predictions...")
@@ -192,14 +191,14 @@ def crop(model_name, in_dir, overlap_th=0.95):
         new_image_path = img_name.replace(out_dir_name, out_dir_name + "_frcnn_cropped")
 
         img = cv2.imread(img_name)
-        bbox = boxes[idx].get("cervix")
+        bbox = boxes[idx].get(" cervix")
 
         if bbox is None or len(bbox) == 0:
             print("Could not find ROI on image " + img_name)
             cv2.imwrite(new_image_path, img)
             continue
         bbox = np.array(bbox)
-        new_boxes, new_probs = non_max_suppression_fast(bbox, np.array(probs[idx]["cervix"]),
+        new_boxes, new_probs = non_max_suppression_fast(bbox, np.array(probs[idx][" cervix"]),
                                                         overlap_thresh=overlap_th)
         (x1, y1, x2, y2) = new_boxes[np.argmax(new_probs), :]
         cv2.imwrite(new_image_path, img[y1:y2, x1:x2])
@@ -210,13 +209,13 @@ def visualize(model_name, in_dir, only_best=True, overlap_th=0.95, img_min_side=
 
     print("Found " + str(len(images)) + " images...")
     for idx, img_name in tqdm(enumerate(images), total=len(images)):
+        img_name = img_name.replace("user", "tim/PycharmProjects")
 
         img = cv2.imread(img_name)
 
         for key in boxes[idx]:
             bbox = np.array(boxes[idx][key])
-            new_boxes, new_probs = non_max_suppression_fast(bbox, np.array(probs[idx][key]),
-                                                            overlap_thresh=overlap_th)
+            new_boxes, new_probs = non_max_suppression_fast(bbox, np.array(probs[idx][key]), overlap_thresh=overlap_th)
 
             if only_best:
                 x1, y1, x2, y2 = new_boxes[np.argmax(new_probs), :]
@@ -250,3 +249,4 @@ def load_predictions(model_name, in_dir):
 
 if __name__ == '__main__':
     fire.Fire()
+    visualize("box_ratios", "test", True, 0.1)
