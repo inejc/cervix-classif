@@ -217,7 +217,7 @@ def rpn(base_layers, num_anchors):
     x_regr = Convolution2D(num_anchors * 4, (1, 1), activation='linear', kernel_initializer='zero',
                            name='rpn_out_regress')(x)
 
-    return [x_class, x_regr, base_layers]
+    return [x_class, x_regr]
 
 
 def classifier(base_layers, input_rois, num_rois, nb_classes=21, trainable=False):
