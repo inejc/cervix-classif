@@ -21,20 +21,17 @@ class Config:
         self.validation_percent = 0.15
 
         # anchor box scales
-        # self.anchor_box_scales = [128, 256, 512]
-        self.anchor_box_scales = [50, 75, 100, 150, 200, 299]  # za model num_rois_2_additional
-        # self.anchor_box_scales = [25, 50, 75, 100, 125, 150, 175, 199] #za kasnejse modele
+        self.anchor_box_scales = [50, 75, 100, 150, 200, 299]
 
         # anchor box ratios
-        self.anchor_box_ratios = [[1, 1], [1, 2], [2, 1], [2, 2], [1, 3], [1, 4], [3, 1], [4, 1],
-                                  [3, 4], [4, 3]]
+        self.anchor_box_ratios = [[1, 1], [1, 2], [2, 1], [2, 2], [1, 3], [1, 4], [3, 1], [4, 1], [3, 4], [4, 3]]
 
         # size to resize the smallest side of the image
         # self.im_size = 299
         self.im_size = 299
 
         # number of ROIs at once
-        self.num_rois = 1
+        self.num_rois = 2
 
         # stride at the RPN (this depends on the network configuration)
         self.rpn_stride = 16
