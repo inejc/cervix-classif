@@ -147,7 +147,7 @@ def predict(model_name, in_dir="train_cleaned", bbox_threshold=0.5):
 
             for ii in range(P_cls.shape[1]):
                 if np.max(P_cls[0, ii, :]) < bbox_threshold or np.argmax(P_cls[0, ii, :]) == (
-                    P_cls.shape[2] - 1):
+                            P_cls.shape[2] - 1):
                     continue
 
                 cls_name = class_mapping[np.argmax(P_cls[0, ii, :])]
@@ -160,10 +160,6 @@ def predict(model_name, in_dir="train_cleaned", bbox_threshold=0.5):
 
                 cls_num = np.argmax(P_cls[0, ii, :])
                 (tx, ty, tw, th) = P_regr[0, ii, 4 * cls_num:4 * (cls_num + 1)]
-                tx /= C.classifier_regr_std[0]
-                ty /= C.classifier_regr_std[1]
-                tw /= C.classifier_regr_std[2]
-                th /= C.classifier_regr_std[3]
                 x, y, w, h = apply_regr(x, y, w, h, tx, ty, tw, th)
 
                 bboxes[cls_name].append([16 * x, 16 * y, 16 * (x + w), 16 * (y + h)])

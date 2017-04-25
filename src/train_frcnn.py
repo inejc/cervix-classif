@@ -4,6 +4,7 @@ import random
 import sys
 from math import ceil
 
+import time
 from keras import backend as K
 from keras.callbacks import EarlyStopping, ModelCheckpoint, Callback
 from keras.callbacks import ReduceLROnPlateau
@@ -67,7 +68,10 @@ def build_model(classes_count, num_anchors):
 
 @dump_args
 def train(model_name, epochs=60, batch_size=1, lr=0.0001, decay=0.001):
+    t = time.time()
     all_imgs, classes_count, class_mapping = get_data(ROI_BBOX_FILE)
+    print("Parsing annotation files took " + str((time.time() - t) / 1000) + "s")
+
     num_anchors = len(C.anchor_box_scales) * len(C.anchor_box_ratios)
 
     C.model_name = model_name
