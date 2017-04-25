@@ -12,28 +12,19 @@ def dump_args(func):
 
     def wrapper(*func_args, **func_kwargs):
         arg_names = func.__code__.co_varnames[:func.__code__.co_argcount]
+        kwargs = {name: func_kwargs[name] for name in arg_names if name in func_kwargs.keys()}
         args = func_args[:len(arg_names)]
+        params = {**dict(zip(arg_names, args)), **kwargs}
         defaults = func.__defaults__ or ()
-        args = args + defaults[len(defaults) - (func.__code__.co_argcount - len(args)):]
-        params = list(zip(arg_names, args))
-        args = func_args[len(arg_names):]
-        if args:
-            params.append(('args', args))
-        if func_kwargs:
-            params.append(('kwargs', func_kwargs))
-
-        print(params)
-        # TODO TIM: SAVE TO FILE
-        if len(func_args) > 0:
-            model_name = func_args[0]
-        else:
-            model_name = func_kwargs.get("model_name")
-        model_dir = os.path.join(FRCNN_MODELS_DIR, model_name)
+        params = {**params, **{name: defaults[i - (len(arg_names) - len(defaults))] for i, name in enumerate(arg_names)
+                               if name not in params.keys()}}
+        model_dir = os.path.join(FRCNN_MODELS_DIR, params["model_name"])
         if not os.path.exists(model_dir):
             os.makedirs(model_dir)
         with open(os.path.join(model_dir, 'log.txt'), 'w') as log:
             log.write(strftime("%d.%m.%Y, %H:%M", gmtime()) + " --> ")
-            log.write(func.__name__ + '(' + ', '.join('%s=%r' % p for p in params) + ')' + "\n")
+            log.write(func.__name__ + '(' + ', '.join('%s=%r' % (n, params[n]) for n in arg_names) + ')' + "\n")
+
         return func(*func_args, **func_kwargs)
 
     return wrapper
