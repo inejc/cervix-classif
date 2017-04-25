@@ -105,71 +105,75 @@ def predict(model_name, in_dir="train_cleaned", bbox_threshold=0.5):
 
     images = sorted(glob.glob(os.path.join(DATA_DIR, in_dir, "**/*.jpg"), recursive=True))
     print("Found " + str(len(images)) + " images...")
+    try:
 
-    probs = []
-    boxes = []
-    for idx, img_name in tqdm(enumerate(images), total=len(images)):
-        img = cv2.imread(img_name)
-        height, width, _ = img.shape
-        X, new_width, new_height = format_img(img, C)
+        probs = []
+        boxes = []
+        for idx, img_name in tqdm(enumerate(images), total=len(images)):
+            img = cv2.imread(img_name)
+            height, width, _ = img.shape
+            X, new_width, new_height = format_img(img, C)
 
-        if K.image_dim_ordering() == 'tf':
-            X = np.transpose(X, (0, 2, 3, 1))
-        # get the feature maps and output from the RPN
-        [Y1, Y2, F] = model_rpn.predict(X)
+            if K.image_dim_ordering() == 'tf':
+                X = np.transpose(X, (0, 2, 3, 1))
+            # get the feature maps and output from the RPN
+            [Y1, Y2, F] = model_rpn.predict(X)
 
-        R = rpn_to_roi(Y1, Y2, C, K.image_dim_ordering(), overlap_thresh=0.7)
+            R = rpn_to_roi(Y1, Y2, C, K.image_dim_ordering(), overlap_thresh=0.7)
 
-        # convert from (x1,y1,x2,y2) to (x,y,w,h)
-        R[:, 2] = R[:, 2] - R[:, 0]
-        R[:, 3] = R[:, 3] - R[:, 1]
+            # convert from (x1,y1,x2,y2) to (x,y,w,h)
+            R[:, 2] = R[:, 2] - R[:, 0]
+            R[:, 3] = R[:, 3] - R[:, 1]
 
-        # apply the spatial pyramid pooling to the proposed regions
-        bboxes = {}
-        boxes.append({})
-        probs.append({})
-        for jk in range(R.shape[0] // C.num_rois + 1):
-            ROIs = np.expand_dims(R[C.num_rois * jk:C.num_rois * (jk + 1), :], axis=0)
-            if ROIs.shape[1] == 0:
-                break
+            # apply the spatial pyramid pooling to the proposed regions
+            bboxes = {}
+            boxes.append({})
+            probs.append({})
+            for jk in range(R.shape[0] // C.num_rois + 1):
+                ROIs = np.expand_dims(R[C.num_rois * jk:C.num_rois * (jk + 1), :], axis=0)
+                if ROIs.shape[1] == 0:
+                    break
 
-            if jk == R.shape[0] // C.num_rois:
-                # pad R
-                curr_shape = ROIs.shape
-                target_shape = (curr_shape[0], C.num_rois, curr_shape[2])
-                ROIs_padded = np.zeros(target_shape).astype(ROIs.dtype)
-                ROIs_padded[:, :curr_shape[1], :] = ROIs
-                ROIs_padded[0, curr_shape[1]:, :] = ROIs[0, 0, :]
-                ROIs = ROIs_padded
+                if jk == R.shape[0] // C.num_rois:
+                    # pad R
+                    curr_shape = ROIs.shape
+                    target_shape = (curr_shape[0], C.num_rois, curr_shape[2])
+                    ROIs_padded = np.zeros(target_shape).astype(ROIs.dtype)
+                    ROIs_padded[:, :curr_shape[1], :] = ROIs
+                    ROIs_padded[0, curr_shape[1]:, :] = ROIs[0, 0, :]
+                    ROIs = ROIs_padded
 
-            [P_cls, P_regr] = model_classifier.predict([F, ROIs])
-            P_regr = P_regr / C.std_scaling
+                [P_cls, P_regr] = model_classifier.predict([F, ROIs])
+                P_regr = P_regr / C.std_scaling
 
-            for ii in range(P_cls.shape[1]):
-                if np.max(P_cls[0, ii, :]) < bbox_threshold or np.argmax(P_cls[0, ii, :]) == (
-                            P_cls.shape[2] - 1):
-                    continue
+                for ii in range(P_cls.shape[1]):
+                    if np.max(P_cls[0, ii, :]) < bbox_threshold or np.argmax(P_cls[0, ii, :]) == (
+                                P_cls.shape[2] - 1):
+                        continue
 
-                cls_name = class_mapping[np.argmax(P_cls[0, ii, :])]
-                if cls_name not in bboxes:
-                    bboxes[cls_name] = []
-                    boxes[idx][cls_name] = []
-                    probs[idx][cls_name] = []
+                    cls_name = class_mapping[np.argmax(P_cls[0, ii, :])]
+                    if cls_name not in bboxes:
+                        bboxes[cls_name] = []
+                        boxes[idx][cls_name] = []
+                        probs[idx][cls_name] = []
 
-                (x, y, w, h) = ROIs[0, ii, :]
+                    (x, y, w, h) = ROIs[0, ii, :]
 
-                cls_num = np.argmax(P_cls[0, ii, :])
-                (tx, ty, tw, th) = P_regr[0, ii, 4 * cls_num:4 * (cls_num + 1)]
-                x, y, w, h = apply_regr(x, y, w, h, tx, ty, tw, th)
+                    cls_num = np.argmax(P_cls[0, ii, :])
+                    (tx, ty, tw, th) = P_regr[0, ii, 4 * cls_num:4 * (cls_num + 1)]
+                    x, y, w, h = apply_regr(x, y, w, h, tx, ty, tw, th)
 
-                bboxes[cls_name].append([16 * x, 16 * y, 16 * (x + w), 16 * (y + h)])
-                probs[idx][cls_name].append(np.max(P_cls[0, ii, :]))
+                    bboxes[cls_name].append([16 * x, 16 * y, 16 * (x + w), 16 * (y + h)])
+                    probs[idx][cls_name].append(np.max(P_cls[0, ii, :]))
 
-        for key in bboxes:
-            bbox = np.array(bboxes[key])
-            boxes[idx][key] = [resize_bounding_box(width / new_width, height / new_height, b) for b
-                               in bbox]
-
+            for key in bboxes:
+                bbox = np.array(bboxes[key])
+                boxes[idx][key] = [resize_bounding_box(width / new_width, height / new_height, b)
+                                   for b
+                                   in bbox]
+    except KeyboardInterrupt:
+        pass
+    print("Saving predictions...")
     np.savez_compressed(
         file=os.path.join(FRCNN_MODELS_DIR, model_name, in_dir + "_predictions"),
         images=images,
