@@ -16,14 +16,16 @@ def dump_args(func):
         args = func_args[:len(arg_names)]
         params = {**dict(zip(arg_names, args)), **kwargs}
         defaults = func.__defaults__ or ()
-        params = {**params, **{name: defaults[i - (len(arg_names) - len(defaults))] for i, name in enumerate(arg_names)
+        params = {**params, **{name: defaults[i - (len(arg_names) - len(defaults))] for i, name in
+                               enumerate(arg_names)
                                if name not in params.keys()}}
         model_dir = os.path.join(FRCNN_MODELS_DIR, params["model_name"])
         if not os.path.exists(model_dir):
             os.makedirs(model_dir)
         with open(os.path.join(model_dir, 'log.txt'), 'w') as log:
             log.write(strftime("%d.%m.%Y, %H:%M", gmtime()) + " --> ")
-            log.write(func.__name__ + '(' + ', '.join('%s=%r' % (n, params[n]) for n in arg_names) + ')' + "\n")
+            log.write(func.__name__ + '(' + ', '.join(
+                '%s=%r' % (n, params[n]) for n in arg_names) + ')' + "\n\n")
 
         return func(*func_args, **func_kwargs)
 
@@ -44,4 +46,4 @@ class LoggingCallback(Callback):
     def on_epoch_end(self, epoch, logs={}):
         msg = "{Epoch: %i} %s" % (epoch, ", ".join("%s: %f" % (k, v) for k, v in logs.items()))
         with open(os.path.join(self.model_dir, 'log.txt'), 'a') as log:
-            log.write("\n" + msg)
+            log.write(msg + "\n")
