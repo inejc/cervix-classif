@@ -192,13 +192,13 @@ def crop(model_name, in_dir, overlap_th=0.95):
         new_image_path = img_name.replace(out_dir_name, out_dir_name + "_frcnn_cropped")
 
         img = cv2.imread(img_name)
-        bbox = np.array(boxes[idx].get("cervix"))
+        bbox = boxes[idx].get("cervix")
 
         if bbox is None or len(bbox) == 0:
             print("Could not find ROI on image " + img_name)
             cv2.imwrite(new_image_path, img)
             continue
-
+        bbox = np.array(bbox)
         new_boxes, new_probs = non_max_suppression_fast(bbox, np.array(probs[idx]["cervix"]),
                                                         overlap_thresh=overlap_th)
         (x1, y1, x2, y2) = new_boxes[np.argmax(new_probs), :]

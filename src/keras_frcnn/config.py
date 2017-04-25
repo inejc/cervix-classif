@@ -26,8 +26,8 @@ class Config:
         # self.anchor_box_scales = [25, 50, 75, 100, 125, 150, 175, 199] #za kasnejse modele
 
         # anchor box ratios
-        self.anchor_box_ratios = [[1, 1], [1, 2], [2, 1], [1, 3], [1, 4], [3, 1], [4, 1], [3, 4],
-                                  [4, 3]]
+        self.anchor_box_ratios = [[1, 1], [1, 2], [2, 1], [2, 2], [1, 3], [1, 4], [3, 1], [4, 1],
+                                  [3, 4], [4, 3]]
 
         # size to resize the smallest side of the image
         # self.im_size = 299
