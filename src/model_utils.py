@@ -15,13 +15,14 @@ def dump_args(func):
         args = func_args[:len(arg_names)]
         defaults = func.__defaults__ or ()
         args = args + defaults[len(defaults) - (func.__code__.co_argcount - len(args)):]
-        params = [zip(arg_names, args)]
+        params = list(zip(arg_names, args))
         args = func_args[len(arg_names):]
         if args:
             params.append(('args', args))
         if func_kwargs:
             params.append(('kwargs', func_kwargs))
 
+        print(params)
         # TODO TIM: SAVE TO FILE
         if len(func_args) > 0:
             model_name = func_args[0]

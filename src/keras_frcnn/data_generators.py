@@ -289,7 +289,7 @@ def threadsafe_generator(f):
 
 
 def get_anchor_gt(all_img_data, class_count, C, backend, mode='train'):
-    all_img_data = sorted(all_img_data)
+    all_img_data = sorted(all_img_data, key=lambda x: sorted(x.keys()))
 
     sample_selector = SampleSelector(class_count)
 
