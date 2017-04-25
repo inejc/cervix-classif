@@ -66,11 +66,11 @@ def build_model(classes_count, num_anchors):
 
 
 @dump_args
-def train(name, epochs=60, batch_size=1, lr=0.0001, decay=0.001):
+def train(name_name, epochs=60, batch_size=1, lr=0.0001, decay=0.001):
     all_imgs, classes_count, class_mapping = get_data(ROI_BBOX_FILE)
     num_anchors = len(C.anchor_box_scales) * len(C.anchor_box_ratios)
 
-    C.model_name = name
+    C.model_name = name_name
 
     if 'bg' not in classes_count:
         classes_count['bg'] = 0
@@ -94,7 +94,8 @@ def train(name, epochs=60, batch_size=1, lr=0.0001, decay=0.001):
     optimizer = Adam(lr=lr, decay=decay)
     model.compile(optimizer=optimizer,
                   loss=[losses.rpn_loss_cls(num_anchors), losses.rpn_loss_regr(num_anchors),
-                        losses.class_loss_cls, losses.class_loss_regr(C.num_rois, len(classes_count) - 1)],
+                        losses.class_loss_cls,
+                        losses.class_loss_regr(C.num_rois, len(classes_count) - 1)],
                   metrics={'dense_class_{}_loss'.format(len(classes_count)): 'accuracy'})
 
     data_gen_train = data_generators.get_anchor_gt(train_imgs, class_mapping, classes_count,
@@ -104,7 +105,8 @@ def train(name, epochs=60, batch_size=1, lr=0.0001, decay=0.001):
                                                  C, K.image_dim_ordering(), mode='val')
 
     callbacks = [EarlyStopping(monitor='val_loss', patience=20, verbose=0),
-                 ModelCheckpoint(C.get_model_path(), monitor='val_loss', save_best_only=True, verbose=0),
+                 ModelCheckpoint(C.get_model_path(), monitor='val_loss', save_best_only=True,
+                                 verbose=0),
                  ReduceLROnPlateau(monitor='loss', factor=0.1, patience=5, min_lr=1e-7, verbose=1),
                  LoggingCallback(C)]
 
