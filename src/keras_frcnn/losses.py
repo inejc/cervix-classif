@@ -52,7 +52,7 @@ def rpn_loss_cls(num_anchors):
     return rpn_loss_cls_fixed_num
 
 
-def class_loss_regr(num_classes):
+def class_loss_regr(num_rois, num_classes):
     def class_loss_regr_fixed_num(y_true, y_pred):
         x = y_true[:, :, 4 * num_classes:] - y_pred
         x_abs = K.abs(x)
