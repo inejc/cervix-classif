@@ -66,11 +66,11 @@ def build_model(classes_count, num_anchors):
 
 
 @dump_args
-def train(name_name, epochs=60, batch_size=1, lr=0.0001, decay=0.001):
+def train(model_name, epochs=60, batch_size=1, lr=0.0001, decay=0.001):
     all_imgs, classes_count, class_mapping = get_data(ROI_BBOX_FILE)
     num_anchors = len(C.anchor_box_scales) * len(C.anchor_box_ratios)
 
-    C.model_name = name_name
+    C.model_name = model_name
 
     if 'bg' not in classes_count:
         classes_count['bg'] = 0
