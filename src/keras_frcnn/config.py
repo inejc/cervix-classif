@@ -1,16 +1,11 @@
-import json
-from os.path import join, isfile
+import os
 
 import numpy as np
 from keras import backend as K
 
-from data_provider import FRCNN_MODELS_DIR, MEAN_PIXEL_FILE
-
 
 class Config:
     def __init__(self, **entries):
-
-        self.verbose = True
 
         self.model_name = "default"
         # setting for roi augmentation
@@ -25,13 +20,11 @@ class Config:
 
         # anchor box scales
         # self.anchor_box_scales = [128, 256, 512]
-        self.anchor_box_scales = [50, 100, 150, 200, 299]
-        # self.anchor_box_scales = [50, 75, 100, 125, 150, 175, 200, 225, 250, 299]
-        # self.anchor_box_scales = [25, 50, 75, 100, 125, 150, 175, 199]
+        self.anchor_box_scales = [50, 75, 100, 125, 150, 175, 200, 225, 250, 299] #za model num_rois_2_additional
+        # self.anchor_box_scales = [25, 50, 75, 100, 125, 150, 175, 199] #za kasnejse modele
 
         # anchor box ratios
-        # self.anchor_box_ratios = [[1, 1], [1, 2], [2, 1], [3, 4], [4, 3]]
-        self.anchor_box_ratios = [[1, 1], [1, 2], [2, 1]]
+        self.anchor_box_ratios = [[1, 1], [1, 2], [2, 1], [1, 3], [1, 4],[3, 1], [4, 1]]
 
         # size to resize the smallest side of the image
         # self.im_size = 299
@@ -47,7 +40,6 @@ class Config:
 
         # scaling the stdev
         self.std_scaling = 4.0
-        self.classifier_regr_std = [8.0, 8.0, 4.0, 4.0]
 
         # overlaps for RPN
         self.rpn_min_overlap = 0.3
