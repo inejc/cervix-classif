@@ -2,6 +2,9 @@ import os
 
 import numpy as np
 from keras import backend as K
+from os.path import isfile, join
+
+from data_provider import MEAN_PIXEL_FILE, FRCNN_MODELS_DIR
 
 
 class Config:
