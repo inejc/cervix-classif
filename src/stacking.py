@@ -1,106 +1,83 @@
 from math import ceil
-from os.path import join
+from os.path import join, isfile
 
 import fire
 import numpy as np
-from keras.applications.inception_v3 import \
-    preprocess_input as inception_preprocess
-from keras.applications.xception import preprocess_input as xception_preprocess
 from keras.models import load_model
 from keras.preprocessing.image import ImageDataGenerator
-from scipy.stats import uniform
+from sklearn.externals.joblib import load, dump
 from sklearn.linear_model import LogisticRegression
-from sklearn.model_selection import RandomizedSearchCV
 
-from data_provider import load_organized_data_info, MODELS_DIR, SUBMISSIONS_DIR
-from resnet50_fine_tune import preprocess_single_input as resnet50_preprocess
-from vgg19_fine_tune import preprocess_single_input as vgg19_preprocess
-from utils import create_submission_file
+from data_provider import load_organized_data_info, MODELS_DIR
 from xception_fine_tune import create_embeddings
 
-WIDTH, HEIGHT = 299, 299
 BATCH_SIZE = 32
 
-MODELS = {
-    'xception_fine_tuned_stable_frozen_86_dropout_0_2_val_loss_0_7288.h5':
-        xception_preprocess,
-    'inception_fine_tuned_stable_frozen_270_dropout_0_5_val_loss_0_7166.h5':
-        inception_preprocess,
-    'resnet50_fine_tuned_stable_frozen_130_dropout_0_5_val_loss_0_6868.h5':
-        resnet50_preprocess,
-    'vgg19_fine_tuned_stable_frozen_17_penultimate_256_dropout_0_5_val_loss_0_6631.h5':
-        vgg19_preprocess,
-    'vgg19_fine_tuned_stable_frozen_7_penultimate_512_dropout_0_5_val_loss_0_6881.h5':
-        vgg19_preprocess,
-}
 
+def stack(group):
+    name, width, height = group['name'], group['width'], group['height']
+    group_uid, models = group['uid'], group['models']
 
-def train(name='stable', cross_validate=True, num_search_iter=500):
-    data_info = load_organized_data_info(imgs_dim=HEIGHT, name=name)
+    meta_model_file = join(
+        MODELS_DIR,
+        'stacking_meta_model_group_{:d}.pickle'.format(group_uid)
+    )
+    meta_model_fitted = isfile(meta_model_file)
 
-    preds_val = np.empty((data_info['num_val'], 0))
-    if not cross_validate:
-        preds_te = np.empty((data_info['num_te'], 0))
+    data_info = load_organized_data_info(imgs_dim=width, name=name)
 
-    for model_name, preprocess_func in MODELS.items():
+    if not meta_model_fitted:
+        preds_val = np.empty((data_info['num_val'], 0))
+    preds_te = np.empty((data_info['num_te'], 0))
+
+    for model_name, preprocess_func in models:
         model_path = join(MODELS_DIR, model_name)
 
-        model_preds_val = _make_predictions(
-            model_path=model_path,
-            preprocess_func=preprocess_func,
-            data_info=data_info,
-            dir_id='val'
-        )
-
-        if not cross_validate:
-            model_preds_te = _make_predictions(
+        if not meta_model_fitted:
+            model_preds_val = _make_predictions(
+                height=height,
+                width=width,
                 model_path=model_path,
                 preprocess_func=preprocess_func,
                 data_info=data_info,
-                dir_id='te'
+                dir_id='val'
             )
 
-        preds_val = np.hstack((preds_val, model_preds_val))
-        if not cross_validate:
-            preds_te = np.hstack((preds_te, model_preds_te))
+        model_preds_te = _make_predictions(
+            height=height,
+            width=width,
+            model_path=model_path,
+            preprocess_func=preprocess_func,
+            data_info=data_info,
+            dir_id='te'
+        )
 
+        if not meta_model_fitted:
+            preds_val = np.hstack((preds_val, model_preds_val))
+        preds_te = np.hstack((preds_te, model_preds_te))
+
+    # todo: use imgs dim param
     _, _, _, y_val, _, te_names = create_embeddings(name=name)
 
-    if cross_validate:
-        l2_distribution = {'C': uniform(1e-3, 1e4)}
-        random_search = RandomizedSearchCV(
-            estimator=LogisticRegression(),
-            param_distributions=l2_distribution,
-            n_iter=num_search_iter,
-            n_jobs=-1,
-            cv=10,
-        )
-        random_search.fit(preds_val, y_val)
-
-        print("Best random search score and params:")
-        print(random_search.best_score_)
-        print(random_search.best_params_)
+    if meta_model_fitted:
+        meta_model = load(meta_model_file)
     else:
-        lr = LogisticRegression(C=1e10)
-        lr.fit(preds_val, y_val)
-        y_pred = lr.predict_proba(preds_te)
+        meta_model = LogisticRegression(C=1e10)
+        meta_model.fit(preds_val, y_val)
+        dump(meta_model, meta_model_file)
 
-        create_submission_file(
-            te_names,
-            y_pred,
-            join(SUBMISSIONS_DIR, 'stacked.csv')
-        )
-
-        print(lr.coef_)
+    te_pred = meta_model.predict_proba(preds_te)
+    return te_names, te_pred
 
 
-def _make_predictions(model_path, preprocess_func, data_info, dir_id):
+def _make_predictions(height, width, model_path, preprocess_func,
+                      data_info, dir_id):
     model = load_model(model_path)
 
     datagen = ImageDataGenerator(preprocessing_function=preprocess_func)
     datagen = datagen.flow_from_directory(
         directory=data_info['dir_' + dir_id],
-        target_size=(HEIGHT, WIDTH),
+        target_size=(height, width),
         class_mode=None,
         batch_size=BATCH_SIZE,
         shuffle=False

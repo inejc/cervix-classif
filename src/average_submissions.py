@@ -6,19 +6,11 @@ import numpy as np
 from data_provider import SUBMISSIONS_DIR
 from utils import read_lines, create_submission_file
 
-W_SUBMISSIONS = {
-    # 0.59544 public score
-    'stacked_0_60049.csv': 1,
-    'stacked_0_60564.csv': 1,
-    'stacked_0_60829.csv': 1,
-    'stacked_0_60967.csv': 1,
-}
 
-
-def average():
+def create_averaged_submission(weighted_submissions):
     names, probs, weights = [], [], []
 
-    for file_name, weight in W_SUBMISSIONS.items():
+    for file_name, weight in weighted_submissions.items():
         file_path = join(SUBMISSIONS_DIR, file_name)
         lines = read_lines(file_path)[1:]
 
@@ -42,7 +34,7 @@ def average():
 
     submissions_file = join(
         SUBMISSIONS_DIR,
-        'averaged_all_0_59544.csv'
+        'averaged_all.csv'
     )
     create_submission_file(names, averaged, submissions_file)
 
