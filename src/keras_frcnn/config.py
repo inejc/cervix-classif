@@ -21,7 +21,7 @@ class Config:
         self.validation_percent = 0.15
 
         # anchor box scales
-        self.anchor_box_scales = [50, 75, 100, 150, 200, 299]
+        self.anchor_box_scales = [25, 50, 75, 100, 150, 200, 299]
 
         # anchor box ratios
         self.anchor_box_ratios = [[1, 1], [1, 2], [2, 1], [2, 2], [1, 3], [1, 4], [3, 1], [4, 1], [3, 4], [4, 3]]
