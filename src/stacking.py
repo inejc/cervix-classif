@@ -15,7 +15,7 @@ BATCH_SIZE = 32
 
 
 def stack(group):
-    name = group['name'], width = group['width'], height = group['height']
+    name, width, height = group['name'], group['width'], group['height']
     group_uid, models = group['uid'], group['models']
 
     meta_model_file = join(
