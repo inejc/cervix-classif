@@ -6,6 +6,7 @@ import sys
 import cv2
 import fire
 import numpy as np
+from collections import defaultdict
 from keras import backend as K
 from keras.layers import Input
 from keras.models import Model
@@ -105,10 +106,10 @@ def predict(model_name, in_dir="train_cleaned", bbox_threshold=0.5):
 
     images = sorted(glob.glob(os.path.join(DATA_DIR, in_dir, "**/*.jpg"), recursive=True))
     print("Found " + str(len(images)) + " images...")
-    try:
 
-        probs = []
-        boxes = []
+    probs = []
+    boxes = []
+    try:
         for idx, img_name in tqdm(enumerate(images), total=len(images)):
             img = cv2.imread(img_name)
             height, width, _ = img.shape
@@ -172,6 +173,10 @@ def predict(model_name, in_dir="train_cleaned", bbox_threshold=0.5):
                                    for b in bbox]
     except KeyboardInterrupt:
         pass
+    save_predictions(model_name, in_dir, images, boxes, probs)
+
+
+def save_predictions(model_name, in_dir, images, boxes, probs):
     print("Saving predictions...")
     np.savez_compressed(
         file=os.path.join(FRCNN_MODELS_DIR, model_name, in_dir + "_predictions"),
@@ -179,6 +184,40 @@ def predict(model_name, in_dir="train_cleaned", bbox_threshold=0.5):
         boxes=boxes,
         probs=probs,
     )
+
+
+def merge_predictions(in_dir):
+    model_name = "merged"
+
+    models = [d for d in glob.glob(os.path.join(FRCNN_MODELS_DIR, "*")) if os.path.isdir(d)]
+    models = [m.split("/")[-1] for m in models if model_name not in m]
+
+    boxes, probs = [], []
+    for m in models:
+        _, b, p = load_predictions(m, in_dir)
+        boxes.append(b)
+        probs.append(p)
+
+    images = boxes[0]
+    merged_boxes, merged_probs = [], []
+    for i in range(len(images)):
+        merged_boxes.append(merge_dicts(*[b[i] for b in boxes]))
+        merged_probs.append(merge_dicts(*[p[i] for p in probs]))
+
+    file = os.path.join(FRCNN_MODELS_DIR, model_name)
+    if not os.path.exists(file):
+        os.makedirs(file)
+    with open(os.path.join(file, "log.txt"), 'w') as log_file:
+        log_file.write("models used: " + ", ".join(models))
+    save_predictions(model_name, in_dir, images, merged_boxes, merged_probs)
+
+
+def merge_dicts(*dict_args):
+    result = defaultdict(list)
+    for dictionary in dict_args:
+        for key, value in dictionary.items():
+            result[key] += value
+    return dict(result)
 
 
 def crop(model_name, in_dir, overlap_th=0.95):
@@ -202,6 +241,14 @@ def crop(model_name, in_dir, overlap_th=0.95):
                                                         overlap_thresh=overlap_th)
         (x1, y1, x2, y2) = new_boxes[np.argmax(new_probs), :]
         cv2.imwrite(new_image_path, img[y1:y2, x1:x2])
+
+
+def load_predictions(model_name, in_dir):
+    file = os.path.join(FRCNN_MODELS_DIR, model_name, in_dir + "_predictions.npz")
+    if not os.path.isfile(file):
+        raise RuntimeError("ROI_PREDICTIONS_FILE not found! You must run predict first!")
+    with np.load(file) as data:
+        return data["images"], data["boxes"], data["probs"]
 
 
 def visualize(model_name, in_dir, only_best=True, overlap_th=0.95, img_min_side=600):
@@ -239,14 +286,6 @@ def visualize(model_name, in_dir, only_best=True, overlap_th=0.95, img_min_side=
 
         cv2.imshow('img', img)
         cv2.waitKey(0)
-
-
-def load_predictions(model_name, in_dir):
-    file = os.path.join(FRCNN_MODELS_DIR, model_name, in_dir + "_predictions.npz")
-    if not os.path.isfile(file):
-        raise RuntimeError("ROI_PREDICTIONS_FILE not found! You must run predict first!")
-    with np.load(file) as data:
-        return data["images"], data["boxes"], data["probs"]
 
 
 if __name__ == '__main__':

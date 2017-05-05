@@ -62,10 +62,6 @@ def build_model(classes_count, num_anchors):
     return model
 
 
-# TODO: AUTO SAVE MODELS PARAMS AND LINK THEM TO NAME!
-# TODO: SAVE FIT HISTORY/SUMMARY
-
-
 @dump_args
 def train(model_name, epochs=60, batch_size=1, lr=0.0001, decay=0.001):
     t = time.time()
