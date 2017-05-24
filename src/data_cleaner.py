@@ -18,9 +18,9 @@ from utils import read_lines, is_green
 
 def clean(dir_):
     """Filters the dir_ directory (splits into dir_cleaned and dir_junk)."""
-    dir_cleaned = join(DATA_DIR, dir_ + '_cleaned')
+    dir_cleaned = join(DATA_DIR, dir_ + '_cleaned_final')
     _make_labeled_dir_structure(dir_cleaned)
-    dir_junk = join(DATA_DIR, dir_ + '_junk')
+    dir_junk = join(DATA_DIR, dir_ + '_junk_final')
     _make_labeled_dir_structure(dir_junk)
 
     black_list = read_lines(
