@@ -290,5 +290,3 @@ def visualize(model_name, in_dir, only_best=True, overlap_th=0.95, img_min_side=
 
 if __name__ == '__main__':
     fire.Fire()
-    # merge_predictions("test")
-    crop("merged", "test")
