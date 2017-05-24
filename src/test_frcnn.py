@@ -195,9 +195,12 @@ def merge_predictions(in_dir):
     images = None
     boxes, probs = [], []
     for m in models:
-        images, b, p = load_predictions(m, in_dir)
-        boxes.append(b)
-        probs.append(p)
+        try:
+            images, b, p = load_predictions(m, in_dir)
+            boxes.append(b)
+            probs.append(p)
+        except RuntimeError:
+            pass
 
     merged_boxes, merged_probs = [], []
     for i in range(len(images)):
