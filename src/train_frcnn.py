@@ -105,8 +105,7 @@ def train(model_name, epochs=60, batch_size=1, lr=0.0001, decay=0.001):
                                                  C, K.image_dim_ordering(), mode='val')
 
     callbacks = [EarlyStopping(monitor='val_loss', patience=20, verbose=0),
-                 ModelCheckpoint(C.get_model_path(), monitor='val_loss', save_best_only=True,
-                                 verbose=0),
+                 ModelCheckpoint(C.get_model_path(), monitor='val_loss', save_best_only=True, verbose=0),
                  ReduceLROnPlateau(monitor='loss', factor=0.1, patience=5, min_lr=1e-7, verbose=1),
                  LoggingCallback(C)]
 

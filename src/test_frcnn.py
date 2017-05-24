@@ -192,13 +192,13 @@ def merge_predictions(in_dir):
     models = [d for d in glob.glob(os.path.join(FRCNN_MODELS_DIR, "*")) if os.path.isdir(d)]
     models = [m.split("/")[-1] for m in models if model_name not in m]
 
+    images = None
     boxes, probs = [], []
     for m in models:
-        _, b, p = load_predictions(m, in_dir)
+        images, b, p = load_predictions(m, in_dir)
         boxes.append(b)
         probs.append(p)
 
-    images = boxes[0]
     merged_boxes, merged_probs = [], []
     for i in range(len(images)):
         merged_boxes.append(merge_dicts(*[b[i] for b in boxes]))
@@ -290,3 +290,5 @@ def visualize(model_name, in_dir, only_best=True, overlap_th=0.95, img_min_side=
 
 if __name__ == '__main__':
     fire.Fire()
+    # merge_predictions("test")
+    crop("merged", "test")
