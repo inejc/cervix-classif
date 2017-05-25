@@ -123,7 +123,7 @@ def _organize_train_dirs(dirs, val_size_fraction, imgs_dim, name, new_dir_tr,
     weighted_paths, weighted_labels = _create_duplicated_examples(
         train_paths[ind_tr],
         train_labels[ind_tr],
-        num_per_cls={'Type_2': 450, 'Type_3': 375}
+        num_per_cls={'Type_1': 40, 'Type_3': 170}
     )
 
     _save_images_to_dir(
