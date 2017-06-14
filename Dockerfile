@@ -65,3 +65,5 @@ COPY requirements.txt requirements.txt
 RUN pip3 install -U pip setuptools wheel
 RUN pip3 install -r requirements.txt
 RUN mkdir models
+RUN mkdir /home/user/remote
+RUN chown -R user:user /home/user

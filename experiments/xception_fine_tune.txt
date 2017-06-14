@@ -1,59 +1,46 @@
-UNCLEANED DATA 0.1 train val split
-----------------------------------
-(cca. 0.89 val_loss, 0.90685 public score)
-train_top_classifier --lr 0.0001 --epochs 2700 --batch_size 1332 --l2_reg 0 --dropout_p 0.5 --save_model True
+train_top_classifier --name 'stable' --lr 0.0001 --epochs 1000 --batch_size 1024 --l2_reg 0 --dropout_p 0.5 --save_model True
 
-(cca 0.83 val_loss, 0.77085 public score and 0.8123 val_loss)
-fine_tune --lr 1e-4 --reduce_lr_factor 0.1 --reduce_lr_patience 1 --epochs 100 --batch_size 256 --l2_reg 0 --dropout_p 0.6 --num_freeze_layers 126
+0.1 VAL DATA CROPPED WITH ADDITIONAL
+------------------------------------
+GROUP 0
+fine_tune --name 'stable' --name_ext 'frozen_86_dropout_0_2' --lr 1e-5 --reduce_lr_factor 0.1 --reduce_lr_patience 50 --epochs 50 --batch_size 256 --l2_reg 0 --dropout_p 0.2 --num_freeze_layers 86
+Epoch 24 - loss: 0.4228 - val_loss: 0.7288 (0.71206 public score)
 
-(0.8039 val_loss, 0.76231 public score)
-fine_tune --lr 1e-5 --reduce_lr_factor 0.1 --reduce_lr_patience 100 --epochs 100 --batch_size 256 --l2_reg 0 --dropout_p 0.6 --num_freeze_layers 126
+fine_tune --name 'stable' --name_ext 'frozen_86_dropout_0_3' --lr 1e-5 --reduce_lr_factor 0.1 --reduce_lr_patience 50 --epochs 50 --batch_size 256 --l2_reg 0 --dropout_p 0.3 --num_freeze_layers 86
+Epoch 30 - loss: 0.3376 - val_loss: 0.7494
 
+fine_tune --name 'stable' --name_ext 'frozen_86_dropout_0_4' --lr 1e-5 --reduce_lr_factor 0.1 --reduce_lr_patience 50 --epochs 50 --batch_size 256 --l2_reg 0 --dropout_p 0.4 --num_freeze_layers 86
+Epoch 24 - loss: 0.4763 - val_loss: 0.7155 (0.73848 public score)
 
-CLEANED DATA (NEW VAL DATA) 0.1 train val split (additional data in val set)
-----------------------------------------------------------------------------
-(0.7627 val_loss, 0.87526 public score)
-train_top_classifier --name 'cleaned' --lr 0.0001 --epochs 2700 --batch_size 1332 --l2_reg 0 --dropout_p 0.5 --save_model True
+GROUP 3
+fine_tune --name 'stable' --name_ext 'frozen_86_dropout_0_5' --lr 1e-5 --reduce_lr_factor 0.1 --reduce_lr_patience 50 --epochs 50 --batch_size 256 --l2_reg 0 --dropout_p 0.5 --num_freeze_layers 86
+Epoch 24 - loss: 0.4990 - val_loss: 0.7520 (0.69868 public score)
 
-CLEANED DATA (NEW VAL DATA) 0.1 train val split (only train data in val set)
-----------------------------------------------------------------------------
-(0.8359 val_loss, 0.87120 public score)
-train_top_classifier --name 'cleaned' --lr 0.0001 --epochs 1000 --batch_size 1024 --l2_reg 0 --dropout_p 0.5 --save_model True
+GROUP 2
+fine_tune --name 'stable' --name_ext 'frozen_86_dropout_0_6' --lr 1e-5 --reduce_lr_factor 0.1 --reduce_lr_patience 50 --epochs 50 --batch_size 256 --l2_reg 0 --dropout_p 0.6 --num_freeze_layers 86
+Epoch 27- loss: 0.4783 - val_loss: 0.7386
 
-fine tuning
------------
-fine_tune --name 'cleaned' --name_ext 'frozen_126' --lr 1e-5 --reduce_lr_factor 0.1 --reduce_lr_patience 100 --epochs 100 --batch_size 256 --l2_reg 0 --dropout_p 0.5 --num_freeze_layers 126
-Epoch 27 - loss: 0.4802 - val_loss: 0.7614
+fine_tune --name 'stable' --name_ext 'frozen_96_dropout_0_3' --lr 1e-5 --reduce_lr_factor 0.1 --reduce_lr_patience 30 --epochs 30 --batch_size 256 --l2_reg 0 --dropout_p 0.3 --num_freeze_layers 96
+Epoch 27 - loss: 0.3967 - val_loss: 0.7326
 
-fine_tune --name 'cleaned' --name_ext 'frozen_116' --lr 1e-5 --reduce_lr_factor 0.1 --reduce_lr_patience 100 --epochs 100 --batch_size 256 --l2_reg 0 --dropout_p 0.5 --num_freeze_layers 116
-Epoch 20 - loss: 0.5719 - val_loss: 0.7696
+fine_tune --name 'stable' --name_ext 'frozen_96_dropout_0_4' --lr 1e-5 --reduce_lr_factor 0.1 --reduce_lr_patience 30 --epochs 30 --batch_size 256 --l2_reg 0 --dropout_p 0.4 --num_freeze_layers 96
+Epoch 29- loss: 0.3769 - val_loss: 0.7216
 
-fine_tune --name 'cleaned' --name_ext 'frozen_116_dropout_0_6' --lr 1e-5 --reduce_lr_factor 0.1 --reduce_lr_patience 100 --epochs 100 --batch_size 256 --l2_reg 0 --dropout_p 0.6 --num_freeze_layers 116
-Epoch 32 - loss: 0.4252 - val_loss: 0.7355 (public score 0.74836)
+fine_tune --name 'stable' --name_ext 'frozen_96_dropout_0_5' --lr 1e-5 --reduce_lr_factor 0.1 --reduce_lr_patience 30 --epochs 30 --batch_size 256 --l2_reg 0 --dropout_p 0.5 --num_freeze_layers 96
+Epoch 15 - loss: 0.6435 - val_loss: 0.7669
 
-fine_tune --name 'cleaned' --name_ext 'frozen_106_dropout_0_6' --lr 1e-5 --reduce_lr_factor 0.1 --reduce_lr_patience 100 --epochs 100 --batch_size 256 --l2_reg 0 --dropout_p 0.6 --num_freeze_layers 106
-Epoch 24 - loss: 0.5405 - val_loss: 0.7193 (0.73764 public score)
+GROUP 1
+fine_tune --name 'stable' --name_ext 'frozen_96_dropout_0_6' --lr 1e-5 --reduce_lr_factor 0.1 --reduce_lr_patience 30 --epochs 30 --batch_size 256 --l2_reg 0 --dropout_p 0.6 --num_freeze_layers 96
+Epoch 26 - loss: 0.4987 - val_loss: 0.7383
 
-fine_tune --name 'cleaned' --name_ext 'frozen_106_dropout_0_6_all_epochs' --lr 1e-5 --reduce_lr_factor 0.1 --reduce_lr_patience 100 --epochs 40 --batch_size 256 --l2_reg 0 --dropout_p 0.6 --num_freeze_layers 106 --save_best_only False
-Epoch 40 - loss: 0.3254 - val_loss: 0.8379 (public score 0.77236)
+fine_tune --name 'stable' --name_ext 'frozen_66_dropout_0_5' --lr 1e-5 --reduce_lr_factor 0.1 --reduce_lr_patience 100 --epochs 100 --batch_size 256 --l2_reg 0 --dropout_p 0.5 --num_freeze_layers 66 --loss_stop_val 0.46
+Epoch 27 - loss: 0.4563 - val_loss: 0.7719
 
-fine_tune --name 'cleaned' --name_ext 'frozen_96_dropout_0_6' --lr 1e-5 --reduce_lr_factor 0.1 --reduce_lr_patience 100 --epochs 100 --batch_size 256 --l2_reg 0 --dropout_p 0.6 --num_freeze_layers 96
-Epoch 26 - loss: 0.5313 - val_loss: 0.7404 (public score 0.72837)
+fine_tune --name 'stable' --name_ext 'frozen_76_dropout_0_5' --lr 1e-5 --reduce_lr_factor 0.1 --reduce_lr_patience 100 --epochs 100 --batch_size 256 --l2_reg 0 --dropout_p 0.5 --num_freeze_layers 76 --loss_stop_val 0.46
+Epoch 15 - loss: 0.6505 - val_loss: 0.7702
 
-fine_tune --name 'cleaned' --name_ext 'frozen_86_dropout_0_6' --lr 1e-5 --reduce_lr_factor 0.1 --reduce_lr_patience 100 --epochs 25 --batch_size 256 --l2_reg 0 --dropout_p 0.6 --num_freeze_layers 86
-Epoch 25 - loss: 0.5358 - val_loss: 0.7585 (public score 0.73830)
+fine_tune --name 'stable' --name_ext 'frozen_96_dropout_0_5' --lr 1e-5 --reduce_lr_factor 0.1 --reduce_lr_patience 100 --epochs 100 --batch_size 256 --l2_reg 0 --dropout_p 0.5 --num_freeze_layers 96 --loss_stop_val 0.46
+Epoch 18 - loss: 0.5946 - val_loss: 0.7359
 
-MORE CLEANED DATA 0.1 train val split (only train data in val set)
-------------------------------------------------------------------
-(0.7854 val_loss)
-train_top_classifier --name 'cleaned' --lr 0.0001 --epochs 1500 --batch_size 1024 --l2_reg 0 --dropout_p 0.3 --save_model True
-
-fine tuning
------------
-0
-fine_tune --name 'cleaned' --name_ext 'frozen_96_dropout_0_6' --lr 1e-5 --reduce_lr_factor 0.1 --reduce_lr_patience 100 --epochs 100 --batch_size 256 --l2_reg 0 --dropout_p 0.6 --num_freeze_layers 96
-Epoch 36 - loss: 0.3216 - val_loss: 0.6145 (public score 0.79816)
-
-1
-fine_tune --name 'cleaned' --name_ext 'frozen_86_dropout_0_6' --lr 1e-5 --reduce_lr_factor 0.1 --reduce_lr_patience 100 --epochs 100 --batch_size 256 --l2_reg 0 --dropout_p 0.6 --num_freeze_layers 86
-Epoch 23 - loss: 0.5237 - val_loss: 0.6949 (public score 0.72094)
+fine_tune --name 'stable' --name_ext 'frozen_106_dropout_0_5' --lr 1e-5 --reduce_lr_factor 0.1 --reduce_lr_patience 100 --epochs 100 --batch_size 256 --l2_reg 0 --dropout_p 0.5 --num_freeze_layers 106 --loss_stop_val 0.46
+Epoch 23 - loss: 0.5038 - val_loss: 0.7550

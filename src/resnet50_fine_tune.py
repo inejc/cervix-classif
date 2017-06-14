@@ -1,23 +1,23 @@
 """
 Example usage
 -------------
-    python xception_fine_tune.py create_embeddings --name 'cleaned'
+    python resnet50_fine_tune.py create_embeddings --name 'cleaned'
 
-    python xception_fine_tune.py train_top_classifier --name 'cleaned'
+    python resnet50_fine_tune.py train_top_classifier --name 'cleaned'
                                  --lr 0.0001 --epochs 3 --batch_size 32
                                  --l2_reg 0 --dropout_p 0.5 --save_model=True
 
-    python xception_fine_tune.py make_submission_top_classifier --name 'cleaned'
+    python resnet50_fine_tune.py make_submission_top_classifier --name 'cleaned'
                                  --dropout_p 0.5
 
-    python xception_fine_tune.py fine_tune --name 'cleaned'
+    python resnet50_fine_tune.py fine_tune --name 'cleaned'
                                  --name_ext 'frozen_96_dropout_0_6' --lr 1e-4
                                  --reduce_lr_factor 0.1 --reduce_lr_patience 3
                                  --epochs 2 --batch_size 32 --l2_reg 0
                                  --dropout_p 0.5 --num_freeze_layers 133,
                                  --save_best_only False --loss_stop_val 0.49
 
-    python xception_fine_tune.py make_submission_xception --name 'cleaned'
+    python resnet50_fine_tune.py make_submission_resnet50 --name 'cleaned'
                                  --name_ext 'frozen_96_dropout_0_6'
                                  --dropout_p 0.6
 """
@@ -28,7 +28,7 @@ from os.path import join, isfile
 
 import fire
 import numpy as np
-from keras.applications.xception import Xception, preprocess_input
+from keras.applications.resnet50 import ResNet50, preprocess_input
 from keras.callbacks import ModelCheckpoint, ReduceLROnPlateau, TensorBoard
 from keras.layers import Dense, Dropout
 from keras.models import Model, Sequential
@@ -43,13 +43,13 @@ from data_provider import MODELS_DIR, load_organized_data_info
 from utils import create_submission_file, EarlyStoppingByLoss
 
 HEIGHT, WIDTH = 299, 299
-EMBEDDINGS_FILE = 'xception_embeddings_{:s}.npz'
-TOP_CLASSIFIER_FILE = 'xception_top_classifier_{:s}.h5'
-MODEL_FILE = 'xception_fine_tuned_{:s}_{:s}.h5'
+EMBEDDINGS_FILE = 'resnet50_embeddings_{:s}.npz'
+TOP_CLASSIFIER_FILE = 'resnet50_top_classifier_{:s}.h5'
+MODEL_FILE = 'resnet50_fine_tuned_{:s}_{:s}.h5'
 
 
 def create_embeddings(name):
-    """Returns xception embeddings (outputs of the last conv layer).
+    """Returns resnet50 embeddings (outputs of the last conv layer).
 
     Returns
     -------
@@ -69,7 +69,7 @@ def create_embeddings(name):
             d['te_names']
 
     data_info = load_organized_data_info(imgs_dim=HEIGHT, name=name)
-    datagen = ImageDataGenerator(preprocessing_function=preprocess_input)
+    datagen = ImageDataGenerator(preprocessing_function=preprocess_single_input)
     batch_size = 32
 
     def dir_datagen(dir_):
@@ -81,7 +81,12 @@ def create_embeddings(name):
             shuffle=False
         )
 
-    model = Xception(weights='imagenet', include_top=False, pooling='avg')
+    model = ResNet50(
+        weights='imagenet',
+        include_top=False,
+        pooling='avg',
+        input_shape=(HEIGHT, WIDTH, 3)
+    )
 
     def embed(dir_, num, data_is_labeled):
         X = model.predict_generator(
@@ -168,7 +173,7 @@ def make_submission_top_classifier(name, dropout_p):
 
     probs_pred = model.predict_proba(X_te)
 
-    submission_file = 'xception_top_classifier_{:s}.csv'.format(name)
+    submission_file = 'resnet50_top_classifier_{:s}.csv'.format(name)
     create_submission_file(
         image_names=te_names,
         probs=probs_pred,
@@ -183,7 +188,7 @@ def fine_tune(name, name_ext, lr=1e-4, reduce_lr_factor=0.1,
 
     data_info = load_organized_data_info(imgs_dim=HEIGHT, name=name)
     tr_datagen = ImageDataGenerator(
-        preprocessing_function=preprocess_input,
+        preprocessing_function=preprocess_single_input,
         rotation_range=180,
         vertical_flip=True,
         horizontal_flip=True,
@@ -193,7 +198,9 @@ def fine_tune(name, name_ext, lr=1e-4, reduce_lr_factor=0.1,
         # shear_range=0.3,
         # fill_mode='reflect'
     )
-    val_datagen = ImageDataGenerator(preprocessing_function=preprocess_input)
+    val_datagen = ImageDataGenerator(
+        preprocessing_function=preprocess_single_input
+    )
     batch_size = 32
 
     def dir_datagen(dir_, gen):
@@ -211,7 +218,12 @@ def fine_tune(name, name_ext, lr=1e-4, reduce_lr_factor=0.1,
     top_classifier_file = join(MODELS_DIR, TOP_CLASSIFIER_FILE.format(name))
     model_file = join(MODELS_DIR, MODEL_FILE.format(name, name_ext))
 
-    model = Xception(weights='imagenet', include_top=False, pooling='avg')
+    model = ResNet50(
+        weights='imagenet',
+        include_top=False,
+        pooling='avg',
+        input_shape=(HEIGHT, WIDTH, 3)
+    )
     top_classifier = _top_classifier(
         l2_reg=l2_reg,
         dropout_p=dropout_p,
@@ -221,11 +233,11 @@ def fine_tune(name, name_ext, lr=1e-4, reduce_lr_factor=0.1,
     model = Model(inputs=model.input, outputs=top_classifier(model.output))
     model.compile(Adam(lr=lr), loss='categorical_crossentropy')
 
-    # model has 134 layers
+    # model has 177 layers
     for layer in model.layers[:num_freeze_layers]:
         layer.trainable = False
 
-    log_dir = join(EXPERIMENTS_DIR, 'xception_fine_tuned_{:s}'.format(name))
+    log_dir = join(EXPERIMENTS_DIR, 'resnet50_fine_tuned_{:s}'.format(name))
     callbacks = [
         EarlyStoppingByLoss(monitor='loss', value=loss_stop_val),
         ReduceLROnPlateau(factor=reduce_lr_factor, patience=reduce_lr_patience),
@@ -246,12 +258,12 @@ def fine_tune(name, name_ext, lr=1e-4, reduce_lr_factor=0.1,
     )
 
 
-def make_submission_xception(name, name_ext, dropout_p):
+def make_submission_resnet50(name, name_ext, dropout_p):
     data_info = load_organized_data_info(imgs_dim=HEIGHT, name=name)
     _, _, _, _, _, te_names = create_embeddings(name)
     batch_size = 32
 
-    datagen = ImageDataGenerator(preprocessing_function=preprocess_input)
+    datagen = ImageDataGenerator(preprocessing_function=preprocess_single_input)
     datagen = datagen.flow_from_directory(
         directory=data_info['dir_te'],
         target_size=(HEIGHT, WIDTH),
@@ -261,7 +273,12 @@ def make_submission_xception(name, name_ext, dropout_p):
     )
 
     model_file = join(MODELS_DIR, MODEL_FILE.format(name, name_ext))
-    model = Xception(weights='imagenet', include_top=False, pooling='avg')
+    model = ResNet50(
+        weights='imagenet',
+        include_top=False,
+        pooling='avg',
+        input_shape=(HEIGHT, WIDTH, 3)
+    )
     top_classifier = _top_classifier(
         l2_reg=0,
         dropout_p=dropout_p,
@@ -275,7 +292,7 @@ def make_submission_xception(name, name_ext, dropout_p):
         steps=ceil(data_info['num_te'] / batch_size)
     )
 
-    submission_file = 'xception_fine_tuned_{:s}.csv'.format(name)
+    submission_file = 'resnet50_fine_tuned_{:s}.csv'.format(name)
     create_submission_file(
         image_names=te_names,
         probs=probs_pred,
@@ -293,6 +310,11 @@ def _top_classifier(l2_reg, dropout_p, input_shape):
     )
     model.add(dense)
     return model
+
+
+def preprocess_single_input(x):
+    x = np.expand_dims(x, axis=0)
+    return preprocess_input(x)
 
 
 if __name__ == '__main__':
