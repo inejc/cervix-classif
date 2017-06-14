@@ -28,6 +28,9 @@ Temporary Items
 ### PyCharm ###
 .idea/
 
+### Vagrant ###
+.vagrant
+
 ### Python ###
 # Byte-compiled / optimized / DLL files
 __pycache__/
