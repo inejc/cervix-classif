@@ -10,7 +10,7 @@ def remove_():
     tr_dir = join(DATA_DIR, 'train_299_final')
     file_name_blueprint = 'additional_cleaned_frcnn_cropped_{:s}'
 
-    with open('test_stg1_additional_duplicates.csv') as lines:
+    with open('./test_stg1_additional_duplicates.csv') as lines:
         def split_(x):
             s = x.strip().split(',')
             s = s[1].split('/')
