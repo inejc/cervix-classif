@@ -13,13 +13,13 @@ def delete(soft=True):
     for file in weighted[:140]:
         print(file)
         if not soft:
-            remove(file)
+            remove(join(dir_, 'Type_2', file))
 
     weighted = [x for x in filter(lambda x: 'weighted' in x, listdir(join(dir_, 'Type_3')))]
     for file in weighted[:135]:
         print(file)
         if not soft:
-            remove(file)
+            remove(join(dir_, 'Type_3', file))
 
 
 if __name__ == '__main__':
