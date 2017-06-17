@@ -45,25 +45,25 @@ def organize(imgs_dim=299, name='', val_size_fraction=0.1,
     manner, train dir should be the first arg to tr_dirs (additional, gan, ...
     should follow).
     """
-    new_dir_tr = join(DATA_DIR, 'train_{:d}{:s}'.format(imgs_dim, '_' + name))
-    new_dir_val = join(DATA_DIR, 'val_{:d}{:s}'.format(imgs_dim, '_' + name))
+    # new_dir_tr = join(DATA_DIR, 'train_{:d}{:s}'.format(imgs_dim, '_' + name))
+    # new_dir_val = join(DATA_DIR, 'val_{:d}{:s}'.format(imgs_dim, '_' + name))
 
-    _make_labeled_dir_structure(new_dir_tr)
-    _make_labeled_dir_structure(new_dir_val)
+    # _make_labeled_dir_structure(new_dir_tr)
+    # _make_labeled_dir_structure(new_dir_val)
 
-    _organize_train_dirs(
-        tr_dirs,
-        val_size_fraction,
-        imgs_dim,
-        name,
-        new_dir_tr,
-        new_dir_val
-    )
+    # _organize_train_dirs(
+    #     tr_dirs,
+    #     val_size_fraction,
+    #     imgs_dim,
+    #     name,
+    #     new_dir_tr,
+    #     new_dir_val
+    # )
 
-    num_per_cls_tr = num_examples_per_class_in_dir(new_dir_tr)
-    num_tr = sum(num_per_cls_tr.values())
-    print("Organized training set class distribution:")
-    print({k: v / num_tr for k, v in num_per_cls_tr.items()})
+    # num_per_cls_tr = num_examples_per_class_in_dir(new_dir_tr)
+    # num_tr = sum(num_per_cls_tr.values())
+    # print("Organized training set class distribution:")
+    # print({k: v / num_tr for k, v in num_per_cls_tr.items()})
 
     if te_dir is not None:
         new_dir_te = join(
