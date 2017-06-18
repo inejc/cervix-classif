@@ -20,7 +20,7 @@ def stack(group):
 
     meta_model_file = join(
         MODELS_DIR,
-        'stacking_meta_model_group_{:d}.pickle'.format(group_uid)
+        'stacking_meta_model_{:s}_group_{:d}.pickle'.format(name, group_uid)
     )
     meta_model_fitted = isfile(meta_model_file)
 
