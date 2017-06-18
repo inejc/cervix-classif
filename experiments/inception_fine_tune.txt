@@ -22,17 +22,17 @@ Epoch 17 - loss: 0.4869 - val_loss: 0.7473
 FINAL
 -----
 GROUP 0
-fine_tune --name 'final' --name_ext 'frozen_280_dropout_0_5' --lr 1e-5 --reduce_lr_factor 0.1 --reduce_lr_patience 100 --epochs 100 --batch_size 256 --l2_reg 0 --dropout_p 0.5 --num_freeze_layers 280
+fine_tune --name 'final' --name_ext 'frozen_280_dropout_0_5' --lr 1e-5 --reduce_lr_factor 0.1 --reduce_lr_patience 100 --epochs 18 --batch_size 256 --l2_reg 0 --dropout_p 0.5 --num_freeze_layers 280 --save_best_only False
 todo a
 
 GROUP 1
-fine_tune --name 'final' --name_ext 'frozen_270_dropout_0_5' --lr 1e-5 --reduce_lr_factor 0.1 --reduce_lr_patience 100 --epochs 100 --batch_size 256 --l2_reg 0 --dropout_p 0.5 --num_freeze_layers 270
+fine_tune --name 'final' --name_ext 'frozen_270_dropout_0_5' --lr 1e-5 --reduce_lr_factor 0.1 --reduce_lr_patience 100 --epochs 18 --batch_size 256 --l2_reg 0 --dropout_p 0.5 --num_freeze_layers 270 --save_best_only False
 todo b
 
 GROUP 2
-fine_tune --name 'final' --name_ext 'frozen_260_dropout_0_5' --lr 1e-5 --reduce_lr_factor 0.1 --reduce_lr_patience 100 --epochs 100 --batch_size 256 --l2_reg 0 --dropout_p 0.5 --num_freeze_layers 260
+fine_tune --name 'final' --name_ext 'frozen_260_dropout_0_5' --lr 1e-5 --reduce_lr_factor 0.1 --reduce_lr_patience 100 --epochs 18 --batch_size 256 --l2_reg 0 --dropout_p 0.5 --num_freeze_layers 260 --save_best_only False
 todo c
 
 GROUP 3
-fine_tune --name 'final' --name_ext 'frozen_250_dropout_0_5' --lr 1e-5 --reduce_lr_factor 0.1 --reduce_lr_patience 100 --epochs 100 --batch_size 256 --l2_reg 0 --dropout_p 0.5 --num_freeze_layers 250
+fine_tune --name 'final' --name_ext 'frozen_250_dropout_0_5' --lr 1e-5 --reduce_lr_factor 0.1 --reduce_lr_patience 100 --epochs 17 --batch_size 256 --l2_reg 0 --dropout_p 0.5 --num_freeze_layers 250 --save_best_only False
 todo d
