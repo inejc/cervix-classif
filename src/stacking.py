@@ -20,7 +20,7 @@ def stack(group):
 
     meta_model_file = join(
         MODELS_DIR,
-        'stacking_meta_model_{:s}_group_{:d}.pickle'.format(name, group_uid)
+        'stacking_meta_model_group_{:d}.pickle'.format(group_uid)
     )
     meta_model_fitted = isfile(meta_model_file)
 
@@ -56,7 +56,6 @@ def stack(group):
             preds_val = np.hstack((preds_val, model_preds_val))
         preds_te = np.hstack((preds_te, model_preds_te))
 
-    # todo: use imgs dim param
     _, _, _, y_val, _, te_names = create_embeddings(name=name)
 
     if meta_model_fitted:
