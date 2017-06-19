@@ -27,12 +27,12 @@ Epoch 33 - loss: 0.5437 - val_loss: 0.7769
 
 GROUP 1
 fine_tune --name 'final' --name_ext 'frozen_11_penultimate_512_dropout_0_5' --lr 1e-5 --reduce_lr_factor 0.1 --reduce_lr_patience 50 --epochs 32 --batch_size 256 --l2_reg 0 --dropout_p 0.5 --num_freeze_layers 11 --penultimate_size 512 --save_best_only False
-todo b
+Epoch 32 - loss: 0.5586 - val_loss: 0.7171
 
 GROUP 2
 fine_tune --name 'final' --name_ext 'frozen_11_penultimate_256_dropout_0_5' --lr 1e-5 --reduce_lr_factor 0.1 --reduce_lr_patience 100 --epochs 27 --batch_size 256 --l2_reg 0 --dropout_p 0.5 --num_freeze_layers 11 --penultimate_size 256 --save_best_only False
-todo c
+Epoch 27 - loss: 0.6494 - val_loss: 0.7381
 
 GROUP 3
 fine_tune --name 'final' --name_ext 'frozen_6_penultimate_512_dropout_0_5' --lr 1e-5 --reduce_lr_factor 0.1 --reduce_lr_patience 50 --epochs 36 --batch_size 256 --l2_reg 0 --dropout_p 0.5 --num_freeze_layers 6 --penultimate_size 512 --save_best_only False
-todo d
+Epoch 36 - loss: 0.5017 - val_loss: 0.7356
