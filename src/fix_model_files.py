@@ -1,6 +1,8 @@
 from os.path import join
+from shutil import copyfile
 
 import h5py
+import fire
 
 from data_provider import MODELS_DIR
 
@@ -27,7 +29,20 @@ MODELS = [
     'vgg16_fine_tuned_final_frozen_6_penultimate_512_dropout_0_5.h5',
 ]
 
-for model in MODELS:
-    f = h5py.File(join(MODELS_DIR, model), 'r+')
-    del f['optimizer_weights']
-    f.close()
+
+def fix():
+    for model in MODELS:
+        f = h5py.File(join(MODELS_DIR, model), 'r+')
+        del f['optimizer_weights']
+        f.close()
+
+
+def copy():
+    for model in MODELS:
+        file = join(MODELS_DIR, model)
+        copy_name = '.'.join([model.split('.')[0] + '_val_trained', 'h5'])
+        copyfile(file, join(MODELS_DIR, copy_name))
+
+
+if __name__ == '__main__':
+    fire.Fire()
