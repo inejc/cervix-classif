@@ -68,6 +68,61 @@ from vgg19_fine_tune import preprocess_single_input as vgg19_preprocess
 #     },
 # ]
 
+# GROUPS = [
+#     {
+#         'uid': 0,
+#         'name': 'final',
+#         'width': 299,
+#         'height': 299,
+#         'models': [
+#             ('xception_fine_tuned_final_frozen_86_dropout_0_2.h5', xception_preprocess),
+#             ('inception_fine_tuned_final_frozen_280_dropout_0_5.h5', inception_preprocess),
+#             ('resnet50_fine_tuned_final_frozen_120_dropout_0_5.h5', resnet50_preprocess),
+#             ('vgg19_fine_tuned_final_frozen_17_penultimate_256_dropout_0_5.h5', vgg19_preprocess),
+#             ('vgg16_fine_tuned_final_frozen_6_penultimate_256_dropout_0_5.h5', vgg16_preprocess),
+#         ]
+#     },
+#     {
+#         'uid': 1,
+#         'name': 'final',
+#         'width': 299,
+#         'height': 299,
+#         'models': [
+#             ('xception_fine_tuned_final_frozen_96_dropout_0_6.h5', xception_preprocess),
+#             ('inception_fine_tuned_final_frozen_270_dropout_0_5.h5', inception_preprocess),
+#             ('resnet50_fine_tuned_final_frozen_130_dropout_0_5.h5', resnet50_preprocess),
+#             ('vgg19_fine_tuned_final_frozen_12_penultimate_512_dropout_0_5.h5', vgg19_preprocess),
+#             ('vgg16_fine_tuned_final_frozen_11_penultimate_512_dropout_0_5.h5', vgg16_preprocess),
+#         ]
+#     },
+#     {
+#         'uid': 2,
+#         'name': 'final',
+#         'width': 299,
+#         'height': 299,
+#         'models': [
+#             ('xception_fine_tuned_final_frozen_86_dropout_0_6.h5', xception_preprocess),
+#             ('inception_fine_tuned_final_frozen_260_dropout_0_5.h5', inception_preprocess),
+#             ('resnet50_fine_tuned_final_frozen_140_dropout_0_5.h5', resnet50_preprocess),
+#             ('vgg19_fine_tuned_final_frozen_7_penultimate_512_dropout_0_5.h5', vgg19_preprocess),
+#             ('vgg16_fine_tuned_final_frozen_11_penultimate_256_dropout_0_5.h5', vgg16_preprocess),
+#         ]
+#     },
+#     {
+#         'uid': 3,
+#         'name': 'final',
+#         'width': 299,
+#         'height': 299,
+#         'models': [
+#             ('xception_fine_tuned_final_frozen_86_dropout_0_5.h5', xception_preprocess),
+#             ('inception_fine_tuned_final_frozen_250_dropout_0_5.h5', inception_preprocess),
+#             ('resnet50_fine_tuned_final_frozen_150_dropout_0_5.h5', resnet50_preprocess),
+#             ('vgg19_fine_tuned_final_frozen_7_penultimate_256_dropout_0_5.h5', vgg19_preprocess),
+#             ('vgg16_fine_tuned_final_frozen_6_penultimate_512_dropout_0_5.h5', vgg16_preprocess),
+#         ]
+#     },
+# ]
+
 GROUPS = [
     {
         'uid': 0,
@@ -75,11 +130,11 @@ GROUPS = [
         'width': 299,
         'height': 299,
         'models': [
-            ('xception_fine_tuned_final_frozen_86_dropout_0_2.h5', xception_preprocess),
-            ('inception_fine_tuned_final_frozen_280_dropout_0_5.h5', inception_preprocess),
-            ('resnet50_fine_tuned_final_frozen_120_dropout_0_5.h5', resnet50_preprocess),
-            ('vgg19_fine_tuned_final_frozen_17_penultimate_256_dropout_0_5.h5', vgg19_preprocess),
-            ('vgg16_fine_tuned_final_frozen_6_penultimate_256_dropout_0_5.h5', vgg16_preprocess),
+            ('xception_fine_tuned_final_frozen_86_dropout_0_2_val_trained.h5', xception_preprocess),
+            ('inception_fine_tuned_final_frozen_280_dropout_0_5_val_trained.h5', inception_preprocess),
+            ('resnet50_fine_tuned_final_frozen_120_dropout_0_5_val_trained.h5', resnet50_preprocess),
+            ('vgg19_fine_tuned_final_frozen_17_penultimate_256_dropout_0_5_val_trained.h5', vgg19_preprocess),
+            ('vgg16_fine_tuned_final_frozen_6_penultimate_256_dropout_0_5_val_trained.h5', vgg16_preprocess),
         ]
     },
     {
@@ -88,11 +143,11 @@ GROUPS = [
         'width': 299,
         'height': 299,
         'models': [
-            ('xception_fine_tuned_final_frozen_96_dropout_0_6.h5', xception_preprocess),
-            ('inception_fine_tuned_final_frozen_270_dropout_0_5.h5', inception_preprocess),
-            ('resnet50_fine_tuned_final_frozen_130_dropout_0_5.h5', resnet50_preprocess),
-            ('vgg19_fine_tuned_final_frozen_12_penultimate_512_dropout_0_5.h5', vgg19_preprocess),
-            ('vgg16_fine_tuned_final_frozen_11_penultimate_512_dropout_0_5.h5', vgg16_preprocess),
+            ('xception_fine_tuned_final_frozen_96_dropout_0_6_val_trained.h5', xception_preprocess),
+            ('inception_fine_tuned_final_frozen_270_dropout_0_5_val_trained.h5', inception_preprocess),
+            ('resnet50_fine_tuned_final_frozen_130_dropout_0_5_val_trained.h5', resnet50_preprocess),
+            ('vgg19_fine_tuned_final_frozen_12_penultimate_512_dropout_0_5_val_trained.h5', vgg19_preprocess),
+            ('vgg16_fine_tuned_final_frozen_11_penultimate_512_dropout_0_5_val_trained.h5', vgg16_preprocess),
         ]
     },
     {
@@ -101,11 +156,11 @@ GROUPS = [
         'width': 299,
         'height': 299,
         'models': [
-            ('xception_fine_tuned_final_frozen_86_dropout_0_6.h5', xception_preprocess),
-            ('inception_fine_tuned_final_frozen_260_dropout_0_5.h5', inception_preprocess),
-            ('resnet50_fine_tuned_final_frozen_140_dropout_0_5.h5', resnet50_preprocess),
-            ('vgg19_fine_tuned_final_frozen_7_penultimate_512_dropout_0_5.h5', vgg19_preprocess),
-            ('vgg16_fine_tuned_final_frozen_11_penultimate_256_dropout_0_5.h5', vgg16_preprocess),
+            ('xception_fine_tuned_final_frozen_86_dropout_0_6_val_trained.h5', xception_preprocess),
+            ('inception_fine_tuned_final_frozen_260_dropout_0_5_val_trained.h5', inception_preprocess),
+            ('resnet50_fine_tuned_final_frozen_140_dropout_0_5_val_trained.h5', resnet50_preprocess),
+            ('vgg19_fine_tuned_final_frozen_7_penultimate_512_dropout_0_5_val_trained.h5', vgg19_preprocess),
+            ('vgg16_fine_tuned_final_frozen_11_penultimate_256_dropout_0_5_val_trained.h5', vgg16_preprocess),
         ]
     },
     {
@@ -114,11 +169,11 @@ GROUPS = [
         'width': 299,
         'height': 299,
         'models': [
-            ('xception_fine_tuned_final_frozen_86_dropout_0_5.h5', xception_preprocess),
-            ('inception_fine_tuned_final_frozen_250_dropout_0_5.h5', inception_preprocess),
-            ('resnet50_fine_tuned_final_frozen_150_dropout_0_5.h5', resnet50_preprocess),
-            ('vgg19_fine_tuned_final_frozen_7_penultimate_256_dropout_0_5.h5', vgg19_preprocess),
-            ('vgg16_fine_tuned_final_frozen_6_penultimate_512_dropout_0_5.h5', vgg16_preprocess),
+            ('xception_fine_tuned_final_frozen_86_dropout_0_5_val_trained.h5', xception_preprocess),
+            ('inception_fine_tuned_final_frozen_250_dropout_0_5_val_trained.h5', inception_preprocess),
+            ('resnet50_fine_tuned_final_frozen_150_dropout_0_5_val_trained.h5', resnet50_preprocess),
+            ('vgg19_fine_tuned_final_frozen_7_penultimate_256_dropout_0_5_val_trained.h5', vgg19_preprocess),
+            ('vgg16_fine_tuned_final_frozen_6_penultimate_512_dropout_0_5_val_trained.h5', vgg16_preprocess),
         ]
     },
 ]
