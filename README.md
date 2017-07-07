@@ -1,4 +1,4 @@
-## Intel & MobileODT Cervical Cancer Screening competition on Kaggle
+## 16th place solution for the Intel & MobileODT Cervical Cancer Screening competition on Kaggle
 
 https://www.kaggle.com/c/intel-mobileodt-cervical-cancer-screening
 
