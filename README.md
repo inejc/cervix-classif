@@ -14,12 +14,4 @@ https://www.kaggle.com/c/intel-mobileodt-cervical-cancer-screening
 * 512 images in the test set
 
 #### Additional dataset
-* 6924 additional training images (at least prior to fixing)
-* [Data cleaning 0](https://www.kaggle.com/chiszpanski/intel-mobileodt-cervical-cancer-screening/non-cervix-images)
-* [Data cleaning 1](https://www.kaggle.com/aamaia/intel-mobileodt-cervical-cancer-screening/three-empty-images-in-additional-7z)
-* Contains blurry and truncated images
-
-### Useful notebooks
-* https://www.kaggle.com/philschmidt/intel-mobileodt-cervical-cancer-screening/cervix-eda/notebook
-* https://www.kaggle.com/kambarakun/intel-mobileodt-cervical-cancer-screening/how-to-start-with-python-on-colfax-cluster/notebook
-* https://www.kaggle.com/vfdev5/intel-mobileodt-cervical-cancer-screening/data-exploration/notebook
+* 6924 additional training images (prior to fixing)
